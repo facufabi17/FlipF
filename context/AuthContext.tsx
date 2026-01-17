@@ -29,6 +29,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
 
     // Initial Session Check with robust error handling
     useEffect(() => {
@@ -48,6 +49,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 // If session is invalid, force sign out to clean state
                 await supabase.auth.signOut();
                 if (mounted) setUser(null);
+            } finally {
+                if (mounted) setLoading(false);
             }
         };
 
@@ -55,13 +58,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             // Manejo explícito de eventos
-            if (event === 'SIGNED_IN' && session?.user && mounted) {
+            if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user && mounted) {
+                // Solo hacer fetch si el usuario cambió o no tenemos usuario aún
+                // Para evitar re-fetches innecesarios en TOKEN_REFRESHED podríamos chequear user.id
+                // Pero por seguridad/consistencia, refrescar el perfil está bien.
                 await fetchProfile(session.user);
             } else if (event === 'SIGNED_OUT' || !session) {
                 if (mounted) {
                     setUser(null);
-                    // Opcional: limpiar localStorage si queda basura de sesiones viejas
                     localStorage.removeItem('supabase.auth.token');
+                    // No seteamos loading a true aquí porque podría causar flashes feos, 
+                    // simplemente el usuario pasa a ser null y la UI debe reaccionar.
                 }
             }
         });
@@ -259,6 +266,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             ownedResources: newResources
         });
     };
+
+    // Pantalla de carga simple para evitar redirecciones prematuras
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-background-dark">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary border-opacity-50"></div>
+            </div>
+        );
+    }
 
     return (
         <AuthContext.Provider value={{
