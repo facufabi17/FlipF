@@ -32,10 +32,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [loading, setLoading] = useState(true);
 
     // Initial Session Check with robust error handling
+    // Initial Session Check with robust error handling
     useEffect(() => {
         let mounted = true;
 
-        const getInitialSession = async () => {
+        // 1. Safety Timeout: Force stop loading if Supabase hangs
+        const safetyTimeout = setTimeout(() => {
+            if (mounted && loading) {
+                console.warn("Supabase auth timeout - forcing app load");
+                setLoading(false);
+            }
+        }, 5000);
+
+        const initAuth = async () => {
             try {
                 const { data: { session }, error } = await supabase.auth.getSession();
 
@@ -46,40 +55,53 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 }
             } catch (error) {
                 console.error("Session check failed:", error);
-                // If session is invalid, force sign out to clean state
+                // Drastic cleanup on initial load failure to ensure clean state
+                localStorage.clear();
                 await supabase.auth.signOut();
                 if (mounted) setUser(null);
             } finally {
+                // Guaranteed execution
                 if (mounted) setLoading(false);
+                clearTimeout(safetyTimeout);
             }
         };
 
-        getInitialSession();
+        initAuth();
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            // Manejo explícito de eventos
-            if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user && mounted) {
-                // Solo hacer fetch si el usuario cambió o no tenemos usuario aún
-                // Para evitar re-fetches innecesarios en TOKEN_REFRESHED podríamos chequear user.id
-                // Pero por seguridad/consistencia, refrescar el perfil está bien.
-                await fetchProfile(session.user);
-            } else if (event === 'SIGNED_OUT' || !session) {
-                if (mounted) {
-                    setUser(null);
-                    localStorage.removeItem('supabase.auth.token');
-                    // No seteamos loading a true aquí porque podría causar flashes feos, 
-                    // simplemente el usuario pasa a ser null y la UI debe reaccionar.
+            try {
+                // Manejo explícito de eventos
+                if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') && session?.user && mounted) {
+                    const success = await fetchProfile(session.user);
+                    if (!success) {
+                        // Si falla el perfil, forzamos logout para no quedar en limbo
+                        console.warn("Profile fetch failed on auth change, forcing logout");
+                        await supabase.auth.signOut();
+                        if (mounted) setUser(null);
+                    }
+                } else if (event === 'SIGNED_OUT' || !session) {
+                    if (mounted) {
+                        setUser(null);
+                        localStorage.removeItem('supabase.auth.token');
+                    }
                 }
+            } catch (error) {
+                console.error("Auth change error:", error);
+                if (mounted) setUser(null);
+            } finally {
+                // Critical: Ensure UI always unblocks on auth changes
+                if (mounted) setLoading(false);
             }
         });
 
         return () => {
             mounted = false;
+            clearTimeout(safetyTimeout);
             subscription.unsubscribe();
         };
     }, []);
 
-    const fetchProfile = async (supabaseUser: any) => {
+    const fetchProfile = async (supabaseUser: any): Promise<boolean> => {
         try {
             const { data, error } = await supabase
                 .from('profiles')
@@ -89,7 +111,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
             if (error) {
                 console.error("Error fetching profile:", error);
-                return;
+                // Critical: If profile fails to load, we cannot consider the user "logged in" fully
+                // as they might be missing critical data.
+                setUser(null);
+                return false;
             }
 
             // Type-safe mapping using DbProfile interface implicit structure
@@ -103,8 +128,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 ownedResources: profileData?.owned_resources || [],
                 progress: profileData?.completed_modules || {}
             });
+            return true;
         } catch (err) {
             console.error("Fetch profile exception:", err);
+            setUser(null);
+            return false;
         }
     };
 
@@ -123,14 +151,34 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const login = async (email: string, password: string) => {
         try {
-            const { error } = await supabase.auth.signInWithPassword({
+            // 1. Limpieza DRÁSTICA antes de intentar loguear
+            // Esto elimina cualquier token corrupto que pueda haber quedado en Vercel
+            localStorage.clear();
+            await supabase.auth.signOut();
+
+            // 2. Timeout Wrapper (10 segundos)
+            const timeoutPromise = new Promise<{ error: { message: string } }>((_, reject) =>
+                setTimeout(() => reject(new Error("Tiempo de espera agotado. El servidor no respondió a tiempo.")), 10000)
+            );
+
+            const loginPromise = supabase.auth.signInWithPassword({
                 email,
                 password,
             });
 
-            if (error) return { success: false, message: error.message };
+            // Race against timeout
+            const { error } = await Promise.race([loginPromise, timeoutPromise]) as any;
+
+            if (error) {
+                throw error;
+            }
+
             return { success: true, message: "Bienvenido" };
         } catch (error: any) {
+            console.error("Login critical error:", error);
+            // 3. Si falla, LIMPIEZA TOTAL nuevamente
+            localStorage.clear();
+            await supabase.auth.signOut();
             return { success: false, message: error.message || "Error desconocido al iniciar sesión" };
         }
     };
