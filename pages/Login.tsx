@@ -12,7 +12,7 @@ const Login: React.FC<LoginProps> = ({ onShowToast }) => {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -22,10 +22,10 @@ const Login: React.FC<LoginProps> = ({ onShowToast }) => {
             return;
         }
 
-        setLoading(true);
+        setIsSubmitting(true);
         try {
             const result = await login(email, password);
-            setLoading(false); // Stop loading immediately
+            setIsSubmitting(false); // Stop loading immediately
 
             if (result.success) {
                 onShowToast('¡Bienvenido de nuevo!', 'success');
@@ -34,7 +34,7 @@ const Login: React.FC<LoginProps> = ({ onShowToast }) => {
                 onShowToast(result.message, 'error');
             }
         } catch (error) {
-            setLoading(false);
+            setIsSubmitting(false);
             onShowToast('Error al iniciar sesión', 'error');
         }
     };
@@ -79,8 +79,8 @@ const Login: React.FC<LoginProps> = ({ onShowToast }) => {
                                     </label>
                                     <a href="#" className="text-primary hover:text-accent transition-colors">¿Olvidaste tu contraseña?</a>
                                 </div>
-                                <button type="submit" disabled={loading} className="w-full bg-primary hover:bg-purple-600 text-white font-bold py-3.5 rounded-lg transition-all shadow-lg shadow-primary/20 disabled:opacity-50">
-                                    {loading ? 'Ingresando...' : 'Ingresar'}
+                                <button type="submit" disabled={isSubmitting} className="w-full bg-primary hover:bg-purple-600 text-white font-bold py-3.5 rounded-lg transition-all shadow-lg shadow-primary/20 disabled:opacity-50">
+                                    {isSubmitting ? 'Ingresando...' : 'Ingresar'}
                                 </button>
                             </div>
                         </form>

@@ -31,38 +31,56 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
+
     // Initial Session Check with robust error handling
     // Initial Session Check with robust error handling
     useEffect(() => {
         let mounted = true;
-
-        // 1. Safety Timeout: Force stop loading if Supabase hangs
-        const safetyTimeout = setTimeout(() => {
-            if (mounted && loading) {
-                console.warn("Supabase auth timeout - forcing app load");
-                setLoading(false);
-            }
-        }, 5000);
+        let safetyTimeout: NodeJS.Timeout;
 
         const initAuth = async () => {
+            // Lazy Check: Primero ver si hay indicio de sesión local
+            const hasLocalSession = !!localStorage.getItem('flip-auth-session');
+
+            if (!hasLocalSession) {
+                // Si no hay token guardado, asumimos logout inmediatamente
+                if (mounted) setLoading(false);
+                return;
+            }
+
+            // Start race timer ONLY if we have a session to check
+            // Increased to 30s as per user request to avoid premature timeouts on slow connections
+            safetyTimeout = setTimeout(() => {
+                if (mounted && loading) {
+                    console.warn("Supabase auth timeout - forcing app load");
+                    setLoading(false);
+                }
+            }, 30000);
+
             try {
+                // Intentar recuperar sesión
                 const { data: { session }, error } = await supabase.auth.getSession();
 
-                if (error) throw error;
+                if (error) {
+                    throw error;
+                }
 
-                if (session?.user && mounted) {
+                if (!session) {
+                    // Si no hay sesión devuelta pero teníamos key, es un token inválido/expirado
+                    // No borramos nada manualmente, dejamos que Supabase maneje su ciclo
+                    console.warn("Session invalid despite local key");
+                    if (mounted) setUser(null);
+                } else if (session.user && mounted) {
+                    // Éxito: tenemos usuario
                     await fetchProfile(session.user);
                 }
             } catch (error) {
-                console.error("Session check failed:", error);
-                // Drastic cleanup on initial load failure to ensure clean state
-                localStorage.clear();
-                await supabase.auth.signOut();
+                console.error("Session restoration error:", error);
+                // IMPORTANTE: En caso de error de red, NO borramos el token para permitir reintentos
                 if (mounted) setUser(null);
             } finally {
-                // Guaranteed execution
-                if (mounted) setLoading(false);
                 clearTimeout(safetyTimeout);
+                if (mounted) setLoading(false);
             }
         };
 
@@ -82,7 +100,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 } else if (event === 'SIGNED_OUT' || !session) {
                     if (mounted) {
                         setUser(null);
-                        localStorage.removeItem('supabase.auth.token');
                     }
                 }
             } catch (error) {
@@ -153,7 +170,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         try {
             // 1. Limpieza DRÁSTICA antes de intentar loguear
             // Esto elimina cualquier token corrupto que pueda haber quedado en Vercel
-            localStorage.clear();
+            // localStorage.clear();
             await supabase.auth.signOut();
 
             // 2. Timeout Wrapper (10 segundos)
@@ -177,7 +194,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } catch (error: any) {
             console.error("Login critical error:", error);
             // 3. Si falla, LIMPIEZA TOTAL nuevamente
-            localStorage.clear();
+            //localStorage.clear();
             await supabase.auth.signOut();
             return { success: false, message: error.message || "Error desconocido al iniciar sesión" };
         }

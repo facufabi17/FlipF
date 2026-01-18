@@ -9,7 +9,7 @@ interface RegisterProps {
 const Register: React.FC<RegisterProps> = ({ onShowToast }) => {
     const navigate = useNavigate();
     const { register } = useAuth();
-    
+
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -17,7 +17,7 @@ const Register: React.FC<RegisterProps> = ({ onShowToast }) => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!name || !email || !password) {
             onShowToast('Por favor completa todos los campos', 'error');
             return;
@@ -41,7 +41,7 @@ const Register: React.FC<RegisterProps> = ({ onShowToast }) => {
 
     return (
         <div className="animate-fade-in">
-             <section className="relative flex min-h-[85vh] w-full items-center justify-center overflow-hidden">
+            <section className="relative flex min-h-[85vh] w-full items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 z-0">
                     <div className="absolute right-1/4 bottom-1/4 h-[400px] w-[400px] rounded-full bg-accent/10 blur-[100px]"></div>
                 </div>
@@ -49,36 +49,36 @@ const Register: React.FC<RegisterProps> = ({ onShowToast }) => {
                     <div className="glass-card rounded-2xl p-8 border border-white/10 shadow-2xl">
                         <h2 className="text-3xl font-bold text-center text-white mb-2">Crear Cuenta</h2>
                         <p className="text-center text-text-muted mb-8">Únete a la comunidad de creadores.</p>
-                        
+
                         <form onSubmit={handleSubmit}>
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-1">Nombre Completo</label>
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
-                                        placeholder="John Doe" 
+                                        placeholder="John Doe"
                                         className="w-full rounded-lg border border-white/10 bg-surface-dark px-4 py-3 text-white placeholder-gray-500 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-1">Correo Electrónico</label>
-                                    <input 
-                                        type="email" 
+                                    <input
+                                        type="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        placeholder="hola@ejemplo.com" 
+                                        placeholder="hola@ejemplo.com"
                                         className="w-full rounded-lg border border-white/10 bg-surface-dark px-4 py-3 text-white placeholder-gray-500 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-1">Contraseña</label>
-                                    <input 
-                                        type="password" 
+                                    <input
+                                        type="password"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        placeholder="••••••••" 
+                                        placeholder="••••••••"
                                         className="w-full rounded-lg border border-white/10 bg-surface-dark px-4 py-3 text-white placeholder-gray-500 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
                                     />
                                 </div>
