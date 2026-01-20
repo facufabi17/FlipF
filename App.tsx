@@ -1,6 +1,6 @@
 import { supabase } from './lib/supabase';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -25,7 +25,16 @@ import { ToastMessage } from './types';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 
-const { data: todos } = await supabase.from('todos').select()
+export const getTodos = async () => {
+  const { data, error } = await supabase.from("todos").select();
+  if (error) {
+    console.error("Error cargando tareas:", error);
+    return [];
+  }
+  return data;
+};
+
+//const { data: todos } = await supabase.from('todos').select()
 
 // Componente auxiliar para manejar la visibilidad del ChatBot
 const ChatBotWithVisibility: React.FC = () => {
