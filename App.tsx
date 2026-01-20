@@ -1,3 +1,5 @@
+import { supabase } from './lib/supabase';
+
 import React, { useState } from 'react';
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -19,7 +21,6 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import UserProfile from './pages/UserProfile';
 import Help from './pages/Help';
-import { supabase } from './lib/supabase';
 import { ToastMessage } from './types';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
