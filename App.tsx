@@ -1,23 +1,4 @@
-console.log("Intentando hablar con Supabase ahora mismo...");
-const { data, error } = await supabase.auth.getSession();
-console.log("Supabase por fin contestó:", data);
-
-// Agregá esto al principio de tu App.tsx para debuguear
-console.log("--- CHEQUEO DE ARRANQUE ---");
-console.log("1. URL de Supabase existe:", !!import.meta.env.VITE_SUPABASE_URL);
-console.log("2. Key de Supabase existe:", !!import.meta.env.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY);
-
-import { supabase } from './lib/supabase'; // Asegurate que la ruta sea correcta
-
-supabase.auth.getSession().then(({ data }) => {
-    console.log("3. ¿Hay algo en el baúl (Storage)?:", !!data.session);
-    if (data.session) {
-        console.log("4. ID del usuario encontrado:", data.session.user.id);
-    } else {
-        console.log("4. El baúl está vacío. No hay sesión para recuperar.");
-    }
-});
-
+import { supabase } from './lib/supabase';
 
 import React, { useState } from 'react';
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
@@ -44,6 +25,7 @@ import { ToastMessage } from './types';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 
+const { data: todos } = await supabase.from('todos').select()
 
 // Componente auxiliar para manejar la visibilidad del ChatBot
 const ChatBotWithVisibility: React.FC = () => {
