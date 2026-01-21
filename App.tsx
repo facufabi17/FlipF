@@ -1,6 +1,6 @@
-import { supabase } from './lib/supabase';
+//import { supabase } from './lib/supabase';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -24,15 +24,6 @@ import Help from './pages/Help';
 import { ToastMessage } from './types';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
-
-export const getTodos = async () => {
-  const { data, error } = await supabase.from("todos").select();
-  if (error) {
-    console.error("Error cargando tareas:", error);
-    return [];
-  }
-  return data;
-};
 
 //const { data: todos } = await supabase.from('todos').select()
 

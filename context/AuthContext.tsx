@@ -31,93 +31,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
-
-    // Initial Session Check with robust error handling
-    // Initial Session Check with robust error handling
-    useEffect(() => {
-        let mounted = true;
-        let safetyTimeout: NodeJS.Timeout;
-
-        const initAuth = async () => {
-            // Lazy Check: Primero ver si hay indicio de sesión local
-            const hasLocalSession = !!localStorage.getItem('flip-auth-session');
-
-            if (!hasLocalSession) {
-                // Si no hay token guardado, asumimos logout inmediatamente
-                if (mounted) setLoading(false);
-                return;
-            }
-
-            // Start race timer ONLY if we have a session to check
-            // Increased to 30s as per user request to avoid premature timeouts on slow connections
-            safetyTimeout = setTimeout(() => {
-                if (mounted && loading) {
-                    console.warn("Supabase auth timeout - forcing app load");
-                    setLoading(false);
-                }
-            }, 30000);
-
-            try {
-                // Intentar recuperar sesión
-                const { data: { session }, error } = await supabase.auth.getSession();
-
-                if (error) {
-                    throw error;
-                }
-
-                if (!session) {
-                    // Si no hay sesión devuelta pero teníamos key, es un token inválido/expirado
-                    // No borramos nada manualmente, dejamos que Supabase maneje su ciclo
-                    console.warn("Session invalid despite local key");
-                    if (mounted) setUser(null);
-                } else if (session.user && mounted) {
-                    // Éxito: tenemos usuario
-                    await fetchProfile(session.user);
-                }
-            } catch (error) {
-                console.error("Session restoration error:", error);
-                // IMPORTANTE: En caso de error de red, NO borramos el token para permitir reintentos
-                if (mounted) setUser(null);
-            } finally {
-                clearTimeout(safetyTimeout);
-                if (mounted) setLoading(false);
-            }
-        };
-
-        initAuth();
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            try {
-                // Manejo explícito de eventos
-                if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') && session?.user && mounted) {
-                    const success = await fetchProfile(session.user);
-                    if (!success) {
-                        // Si falla el perfil, forzamos logout para no quedar en limbo
-                        console.warn("Profile fetch failed on auth change, forcing logout");
-                        await supabase.auth.signOut();
-                        if (mounted) setUser(null);
-                    }
-                } else if (event === 'SIGNED_OUT' || !session) {
-                    if (mounted) {
-                        setUser(null);
-                    }
-                }
-            } catch (error) {
-                console.error("Auth change error:", error);
-                if (mounted) setUser(null);
-            } finally {
-                // Critical: Ensure UI always unblocks on auth changes
-                if (mounted) setLoading(false);
-            }
-        });
-
-        return () => {
-            mounted = false;
-            clearTimeout(safetyTimeout);
-            subscription.unsubscribe();
-        };
-    }, []);
-
+    // 1. Define fetchProfile first so it's available and stable
     const fetchProfile = async (supabaseUser: any): Promise<boolean> => {
         try {
             const { data, error } = await supabase
@@ -153,6 +67,67 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     };
 
+    // 2. Auth Implementation
+    useEffect(() => {
+        let mounted = true;
+
+        // A. Initial Session Check
+        const initSession = async () => {
+            try {
+                // Check if we have a session token in storage simply to avoid flash if possible,
+                // but rely on getSession for truth.
+                const { data: { session }, error } = await supabase.auth.getSession();
+
+                if (error) throw error;
+
+                if (session?.user && mounted) {
+                    await fetchProfile(session.user);
+                } else if (mounted) {
+                    // No session
+                    setUser(null);
+                }
+            } catch (error) {
+                console.error("Session init error:", error);
+                if (mounted) setUser(null);
+            } finally {
+                if (mounted) setLoading(false);
+            }
+        };
+
+        initSession();
+
+        // B. Auth Listener - MUST BE SYNCHRONOUS
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+            (event, session) => {
+                console.log(`Supabase Auth Event: ${event}`);
+
+                if (event === 'SIGNED_OUT' || !session) {
+                    if (mounted) {
+                        setUser(null);
+                        setLoading(false);
+                    }
+                    return;
+                }
+
+                if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
+                    // CRITICAL: Do not await here. Break the deadlock with setTimeout.
+                    setTimeout(() => {
+                        if (mounted && session?.user) {
+                            fetchProfile(session.user).finally(() => {
+                                if (mounted) setLoading(false);
+                            });
+                        }
+                    }, 0);
+                }
+            }
+        );
+
+        return () => {
+            mounted = false;
+            subscription.unsubscribe();
+        };
+    }, []);
+
     const register = async (name: string, email: string, password: string) => {
         const { error } = await supabase.auth.signUp({
             email,
@@ -168,41 +143,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const login = async (email: string, password: string) => {
         try {
-            // 1. Limpieza DRÁSTICA antes de intentar loguear
-            // Esto elimina cualquier token corrupto que pueda haber quedado en Vercel
-            // localStorage.clear();
+            // No strict need to clear explicitly if Supabase client handles it, 
+            // but signing out first ensures clean slate.
             await supabase.auth.signOut();
 
-            // 2. Timeout Wrapper (10 segundos)
-            const timeoutPromise = new Promise<{ error: { message: string } }>((_, reject) =>
-                setTimeout(() => reject(new Error("Tiempo de espera agotado. El servidor no respondió a tiempo.")), 10000)
-            );
-
-            const loginPromise = supabase.auth.signInWithPassword({
+            const { error } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             });
 
-            // Race against timeout
-            const { error } = await Promise.race([loginPromise, timeoutPromise]) as any;
-
-            if (error) {
-                throw error;
-            }
+            if (error) throw error;
 
             return { success: true, message: "Bienvenido" };
         } catch (error: any) {
-            console.error("Login critical error:", error);
-            // 3. Si falla, LIMPIEZA TOTAL nuevamente
-            //localStorage.clear();
-            await supabase.auth.signOut();
-            return { success: false, message: error.message || "Error desconocido al iniciar sesión" };
+            console.error("Login error:", error);
+            return { success: false, message: error.message || "Error al iniciar sesión" };
         }
     };
 
     const logout = async () => {
         try {
-            setUser(null); // Clear local state immediately for UI responsiveness
+            // Optimistic UI update
+            setUser(null);
             await supabase.auth.signOut();
         } catch (error) {
             console.error("Error signing out:", error);
@@ -332,7 +294,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         });
     };
 
-    // Pantalla de carga simple para evitar redirecciones prematuras
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-background-dark">
