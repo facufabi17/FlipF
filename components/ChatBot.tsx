@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { GoogleGenAI, GenerateContentResponse, Chat } from "@google/genai";
+import { ChatSession } from "@google/generative-ai";
 import { createChatSession } from '../services/gemini';
 import { ChatMessage } from '../types';
 
@@ -10,7 +10,7 @@ const ChatBot: React.FC = () => {
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [chatSession, setChatSession] = useState<Chat | null>(null);
+    const [chatSession, setChatSession] = useState<ChatSession | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -40,29 +40,28 @@ const ChatBot: React.FC = () => {
         setIsLoading(true);
 
         try {
-            const result = await chatSession.sendMessageStream({ message: userMessage.text });
-            
+            const result = await chatSession.sendMessageStream(userMessage.text);
+
             let fullText = '';
             const botMessageId = (Date.now() + 1).toString();
-            
+
             // Add placeholder message
             setMessages(prev => [...prev, { id: botMessageId, role: 'model', text: '' }]);
 
-            for await (const chunk of result) {
-                const c = chunk as GenerateContentResponse;
-                const text = c.text || '';
+            for await (const chunk of result.stream) {
+                const text = chunk.text();
                 fullText += text;
-                
-                setMessages(prev => prev.map(msg => 
+
+                setMessages(prev => prev.map(msg =>
                     msg.id === botMessageId ? { ...msg, text: fullText } : msg
                 ));
             }
         } catch (error) {
             console.error("Error sending message:", error);
-            setMessages(prev => [...prev, { 
-                id: Date.now().toString(), 
-                role: 'model', 
-                text: 'Lo siento, tuve un problema al procesar tu mensaje. Por favor intenta de nuevo.' 
+            setMessages(prev => [...prev, {
+                id: Date.now().toString(),
+                role: 'model',
+                text: `Error: ${error instanceof Error ? error.message : 'Unknown error'}. Por favor verifica tu API Key o conexión.`
             }]);
         } finally {
             setIsLoading(false);
@@ -98,7 +97,7 @@ const ChatBot: React.FC = () => {
                         </div>
                         <div>
                             <h3 className="text-white font-bold text-sm">FlipBot AI</h3>
-                            <p className="text-xs text-gray-400">Impulsado por Gemini 3 Pro</p>
+                            <p className="text-xs text-gray-400">Impulsado por Gemini 1.5 Flash</p>
                         </div>
                     </div>
 
@@ -110,11 +109,10 @@ const ChatBot: React.FC = () => {
                                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                             >
                                 <div
-                                    className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm ${
-                                        msg.role === 'user'
-                                            ? 'bg-primary text-white rounded-br-sm'
-                                            : 'bg-surface-dark text-gray-200 border border-border-dark rounded-bl-sm'
-                                    }`}
+                                    className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm ${msg.role === 'user'
+                                        ? 'bg-primary text-white rounded-br-sm'
+                                        : 'bg-surface-dark text-gray-200 border border-border-dark rounded-bl-sm'
+                                        }`}
                                 >
                                     {msg.text}
                                 </div>

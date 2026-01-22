@@ -27,7 +27,7 @@ const Register: React.FC<RegisterProps> = ({ onShowToast }) => {
         try {
             const result = await register(name, email, password);
             if (result.success) {
-                onShowToast('¡Cuenta creada exitosamente!', 'success');
+                onShowToast('¡Cuenta creada! Por favor verifica tu email para continuar.', 'success');
                 navigate('/');
             } else {
                 onShowToast(result.message, 'error');

@@ -239,12 +239,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const updateProfile = async (data: Partial<User>) => {
         if (!user) return;
-        const { error } = await supabase
-            .from('profiles')
-            .update({ full_name: data.name })
-            .eq('id', user.id);
 
-        if (!error) setUser({ ...user, ...data });
+        try {
+            // 1. Update Auth (Email/Password)
+            if (data.email || data.password) {
+                const attrs: any = {};
+                if (data.email && data.email !== user.email) attrs.email = data.email;
+                if (data.password) attrs.password = data.password;
+
+                if (Object.keys(attrs).length > 0) {
+                    const { error: authError } = await supabase.auth.updateUser(attrs);
+                    if (authError) throw authError;
+                }
+            }
+
+            // 2. Update Public Profile (Name)
+            if (data.name && data.name !== user.name) {
+                const { error: profileError } = await supabase
+                    .from('profiles')
+                    .update({ full_name: data.name })
+                    .eq('id', user.id);
+
+                if (profileError) throw profileError;
+            }
+
+            // 3. Update Local State
+            setUser({ ...user, ...data });
+
+        } catch (error: any) {
+            console.error("Error updating profile:", error);
+            throw error; // Propagate to UI
+        }
     };
 
     const purchaseItems = async (items: { id: string, type: 'course' | 'resource' }[]) => {

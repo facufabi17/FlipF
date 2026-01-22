@@ -1,0 +1,6 @@
+Debug Results:
+- gemini-1.5-flash: FAILED [NOT FOUND (404)]
+- gemini-1.5-flash-001: FAILED [NOT FOUND (404)]
+- gemini-1.5-pro: FAILED [NOT FOUND (404)]
+- gemini-pro: FAILED [NOT FOUND (404)]
+- gemini-1.0-pro: FAILED [NOT FOUND (404)]

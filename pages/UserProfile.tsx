@@ -14,33 +14,66 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
     const [email, setEmail] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [isEditing, setIsEditing] = useState(false);
+
+    // Changing from boolean to explicit mode
+    const [editingMode, setEditingMode] = useState<'none' | 'info' | 'password'>('none');
 
     useEffect(() => {
         if (!isAuthenticated) {
             navigate('/login');
         } else if (user) {
-            setName(user.name);
-            setEmail(user.email);
+            setName(user.name || '');
+            setEmail(user.email || '');
         }
     }, [isAuthenticated, user, navigate]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleUpdateInfo = async (e: React.FormEvent) => {
         e.preventDefault();
+        try {
+            const emailChanged = user && email !== user.email;
+            await updateProfile({ name, email });
 
-        if (newPassword && newPassword !== confirmPassword) {
+            if (emailChanged) {
+                onShowToast('Información actualizada. Por favor verifica tu nuevo email.', 'success');
+            } else {
+                onShowToast('Información actualizada correctamente', 'success');
+            }
+            setEditingMode('none');
+        } catch (error: any) {
+            console.error("Info update error:", error);
+            onShowToast(error?.message || 'Error al actualizar información', 'error');
+        }
+    };
+
+    const handleUpdatePassword = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (newPassword !== confirmPassword) {
             onShowToast('Las contraseñas no coinciden', 'error');
             return;
         }
-
-        const updates: any = { name, email };
-        if (newPassword) {
-            updates.password = newPassword;
+        if (newPassword.length < 6) {
+            onShowToast('La contraseña debe tener al menos 6 caracteres', 'error');
+            return;
         }
 
-        updateProfile(updates);
-        onShowToast('Perfil actualizado correctamente', 'success');
-        setIsEditing(false);
+        try {
+            await updateProfile({ password: newPassword });
+            onShowToast('Contraseña actualizada correctamente', 'success');
+            setEditingMode('none');
+            setNewPassword('');
+            setConfirmPassword('');
+        } catch (error: any) {
+            console.error("Password update error:", error);
+            onShowToast(error?.message || 'Error al actualizar contraseña', 'error');
+        }
+    };
+
+    const cancelEditing = () => {
+        setEditingMode('none');
+        if (user) {
+            setName(user.name || '');
+            setEmail(user.email || '');
+        }
         setNewPassword('');
         setConfirmPassword('');
     };
@@ -51,7 +84,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
                 <div className="absolute inset-0 z-0">
                     <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-primary/10 blur-[120px]"></div>
                 </div>
-                
+
                 <div className="relative z-10 w-full max-w-2xl px-6">
                     <div className="glass-card rounded-2xl p-8 md:p-12 border border-white/10 shadow-2xl">
                         <div className="flex items-center justify-between mb-8">
@@ -66,90 +99,134 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
                             </div>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium text-gray-300">Nombre Completo</label>
-                                    <input 
-                                        type="text" 
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                        disabled={!isEditing}
-                                        className="w-full rounded-lg border border-white/10 bg-surface-dark px-4 py-3 text-white focus:border-primary focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                                    />
+                        <div className="space-y-8">
+                            {/* --- Sección Información Personal --- */}
+                            <form onSubmit={handleUpdateInfo} className="space-y-6">
+                                <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-primary">person</span>
+                                        Información Personal
+                                    </h3>
+                                    {editingMode === 'info' ? (
+                                        <div className="flex gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={cancelEditing}
+                                                className="text-xs bg-white/5 hover:bg-white/10 text-white px-3 py-1.5 rounded-lg transition-colors"
+                                            >
+                                                Cancelar
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                className="text-xs bg-primary hover:bg-purple-600 text-white px-3 py-1.5 rounded-lg transition-colors font-bold shadow-lg shadow-primary/20"
+                                            >
+                                                Guardar
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            onClick={() => setEditingMode('info')}
+                                            disabled={editingMode !== 'none'}
+                                            className="text-xs bg-white/5 hover:bg-white/10 text-primary px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 disabled:opacity-30 disabled:cursor-not-allowed"
+                                        >
+                                            <span className="material-symbols-outlined text-sm">edit</span>
+                                            Editar
+                                        </button>
+                                    )}
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium text-gray-300">Correo Electrónico</label>
-                                    <input 
-                                        type="email" 
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        disabled={!isEditing}
-                                        className="w-full rounded-lg border border-white/10 bg-surface-dark px-4 py-3 text-white focus:border-primary focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                                    />
-                                </div>
-                            </div>
 
-                            {isEditing && (
-                                <div className="space-y-4 pt-4 border-t border-white/5 animate-fade-in">
-                                    <h3 className="text-lg font-bold text-white">Cambiar Contraseña</h3>
-                                    <p className="text-xs text-gray-400">Deja estos campos vacíos si no deseas cambiar tu contraseña.</p>
-                                    
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-gray-300">Nombre Completo</label>
+                                        <input
+                                            type="text"
+                                            value={name}
+                                            onChange={(e) => setName(e.target.value)}
+                                            disabled={editingMode !== 'info'}
+                                            className="w-full rounded-lg border border-white/10 bg-surface-dark px-4 py-3 text-white focus:border-primary focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-gray-300">Correo Electrónico</label>
+                                        <input
+                                            type="email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            disabled={editingMode !== 'info'}
+                                            className="w-full rounded-lg border border-white/10 bg-surface-dark px-4 py-3 text-white focus:border-primary focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                                        />
+                                    </div>
+                                </div>
+                            </form>
+
+                            {/* --- Sección Seguridad --- */}
+                            <form onSubmit={handleUpdatePassword} className="space-y-6 pt-6">
+                                <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-primary">lock</span>
+                                        Seguridad
+                                    </h3>
+                                    {editingMode === 'password' ? (
+                                        <div className="flex gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={cancelEditing}
+                                                className="text-xs bg-white/5 hover:bg-white/10 text-white px-3 py-1.5 rounded-lg transition-colors"
+                                            >
+                                                Cancelar
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                className="text-xs bg-primary hover:bg-purple-600 text-white px-3 py-1.5 rounded-lg transition-colors font-bold shadow-lg shadow-primary/20"
+                                            >
+                                                Actualizar Contraseña
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            onClick={() => setEditingMode('password')}
+                                            disabled={editingMode !== 'none'}
+                                            className="text-xs bg-white/5 hover:bg-white/10 text-primary px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 disabled:opacity-30 disabled:cursor-not-allowed"
+                                        >
+                                            <span className="material-symbols-outlined text-sm">key</span>
+                                            Cambiar Contraseña
+                                        </button>
+                                    )}
+                                </div>
+
+                                {editingMode === 'password' && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
                                         <div className="space-y-2">
                                             <label className="text-sm font-medium text-gray-300">Nueva Contraseña</label>
-                                            <input 
-                                                type="password" 
+                                            <input
+                                                type="password"
                                                 value={newPassword}
                                                 onChange={(e) => setNewPassword(e.target.value)}
-                                                placeholder="••••••••"
+                                                placeholder="Mínimo 6 caracteres"
                                                 className="w-full rounded-lg border border-white/10 bg-surface-dark px-4 py-3 text-white focus:border-primary focus:outline-none"
                                             />
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-sm font-medium text-gray-300">Confirmar Contraseña</label>
-                                            <input 
-                                                type="password" 
+                                            <input
+                                                type="password"
                                                 value={confirmPassword}
                                                 onChange={(e) => setConfirmPassword(e.target.value)}
-                                                placeholder="••••••••"
+                                                placeholder="Repite la contraseña"
                                                 className="w-full rounded-lg border border-white/10 bg-surface-dark px-4 py-3 text-white focus:border-primary focus:outline-none"
                                             />
                                         </div>
                                     </div>
-                                </div>
-                            )}
-
-                            <div className="pt-6 flex gap-4">
-                                {isEditing ? (
-                                    <>
-                                        <button 
-                                            type="submit" 
-                                            className="bg-primary hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-lg transition-all shadow-lg shadow-primary/20 flex items-center gap-2"
-                                        >
-                                            <span className="material-symbols-outlined">save</span>
-                                            Guardar Cambios
-                                        </button>
-                                        <button 
-                                            type="button" 
-                                            onClick={() => { setIsEditing(false); setName(user?.name || ''); setEmail(user?.email || ''); setNewPassword(''); setConfirmPassword(''); }}
-                                            className="bg-white/5 hover:bg-white/10 text-white font-bold py-3 px-6 rounded-lg transition-all border border-white/10"
-                                        >
-                                            Cancelar
-                                        </button>
-                                    </>
-                                ) : (
-                                    <button 
-                                        type="button" 
-                                        onClick={() => setIsEditing(true)}
-                                        className="bg-white/10 hover:bg-white/20 text-white font-bold py-3 px-6 rounded-lg transition-all border border-white/10 flex items-center gap-2"
-                                    >
-                                        <span className="material-symbols-outlined">edit</span>
-                                        Editar Perfil
-                                    </button>
                                 )}
-                            </div>
-                        </form>
+                                {editingMode !== 'password' && (
+                                    <div className="p-4 bg-surface-dark border border-white/5 rounded-lg text-sm text-gray-400">
+                                        La contraseña está oculta por seguridad. Haz clic en "Cambiar Contraseña" para actualizarla.
+                                    </div>
+                                )}
+                            </form>
+                        </div>
                     </div>
                 </div>
             </section>
