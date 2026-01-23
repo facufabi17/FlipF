@@ -11,7 +11,7 @@ const Checkout = () => {
   const obtenerPreferenceId = async () => {
     try {
       // 1. Hacemos el pedido a NUESTRO backend (no a Mercado Pago directo)
-      const response = await fetch("https://flip-f.vercel.app/crear-preferencia", {
+      const response = await fetch("https://flip-f.vercel.app/api/create_preference", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
