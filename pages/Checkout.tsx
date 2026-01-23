@@ -12,6 +12,7 @@ interface CheckoutProps {
     onShowToast: (text: string, type?: 'success' | 'error') => void;
 }
 
+
 const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
@@ -95,30 +96,44 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
         }
     };
 
-    // Mercado Pago Checkout Pro: enviar items al backend y obtener preferenceId
+    // Mercado Pago Checkout Pro: enviar items al backend y obtener preference_id
     const handleCheckout = async () => {
-        // Evitar llamadas vacías
         const itemsToSend = id
             ? [{ title: directCourse!.title, unit_price: directCourse!.price, quantity: 1 }]
             : cart.map(item => ({ title: item.title, unit_price: item.price, quantity: 1 }));
 
-        if (!itemsToSend || itemsToSend.length === 0) return;
+        if (!itemsToSend || itemsToSend.length === 0) {
+            console.log('No hay items para enviar a Mercado Pago');
+            return;
+        }
 
         setMpLoading(true);
         try {
-            const res = await fetch('/api/create_preference', {
+            console.log('Enviando items al backend:', itemsToSend);
+            const res = await fetch('/api/mp-api', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ items: itemsToSend })
             });
 
             const data = await res.json();
-            if (!res.ok) throw new Error(data?.error || 'Error creando preferencia');
+            console.log('Respuesta del backend MP:', res.status, data);
 
-            setMpPreferenceId(data.id);
+            if (!res.ok) {
+                console.log('Error creando preferencia:', data);
+                throw new Error(data?.message || 'Error creando preferencia');
+            }
+
+            const preferenceId = data.preference_id || data.preferenceId || data.id;
+            if (!preferenceId) {
+                console.log('No se recibió preference_id en la respuesta:', data);
+                throw new Error('Preference ID no recibido');
+            }
+
+            setMpPreferenceId(preferenceId);
+            console.log('Preference ID seteado:', preferenceId);
         } catch (error) {
-            console.error('MP checkout error', error);
-            // Aquí se podría mostrar un toast de error usando onShowToast
+            console.log('MP checkout error', error);
             onShowToast('Error al iniciar pago con Mercado Pago', 'error');
         } finally {
             setMpLoading(false);
@@ -182,98 +197,30 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                             </div>
                         </div>
 
-                        {/* Formulario de Pago */}
+                        {/* Pago con Mercado Pago (única opción) */}
                         <div className="bg-surface-dark p-8 rounded-2xl border border-white/5 shadow-2xl relative overflow-hidden">
-                            <div className="absolute top-0 right-0 p-4 opacity-5">
-                                <span className="material-symbols-outlined text-9xl">credit_card</span>
+                            <div className="flex items-center gap-4 mb-6">
+                                <img
+                                    src="https://www.mercadopago.com/org-img/MP3/home/logomp3.svg"
+                                    alt="Mercado Pago"
+                                    className="h-10"
+                                    onError={(e: any) => { e.target.style.display = 'none'; }}
+                                />
+                                <h3 className="text-xl font-bold text-white">Pagar con Mercado Pago</h3>
                             </div>
 
-                            <h3 className="text-xl font-bold text-white mb-6 relative z-10">Datos de la Tarjeta</h3>
-
-                            <form onSubmit={handlePayment} className="space-y-5 relative z-10">
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Número de Tarjeta</label>
-                                    <div className="relative">
-                                        <input
-                                            type="text"
-                                            placeholder="0000 0000 0000 0000"
-                                            maxLength={19}
-                                            value={cardNumber}
-                                            onChange={(e) => setCardNumber(e.target.value)}
-                                            className="w-full bg-[#1b131f] border border-white/10 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none pl-12"
-                                        />
-                                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">payment</span>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Titular de la Tarjeta</label>
-                                    <input
-                                        type="text"
-                                        placeholder="NOMBRE APELLIDO"
-                                        value={cardName}
-                                        onChange={(e) => setCardName(e.target.value)}
-                                        className="w-full bg-[#1b131f] border border-white/10 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none uppercase"
-                                    />
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Vencimiento</label>
-                                        <input
-                                            type="text"
-                                            placeholder="MM/AA"
-                                            maxLength={5}
-                                            value={expiry}
-                                            onChange={(e) => setExpiry(e.target.value)}
-                                            className="w-full bg-[#1b131f] border border-white/10 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none text-center"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">CVC</label>
-                                        <div className="relative">
-                                            <input
-                                                type="password"
-                                                placeholder="123"
-                                                maxLength={3}
-                                                value={cvc}
-                                                onChange={(e) => setCvc(e.target.value)}
-                                                className="w-full bg-[#1b131f] border border-white/10 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none text-center"
-                                            />
-                                            <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 text-sm">help</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <button
-                                    type="submit"
-                                    disabled={isProcessing}
-                                    className="w-full bg-primary hover:bg-purple-600 transition-all text-white py-4 rounded-xl font-bold flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed mt-4 shadow-lg shadow-primary/20"
-                                >
-                                    {isProcessing ? (
-                                        <>
-                                            <span className="material-symbols-outlined animate-spin">sync</span> Procesando...
-                                        </>
-                                    ) : (
-                                        <>
-                                            Pagar ${finalTotal.toLocaleString()}
-                                        </>
-                                    )}
-                                </button>
-                            </form>
-
-                            <div className="mt-6 relative z-10">
+                            <div className="relative z-10">
                                 <div className="my-4 border-t border-white/5"></div>
 
                                 {mpPreferenceId ? (
                                     <div>
-                                        <p className="text-sm text-gray-300 mb-3">Pagar con Mercado Pago</p>
+                                        <p className="text-sm text-gray-300 mb-3">Completa tu pago con Mercado Pago</p>
                                         <Wallet initialization={{ preferenceId: mpPreferenceId }} />
                                     </div>
                                 ) : (
                                     <button
                                         onClick={handleCheckout}
-                                        disabled={mpLoading || cart.length === 0 && !directCourse}
+                                        disabled={mpLoading || (cart.length === 0 && !directCourse)}
                                         className="w-full bg-amber-500 hover:bg-amber-600 transition-all text-black py-3 rounded-lg font-bold flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
                                     >
                                         {mpLoading ? (
