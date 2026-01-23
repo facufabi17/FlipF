@@ -3,6 +3,10 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { COURSES } from '../data/courses';
+import { Wallet } from '@mercadopago/sdk-react';
+import { initMercadoPago } from '@mercadopago/sdk-react';
+
+initMercadoPago('APP_USR-98a878b5-6b5d-4b2e-994a-244b1b907b3a');
 
 interface CheckoutProps {
     onShowToast: (text: string, type?: 'success' | 'error') => void;
@@ -18,6 +22,8 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     const directCourse = id ? COURSES.find(c => c.id === id) : null;
 
     const [isProcessing, setIsProcessing] = useState(false);
+    const [mpLoading, setMpLoading] = useState(false);
+    const [mpPreferenceId, setMpPreferenceId] = useState<string | null>(null);
 
     // Estados Formulario
     const [cardNumber, setCardNumber] = useState('');
@@ -86,6 +92,36 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
             onShowToast('Hubo un error al procesar la compra', 'error');
         } finally {
             setIsProcessing(false);
+        }
+    };
+
+    // Mercado Pago Checkout Pro: enviar items al backend y obtener preferenceId
+    const handleCheckout = async () => {
+        // Evitar llamadas vacías
+        const itemsToSend = id
+            ? [{ title: directCourse!.title, unit_price: directCourse!.price, quantity: 1 }]
+            : cart.map(item => ({ title: item.title, unit_price: item.price, quantity: 1 }));
+
+        if (!itemsToSend || itemsToSend.length === 0) return;
+
+        setMpLoading(true);
+        try {
+            const res = await fetch('/api/create_preference', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items: itemsToSend })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data?.error || 'Error creando preferencia');
+
+            setMpPreferenceId(data.id);
+        } catch (error) {
+            console.error('MP checkout error', error);
+            // Aquí se podría mostrar un toast de error usando onShowToast
+            onShowToast('Error al iniciar pago con Mercado Pago', 'error');
+        } finally {
+            setMpLoading(false);
         }
     };
 
@@ -225,6 +261,31 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                     )}
                                 </button>
                             </form>
+
+                            <div className="mt-6 relative z-10">
+                                <div className="my-4 border-t border-white/5"></div>
+
+                                {mpPreferenceId ? (
+                                    <div>
+                                        <p className="text-sm text-gray-300 mb-3">Pagar con Mercado Pago</p>
+                                        <Wallet initialization={{ preferenceId: mpPreferenceId }} />
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={handleCheckout}
+                                        disabled={mpLoading || cart.length === 0 && !directCourse}
+                                        className="w-full bg-amber-500 hover:bg-amber-600 transition-all text-black py-3 rounded-lg font-bold flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
+                                    >
+                                        {mpLoading ? (
+                                            <>
+                                                <span className="material-symbols-outlined animate-spin">sync</span> Iniciando Mercado Pago...
+                                            </>
+                                        ) : (
+                                            <>Pagar con Mercado Pago</>
+                                        )}
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>

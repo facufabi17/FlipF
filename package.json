@@ -12,6 +12,7 @@
     "@emailjs/browser": "^4.4.1",
     "@google/genai": "^1.35.0",
     "@google/generative-ai": "^0.24.1",
+    "@mercadopago/sdk-react": "^1.0.7",
     "@supabase/supabase-js": "^2.39.0",
     "mercadopago": "^2.12.0",
     "react": "^19.2.3",
