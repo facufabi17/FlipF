@@ -58,9 +58,9 @@ const result = await preference.create({
             currency_id: 'ARS' 
         })),
         back_urls: {
-                    success: "https://flip-f.vercel.app/#/mis-cursos",
-                    failure: "https://flip-f.vercel.app/#/checkout",
-                    pending: "https://flip-f.vercel.app/#/checkout"
+                    success: "https://www.google.com",
+                    failure: "https://www.google.com",
+                    pending: "https://www.google.com"
         },
         auto_return: "approved", // Solo funciona si 'success' está bien definido
     }
