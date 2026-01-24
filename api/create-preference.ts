@@ -29,6 +29,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         const preference = new Preference(client);
         
+<<<<<<< HEAD
         const result = await preference.create({
             body: {
                 items: items.map((item: any) => ({
@@ -48,6 +49,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         // Respondemos directamente
         return res.status(200).json({
+=======
+        // Creamos la preferencia con datos tipados y dinámicos
+const result = await preference.create({
+    body: {
+        items: items.map(item => ({
+            title: item.title,
+            quantity: Number(item.quantity),
+            unit_price: Number(item.price),
+            currency_id: 'ARS' 
+        })),
+        back_urls: {
+                    success: "https://www.google.com",
+                    failure: "https://www.google.com",
+                    pending: "https://www.google.com"
+        },
+        auto_return: "approved", // Solo funciona si 'success' está bien definido
+    }
+});
+        // Respondemos con el ID para el componente Wallet de React
+        res.status(200).json({
+>>>>>>> f07f46b29264bda1dbc51e912fe36001985fac2f
             preference_id: result.id,
             preference_url: result.init_point,
         });
@@ -59,4 +81,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             details: error.message 
         });
     }
+<<<<<<< HEAD
 }
+=======
+    res.status(500).json({ "error": "error creating preference", "details": error.message });
+}
+});
+
+const PORT: number = 8080;
+app.listen(PORT, () => {
+    console.log(`The server is now running on Port ${PORT}`);
+});
+>>>>>>> f07f46b29264bda1dbc51e912fe36001985fac2f
