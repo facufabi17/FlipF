@@ -15,12 +15,14 @@
     "@google/generative-ai": "^0.24.1",
     "@mercadopago/sdk-react": "^1.0.7",
     "@supabase/supabase-js": "^2.39.0",
+    "@types/three": "^0.182.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "mercadopago": "^2.12.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "react-router-dom": "^7.12.0"
+    "react-router-dom": "^7.12.0",
+    "three": "^0.182.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

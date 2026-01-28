@@ -5,12 +5,23 @@ import { COURSES } from '../data/courses';
 
 const MyCourses: React.FC = () => {
     const navigate = useNavigate();
-    const { user, isAuthenticated } = useAuth();
+    const { user, isAuthenticated, loading } = useAuth();
 
-    if (!isAuthenticated) {
-        navigate('/login');
-        return null;
+    React.useEffect(() => {
+        if (!loading && !isAuthenticated) {
+            navigate('/login');
+        }
+    }, [loading, isAuthenticated, navigate]);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary border-opacity-50"></div>
+            </div>
+        );
     }
+
+    if (!isAuthenticated) return null;
 
     const myCourses = COURSES.filter(course => user?.enrolledCourses?.includes(course.id));
 
@@ -18,12 +29,12 @@ const MyCourses: React.FC = () => {
         <div className="animate-fade-in min-h-screen">
             <section className="p-6 lg:p-12 max-w-7xl mx-auto">
                 <div className="flex items-center gap-4 mb-8">
-                     <button onClick={() => navigate('/academia')} className="text-text-muted hover:text-white transition-colors">
+                    <button onClick={() => navigate('/academia')} className="text-text-muted hover:text-white transition-colors">
                         <span className="material-symbols-outlined">arrow_back</span>
                     </button>
                     <h2 className="text-4xl font-bold">Mi Aula Virtual</h2>
                 </div>
-                
+
                 {myCourses.length === 0 ? (
                     <div className="text-center py-20 bg-surface-dark rounded-2xl border border-white/5">
                         <span className="material-symbols-outlined text-6xl text-gray-600 mb-4">school</span>
@@ -36,7 +47,7 @@ const MyCourses: React.FC = () => {
                         {myCourses.map(course => {
                             // Calcular el total de lecciones sumando los arrays de lecciones de cada módulo
                             const totalLessons = course.modules.reduce((acc, mod) => acc + mod.lessons.length, 0);
-                            
+
                             return (
                                 <div key={course.id} className="glass-card rounded-2xl overflow-hidden group hover:border-tech transition-all duration-300 cursor-pointer" onClick={() => navigate(`/aula-virtual/${course.id}`)}>
                                     <div className="relative h-40 bg-gray-900 overflow-hidden">

@@ -5,12 +5,23 @@ import { PAID_RESOURCES } from '../data/resources';
 
 const MyResources: React.FC = () => {
     const navigate = useNavigate();
-    const { user, isAuthenticated } = useAuth();
+    const { user, isAuthenticated, loading } = useAuth();
 
-    if (!isAuthenticated) {
-        navigate('/login');
-        return null;
+    React.useEffect(() => {
+        if (!loading && !isAuthenticated) {
+            navigate('/login');
+        }
+    }, [loading, isAuthenticated, navigate]);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary border-opacity-50"></div>
+            </div>
+        );
     }
+
+    if (!isAuthenticated) return null;
 
     const myResources = PAID_RESOURCES.filter(res => user?.ownedResources?.includes(res.id));
 
@@ -18,7 +29,7 @@ const MyResources: React.FC = () => {
         <div className="animate-fade-in min-h-screen">
             <section className="p-6 lg:p-12 max-w-7xl mx-auto">
                 <div className="flex items-center gap-4 mb-8">
-                     <button onClick={() => navigate('/recursos-pago')} className="text-text-muted hover:text-white transition-colors">
+                    <button onClick={() => navigate('/recursos-pago')} className="text-text-muted hover:text-white transition-colors">
                         <span className="material-symbols-outlined">arrow_back</span>
                     </button>
                     <div>
@@ -26,7 +37,7 @@ const MyResources: React.FC = () => {
                         <p className="text-text-muted">Descarga tus herramientas adquiridas.</p>
                     </div>
                 </div>
-                
+
                 {myResources.length === 0 ? (
                     <div className="text-center py-20 bg-surface-dark rounded-2xl border border-white/5">
                         <span className="material-symbols-outlined text-6xl text-gray-600 mb-4">folder_off</span>
@@ -48,8 +59,8 @@ const MyResources: React.FC = () => {
                                 </div>
                                 <h3 className="text-lg font-bold text-white mb-2">{resource.title}</h3>
                                 <p className="text-sm text-gray-400 mb-6 flex-1">{resource.description}</p>
-                                
-                                <a 
+
+                                <a
                                     href={resource.downloadUrl}
                                     target="_blank"
                                     rel="noreferrer"

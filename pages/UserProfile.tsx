@@ -7,7 +7,7 @@ interface UserProfileProps {
 }
 
 const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
-    const { user, updateProfile, isAuthenticated } = useAuth();
+    const { user, updateProfile, isAuthenticated, loading } = useAuth();
     const navigate = useNavigate();
 
     const [name, setName] = useState('');
@@ -19,13 +19,23 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
     const [editingMode, setEditingMode] = useState<'none' | 'info' | 'password'>('none');
 
     useEffect(() => {
+        if (loading) return;
+
         if (!isAuthenticated) {
             navigate('/login');
         } else if (user) {
             setName(user.name || '');
             setEmail(user.email || '');
         }
-    }, [isAuthenticated, user, navigate]);
+    }, [isAuthenticated, user, navigate, loading]);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary border-opacity-50"></div>
+            </div>
+        );
+    }
 
     const handleUpdateInfo = async (e: React.FormEvent) => {
         e.preventDefault();
