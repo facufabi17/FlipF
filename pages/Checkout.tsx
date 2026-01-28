@@ -6,7 +6,7 @@ import { COURSES } from '../data/courses';
 import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
 
 // Inicializa con tu PUBLIC KEY (No la Private/Access Token)
-initMercadoPago('APP_USR-98a878b5-6b5d-4b2e-994a-244b1b907b3a');
+initMercadoPago('APP_USR-b6fc115a-edde-4282-a4b2-59276ccbaf6a');
 
 interface CheckoutProps {
     onShowToast: (text: string, type?: 'success' | 'error') => void;
