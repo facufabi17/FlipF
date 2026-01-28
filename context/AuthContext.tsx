@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { User } from '../types';
 import { supabase } from '../lib/supabase';
 
-// Define DB Profile type to match Supabase columns
+// Definir tipo de perfil de BD para coincidir con columnas de Supabase
 interface DbProfile {
     id: string;
     full_name: string;
@@ -23,6 +23,7 @@ interface AuthContextType {
     updateProfile: (data: Partial<User>) => Promise<void>;
     purchaseItems: (items: { id: string, type: 'course' | 'resource' }[]) => Promise<void>;
     isAuthenticated: boolean;
+    loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -31,7 +32,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
-    // 1. Define fetchProfile first so it's available and stable
+    // 1. Definir fetchProfile primero para que esté disponible y estable
     const fetchProfile = async (supabaseUser: any): Promise<boolean> => {
         try {
             const { data, error } = await supabase
@@ -42,13 +43,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
             if (error) {
                 console.error("Error fetching profile:", error);
-                // Critical: If profile fails to load, we cannot consider the user "logged in" fully
-                // as they might be missing critical data.
+                // Crítico: Si el perfil falla al cargar, no podemos considerar al usuario "conectado" completamente
+                // ya que podría faltarle datos críticos.
                 setUser(null);
                 return false;
             }
 
-            // Type-safe mapping using DbProfile interface implicit structure
+            // Mapeo seguro de tipos usando la estructura implícita de la interfaz DbProfile
             const profileData = data as DbProfile;
 
             setUser({
@@ -67,15 +68,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     };
 
-    // 2. Auth Implementation
+    // 2. Implementación de Auth
     useEffect(() => {
         let mounted = true;
 
-        // A. Initial Session Check
+        // A. Verificación Inicial de Sesión
         const initSession = async () => {
             try {
-                // Check if we have a session token in storage simply to avoid flash if possible,
-                // but rely on getSession for truth.
+                // Verificar si tenemos un token de sesión en almacenamiento simplemente para evitar parpadeo si es posible,
+                // pero confiar en getSession para la verdad.
                 const { data: { session }, error } = await supabase.auth.getSession();
 
                 if (error) throw error;
@@ -83,7 +84,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 if (session?.user && mounted) {
                     await fetchProfile(session.user);
                 } else if (mounted) {
-                    // No session
+                    // Sin sesión
                     setUser(null);
                 }
             } catch (error) {
@@ -96,7 +97,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         initSession();
 
-        // B. Auth Listener - MUST BE SYNCHRONOUS
+        // B. Escucha de Auth - DEBE SER SÍNCRONO
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             (event, session) => {
                 console.log(`Supabase Auth Event: ${event}`);
@@ -110,7 +111,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 }
 
                 if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
-                    // CRITICAL: Do not await here. Break the deadlock with setTimeout.
+                    // CRÍTICO: No esperar (await) aquí. Romper el bloqueo con setTimeout.
                     setTimeout(() => {
                         if (mounted && session?.user) {
                             fetchProfile(session.user).finally(() => {
@@ -143,8 +144,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const login = async (email: string, password: string) => {
         try {
-            // No strict need to clear explicitly if Supabase client handles it, 
-            // but signing out first ensures clean slate.
+            // No hay necesidad estricta de limpiar explícitamente si el cliente Supabase lo maneja, 
+            // pero cerrar sesión primero asegura un estado limpio.
             await supabase.auth.signOut();
 
             const { error } = await supabase.auth.signInWithPassword({
@@ -163,7 +164,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const logout = async () => {
         try {
-            // Optimistic UI update
+            // Actualización optimista de UI
             setUser(null);
             await supabase.auth.signOut();
         } catch (error) {
@@ -201,7 +202,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (!user) return;
 
         try {
-            // 1. Fetch latest progress from DB to ensure atomicity
+            // 1. Obtener el último progreso de la BD para asegurar atomicidad
             const { data: currentData, error: fetchError } = await supabase
                 .from('profiles')
                 .select('completed_modules')
@@ -210,7 +211,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
             if (fetchError) throw fetchError;
 
-            // 2. Calculate new progress
+            // 2. Calcular nuevo progreso
             const dbProgress = (currentData?.completed_modules || {}) as Record<string, string[]>;
             const courseProgress = dbProgress[courseId] || [];
 
@@ -221,7 +222,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     [courseId]: [...courseProgress, moduleId]
                 };
 
-                // 3. Update DB
+                // 3. Actualizar BD
                 const { error: updateError } = await supabase
                     .from('profiles')
                     .update({ completed_modules: newProgress })
@@ -229,7 +230,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
                 if (updateError) throw updateError;
 
-                // 4. Update local state explicitly with the new confirmed data
+                // 4. Actualizar estado local explícitamente con los nuevos datos confirmados
                 setUser(prev => prev ? ({ ...prev, progress: newProgress }) : null);
             }
         } catch (error) {
@@ -241,7 +242,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (!user) return;
 
         try {
-            // 1. Update Auth (Email/Password)
+            // 1. Actualizar Auth (Email/Password)
             if (data.email || data.password) {
                 const attrs: any = {};
                 if (data.email && data.email !== user.email) attrs.email = data.email;
@@ -253,7 +254,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 }
             }
 
-            // 2. Update Public Profile (Name)
+            // 2. Actualizar Perfil Público (Nombre)
             if (data.name && data.name !== user.name) {
                 const { error: profileError } = await supabase
                     .from('profiles')
@@ -263,19 +264,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 if (profileError) throw profileError;
             }
 
-            // 3. Update Local State
+            // 3. Actualizar Estado Local
             setUser({ ...user, ...data });
 
         } catch (error: any) {
             console.error("Error updating profile:", error);
-            throw error; // Propagate to UI
+            throw error; // Propagar a UI
         }
     };
 
     const purchaseItems = async (items: { id: string, type: 'course' | 'resource' }[]) => {
         if (!user) return;
 
-        // 1. Calculate new state based on current user state
+        // 1. Calcular nuevo estado basado en el estado actual del usuario
         const newCourses = [...(user.enrolledCourses || [])];
         const newResources = [...(user.ownedResources || [])];
 
@@ -297,7 +298,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         if (!hasChanges) return;
 
-        // 2. Perform single atomic update to Supabase
+        // 2. Realizar actualización atómica única a Supabase
         const { error } = await supabase
             .from('profiles')
             .update({
@@ -308,10 +309,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         if (error) {
             console.error("Error processing purchase:", error);
-            throw error; // Re-throw to be handled by caller
+            throw error; // Relanzar para ser manejado por quien llama
         }
 
-        // 3. Update local state immediately
+        // 3. Actualizar estado local inmediatamente
         setUser({
             ...user,
             enrolledCourses: newCourses,
@@ -319,18 +320,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         });
     };
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen bg-background-dark">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary border-opacity-50"></div>
-            </div>
-        );
-    }
-
     return (
         <AuthContext.Provider value={{
             user, login, register, logout, enrollInCourse, addResourceToUser,
-            markModuleCompleted, updateProfile, purchaseItems, isAuthenticated: !!user
+            markModuleCompleted, updateProfile, purchaseItems, isAuthenticated: !!user, loading
         }}>
             {children}
         </AuthContext.Provider>

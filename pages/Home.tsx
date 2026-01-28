@@ -9,11 +9,11 @@ const Home: React.FC = () => {
             {/* 1. HERO SECTION (Segmentación Dual) */}
             <section className="relative w-full min-h-[90vh] flex flex-col justify-center items-center text-center px-6 pt-20 pb-12 overflow-hidden bg-background">
 
-                {/* Background Animation */}
+                {/* Animación de Fondo */}
                 <FlowGradient className="opacity-80" />
                 <div className="absolute top-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
 
-                {/* Content */}
+                {/* Contenido */}
                 <div className="relative z-10 max-w-5xl mx-auto flex flex-col items-center">
                     <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter text-white mb-8 leading-[1.1]">
                         Transformamos Negocios. <br />
@@ -24,9 +24,9 @@ const Home: React.FC = () => {
                         La agencia de marketing digital que no solo ejecuta estrategias, sino que te enseña a dominarlas.
                     </p>
 
-                    {/* Dual CTA Buttons */}
+                    {/* Botones CTA Duales */}
                     <div className="flex flex-col md:flex-row gap-6 w-full max-w-2xl justify-center items-stretch md:items-center">
-                        {/* Button A: Aprender (Cian) */}
+                        {/* Botón A: Aprender (Cian) */}
                         <Link to="/academia" className="group relative flex-1 bg-[#00F5F1]/10 border border-[#00F5F1]/50 hover:bg-[#00F5F1] hover:text-black hover:border-[#00F5F1] text-[#00F5F1] transition-all duration-300 rounded-xl px-8 py-6 flex flex-col items-center justify-center text-center gap-2 overflow-hidden">
                             <span className="absolute inset-0 bg-[#00F5F1]/20 blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-300"></span>
                             <span className="font-bold text-lg relative z-10 tracking-wide">Quiero Aprender Marketing</span>
@@ -34,7 +34,7 @@ const Home: React.FC = () => {
                             <span className="material-symbols-outlined absolute right-4 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">school</span>
                         </Link>
 
-                        {/* Button B: Contratar (Púrpura) */}
+                        {/* Botón B: Contratar (Púrpura) */}
                         <Link to="/consultas" className="group relative flex-1 bg-[#842DB4]/10 border border-[#842DB4]/50 hover:bg-[#842DB4] hover:text-white hover:border-[#842DB4] text-[#842DB4] transition-all duration-300 rounded-xl px-8 py-6 flex flex-col items-center justify-center text-center gap-2 overflow-hidden">
                             <span className="absolute inset-0 bg-[#842DB4]/20 blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-300"></span>
                             <span className="font-bold text-lg relative z-10 tracking-wide">Quiero Contratar la Agencia</span>
@@ -47,18 +47,18 @@ const Home: React.FC = () => {
 
             {/* 2. ESCALERA DE VALOR (Content Sections) */}
 
-            {/* Level DIY (Cursos) - Cyan Theme */}
+            {/* Nivel DIY (Cursos) - Tema Cian */}
             <section className="relative w-full py-24 px-6 border-t border-white/5 overflow-hidden">
                 <div className="absolute top-0 right-0 w-1/3 h-full bg-[#00F5F1]/5 blur-[100px] pointer-events-none"></div>
 
                 <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center relative z-10">
                     <div className="order-2 md:order-1 relative">
-                        {/* Abstract visual representation of tools/learning */}
+                        {/* Representación visual abstracta de herramientas/aprendizaje */}
                         <div className="aspect-square rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-8 flex items-center justify-center relative overflow-hidden group">
                             <div className="absolute inset-0 bg-gradient-to-br from-[#00F5F1]/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
                             <span className="material-symbols-outlined text-9xl text-[#00F5F1]/50 group-hover:scale-110 transition-transform duration-500">handyman</span>
 
-                            {/* Floating cards */}
+                            {/* Tarjetas flotantes */}
                             <div className="absolute top-10 right-10 p-4 bg-black/80 border border-white/10 rounded-lg shadow-xl backdrop-blur-md transform rotate-3 hover:rotate-0 transition-transform duration-300">
                                 <div className="h-2 w-20 bg-gray-700 rounded mb-2"></div>
                                 <div className="h-2 w-16 bg-[#00F5F1] rounded"></div>
@@ -95,7 +95,7 @@ const Home: React.FC = () => {
                 </div>
             </section>
 
-            {/* Level DFY (Agencia) - Purple Theme */}
+            {/* Nivel DFY (Agencia) - Tema Púrpura */}
             <section className="relative w-full py-24 px-6 border-t border-white/5 bg-white/[0.02] overflow-hidden">
                 <div className="absolute bottom-0 left-0 w-1/3 h-full bg-[#842DB4]/5 blur-[100px] pointer-events-none"></div>
 
@@ -125,12 +125,12 @@ const Home: React.FC = () => {
                     </div>
 
                     <div className="relative">
-                        {/* Abstract visual representation of growth/agency */}
+                        {/* Representación visual abstracta de crecimiento/agencia */}
                         <div className="aspect-square rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-8 flex items-center justify-center relative overflow-hidden group">
                             <div className="absolute inset-0 bg-gradient-to-bl from-[#842DB4]/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
                             <span className="material-symbols-outlined text-9xl text-[#842DB4]/50 group-hover:scale-110 transition-transform duration-500">monitoring</span>
 
-                            {/* Stats Float */}
+                            {/* Flotante de Estadísticas */}
                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[200px] bg-black/90 border border-[#842DB4]/30 p-4 rounded-xl shadow-2xl">
                                 <div className="flex justify-between items-end mb-2">
                                     <div className="h-8 w-8 bg-[#842DB4] rounded-full flex items-center justify-center">
@@ -152,7 +152,7 @@ const Home: React.FC = () => {
                 </div>
             </section>
 
-            {/* 3. LEAD MAGNET SECTION */}
+            {/* 3. SECCIÓN LEAD MAGNET */}
             <section className="w-full py-24 px-6 bg-gradient-to-b from-black to-[#1a1a1a]">
                 <div className="max-w-4xl mx-auto rounded-3xl bg-white/5 border border-white/10 p-8 md:p-12 text-center relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#00F5F1] via-white to-[#842DB4]"></div>
@@ -182,7 +182,7 @@ const Home: React.FC = () => {
                     <div className="text-center mb-20">
                         <p className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-8">Empresas y alumnos que confían en Flip</p>
                         <div className="flex flex-wrap justify-center gap-8 md:gap-16 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-                            {/* Placeholders for logos - Replaced with generic text styling for now */}
+                            {/* Espacios reservados para logos - Reemplazado con estilo de texto genérico por ahora */}
                             {['TechCorp', 'Innova Market', 'Growth Lab', 'Future Academy', 'ScaleUp'].map((logo, i) => (
                                 <div key={i} className="text-xl md:text-2xl font-bold text-gray-400 flex items-center gap-2">
                                     <div className="size-6 bg-gray-700 rounded-full"></div>
@@ -192,7 +192,7 @@ const Home: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* About Block */}
+                    {/* Bloque Sobre Nosotros */}
                     <div className="grid md:grid-cols-2 gap-12 items-center bg-white/[0.02] border border-white/5 rounded-3xl p-8 md:p-12">
                         <div>
                             <h3 className="text-3xl font-bold text-white mb-4">Más que una agencia. <br /> Una filosofía.</h3>
@@ -208,7 +208,7 @@ const Home: React.FC = () => {
                             </Link>
                         </div>
                         <div className="relative h-64 md:h-full min-h-[300px] rounded-xl overflow-hidden bg-black/50 border border-white/5">
-                            {/* Abstract Human Element Placeholder */}
+                            {/* Marcador de posición de elemento humano abstracto */}
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="text-center">
                                     <div className="size-20 mx-auto bg-gradient-to-br from-[#842DB4] to-[#00F5F1] rounded-full mb-4 flex items-center justify-center text-white font-bold text-2xl shadow-lg border-2 border-white/10">F</div>
@@ -217,7 +217,7 @@ const Home: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* Background grid */}
+                            {/* Cuadrícula de fondo */}
                             <div className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
                         </div>
                     </div>

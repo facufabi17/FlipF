@@ -6,7 +6,15 @@ import { COURSES } from '../data/courses';
 import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
 
 // Inicializa con tu PUBLIC KEY (No la Private/Access Token)
-initMercadoPago('APP_USR-b6fc115a-edde-4282-a4b2-59276ccbaf6a');
+// Asegúrate de definir VITE_MP_PUBLIC_KEY en tu archivo .env.local
+const publicKey = import.meta.env.VITE_MP_PUBLIC_KEY;
+console.log("Mercado Pago PK Status:", publicKey ? "Presente" : "Faltante", publicKey?.substring(0, 10) + "...");
+
+if (publicKey) {
+    initMercadoPago(publicKey);
+} else {
+    console.error("VITE_MP_PUBLIC_KEY no está definida.");
+}
 
 interface CheckoutProps {
     onShowToast: (text: string, type?: 'success' | 'error') => void;
@@ -15,13 +23,13 @@ interface CheckoutProps {
 const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth();
     const { cart, total, removeFromCart, getCheckoutItems, activeCoupon, applyCoupon, removeCoupon, discount, totalAfterDiscount } = useCart();
 
     const [preferenceId, setPreferenceId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [couponInput, setCouponInput] = useState('');
-    const [preferenceUrl, setPreferenceUrl] =  useState<string | null>(null);
+    const [preferenceUrl, setPreferenceUrl] = useState<string | null>(null);
     const [isWaitingForPayment, setIsWaitingForPayment] = useState(false);
     const [isPaymentSuccess, setIsPaymentSuccess] = useState(false);
 
@@ -46,19 +54,31 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
             const response = await fetch("/api/create-preference", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ items: itemsToPay }),
+                body: JSON.stringify({
+                    items: itemsToPay,
+                    userId: user?.id
+                }),
             });
 
             const data = await response.json();
+            console.log("Preference Response:", data);
+
+            if (!response.ok) {
+                throw new Error(data.error || "Error en respuesta del servidor");
+            }
+
             if (data.preference_id) {
                 setPreferenceId(data.preference_id);
+            } else {
+                console.error("No preference ID returned:", data);
+                onShowToast('Error: No se recibió ID de preferencia', 'error');
             }
-            // API devuelve preference_url (init_point) además de preference_id
+
             if (data.preference_url) setPreferenceUrl(data.preference_url);
             if (data.init_point && !data.preference_url) setPreferenceUrl(data.init_point);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error al crear preferencia:", error);
-            onShowToast('Error al conectar con la pasarela de pago', 'error');
+            onShowToast(`Error de conexión: ${error.message}`, 'error');
         } finally {
             setIsLoading(false);
         }
@@ -72,7 +92,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     useEffect(() => {
         const checkStatusParam = () => {
             try {
-                const s = window.location.search || ''; 
+                const s = window.location.search || '';
                 const h = window.location.hash || '';
                 if (s.includes('status=approved') || h.includes('status=approved')) {
                     setIsPaymentSuccess(true);
@@ -149,7 +169,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                         <p className="text-gray-300">Hemos abierto Mercado Pago en una nueva pestaña. Cuando finalices, vuelve aquí o presiona verificar.</p>
                                         <div className="mt-6 flex gap-2">
                                             <button onClick={() => {
-                                                // re-check status in URL
+                                                // verificar estado nuevamente en la URL
                                                 const s = window.location.search || '';
                                                 const h = window.location.hash || '';
                                                 if (s.includes('status=approved') || h.includes('status=approved')) {
@@ -282,7 +302,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                         {/* SDK Wallet: prevenir duplicados con key y mostrar opción integrada */}
                                         {preferenceId && (
                                             <div className="w-full h-full items-center justify-center gap-3 px-4 py-3 bg-[#00bcff] hover:bg-[#00bcff] rounded-xl shadow-lg ">
-                                                <Wallet  key={preferenceId} initialization={{ preferenceId: preferenceId! }} customization={{ texts: { valueProp: 'smart_option ' } } as any} />
+                                                <Wallet key={preferenceId} initialization={{ preferenceId: preferenceId! }} customization={{ texts: { valueProp: 'smart_option ' } } as any} />
                                             </div>
                                         )}
                                     </div>
