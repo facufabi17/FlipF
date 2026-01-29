@@ -95,5 +95,6 @@ export interface User {
     enrolledCourses: string[];
     ownedResources: string[]; // Lista de IDs de recursos comprados
     progress?: Record<string, string[]>;
+    certificates?: Record<string, string>; // courseId -> certificateId
     dni?: string;
 }

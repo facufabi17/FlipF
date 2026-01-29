@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { COURSES } from '../data/courses';
+import CertificateDisplay from '../components/CertificateDisplay';
 
 const CoursePlayer: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { user, isAuthenticated, markModuleCompleted } = useAuth();
+    const { user, isAuthenticated, markModuleCompleted, issueCertificate } = useAuth();
 
     // Estado de Navegación
     const [currentModuleIdx, setCurrentModuleIdx] = useState(0);
@@ -14,6 +15,9 @@ const CoursePlayer: React.FC = () => {
 
     // Modos de vista: 'lesson', 'quiz', 'certificate'
     const [viewMode, setViewMode] = useState<'lesson' | 'quiz' | 'certificate'>('lesson');
+
+    // Estado del Certificado
+    const [certificateId, setCertificateId] = useState<string | undefined>(undefined);
 
     // Estado del Quiz
     const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
@@ -27,6 +31,27 @@ const CoursePlayer: React.FC = () => {
         setCurrentLessonIdx(0);
         setViewMode('lesson');
     }, [id]);
+
+    // Efecto para generar/obtener certificado cuando se entra en modo certificado
+    useEffect(() => {
+        const fetchCertificate = async () => {
+            if (viewMode === 'certificate' && selectedCourse && user) {
+                // Verificar si ya tenemos el ID en el estado local del usuario primero para evitar llamada si es posible
+                if (user.certificates && user.certificates[selectedCourse.id]) {
+                    setCertificateId(user.certificates[selectedCourse.id]);
+                    return;
+                }
+
+                // Si no, intentamos emitirlo (esto lo busca en la BD o lo genera y guarda)
+                const certId = await issueCertificate(selectedCourse.id);
+                if (certId) {
+                    setCertificateId(certId);
+                }
+            }
+        };
+
+        fetchCertificate();
+    }, [viewMode, selectedCourse, user, issueCertificate]);
 
     if (!selectedCourse) return <div className="p-20 text-center text-white">Curso no encontrado</div>;
     if (!isAuthenticated || !user?.enrolledCourses?.includes(selectedCourse.id)) return <div className="p-20 text-center text-white">No tienes acceso.</div>;
@@ -96,38 +121,16 @@ const CoursePlayer: React.FC = () => {
         setQuizSubmitted(false);
     };
 
-    // Certificado Component
+    // Certificado Component integrado
     const CertificateView = () => (
-        <div className="w-full h-full flex items-center justify-center p-4">
-            <div className="bg-white text-black p-10 md:p-16 rounded-lg shadow-2xl max-w-4xl w-full border-[10px] border-double border-primary text-center relative overflow-hidden animate-fade-in-up">
-                <div className="absolute top-0 left-0 w-32 h-32 bg-primary/10 rounded-br-full"></div>
-                <div className="absolute bottom-0 right-0 w-32 h-32 bg-primary/10 rounded-tl-full"></div>
-
-                <div className="relative z-10">
-                    <span className="material-symbols-outlined text-6xl text-primary mb-4">workspace_premium</span>
-                    <h1 className="text-4xl md:text-5xl font-display font-bold mb-2 uppercase tracking-widest text-primary">Certificado</h1>
-                    <p className="text-xl text-gray-500 mb-8 uppercase tracking-widest">de Finalización</p>
-
-                    <p className="text-lg text-gray-600 mb-2">Este certificado se otorga a</p>
-                    <h2 className="text-3xl md:text-4xl font-bold text-black border-b-2 border-gray-300 pb-2 mb-2 inline-block min-w-[300px]">{user?.name}</h2>
-                    {user?.dni && <p className="text-sm text-gray-500 mb-6">DNI: {user.dni}</p>}
-
-                    <p className="text-lg text-gray-600 mb-2">Por haber completado satisfactoriamente el curso</p>
-                    <h3 className="text-2xl font-bold text-primary mb-10">{selectedCourse.title}</h3>
-
-                    <div className="flex justify-between items-end w-full max-w-lg mx-auto mt-12">
-                        <div className="text-center">
-                            <div className="w-40 border-b border-gray-400 mb-2"></div>
-                            <p className="text-xs font-bold text-gray-500 uppercase">Flip Academy</p>
-                        </div>
-                        <div className="text-center">
-                            <p className="text-sm font-bold text-gray-800">{new Date().toLocaleDateString()}</p>
-                            <div className="w-40 border-b border-gray-400 mb-2"></div>
-                            <p className="text-xs font-bold text-gray-500 uppercase">Fecha</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div className="w-full flex items-center justify-center p-4">
+            <CertificateDisplay
+                studentName={user?.name || 'Estudiante'}
+                studentDni={user?.dni || ''}
+                courseName={selectedCourse.title}
+                completionDate={new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+                uniqueId={certificateId}
+            />
         </div>
     );
 

@@ -14,6 +14,7 @@ import Academy from './pages/Academy';
 import CourseDetails from './pages/CourseDetails';
 import Checkout from './pages/Checkout';
 import MyCourses from './pages/MyCourses';
+import MyCertificates from './pages/MyCertificates';
 import MyResources from './pages/MyResources';
 import CoursePlayer from './pages/CoursePlayer';
 import Consulting from './pages/Consulting';
@@ -72,6 +73,7 @@ const App: React.FC = () => {
                                 <Route path="/checkout/:id" element={<Checkout onShowToast={showToast} />} />
 
                                 <Route path="/mis-cursos" element={<MyCourses />} />
+                                <Route path="/mis-certificados" element={<MyCertificates />} />
                                 <Route path="/mis-recursos" element={<MyResources />} />
                                 <Route path="/perfil" element={<UserProfile onShowToast={showToast} />} />
                                 <Route path="/ayuda" element={<Help />} />

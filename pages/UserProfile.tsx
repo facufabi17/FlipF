@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { COURSES } from '../data/courses';
+import CertificateDisplay from '../components/CertificateDisplay';
 
 interface UserProfileProps {
     onShowToast: (text: string, type?: 'success' | 'error') => void;
@@ -18,6 +20,9 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
 
     // Changing from boolean to explicit mode
     const [editingMode, setEditingMode] = useState<'none' | 'info' | 'password'>('none');
+
+    // Certificate Viewer State
+    const [viewingCertificate, setViewingCertificate] = useState<typeof COURSES[0] | null>(null);
 
     useEffect(() => {
         if (loading) return;
@@ -196,7 +201,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
                             </form>
 
                             {/* --- Sección Seguridad --- */}
-                            <form onSubmit={handleUpdatePassword} className="space-y-6 pt-6">
+                            <form onSubmit={handleUpdatePassword} className="space-y-6 pt-6 border-t border-white/5">
                                 <div className="flex items-center justify-between border-b border-white/5 pb-4">
                                     <h3 className="text-xl font-bold text-white flex items-center gap-2">
                                         <span className="material-symbols-outlined text-primary">lock</span>
@@ -264,6 +269,31 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
                         </div>
                     </div>
                 </div>
+
+                {/* --- Certificate Modal --- */}
+                {viewingCertificate && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+                        <div className="relative w-full max-w-5xl bg-background-dark rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                            <div className="flex items-center justify-between p-4 border-b border-white/10 bg-[#0f0f13]">
+                                <h3 className="text-lg font-bold text-white">Vista de Certificado</h3>
+                                <button
+                                    onClick={() => setViewingCertificate(null)}
+                                    className="p-2 hover:bg-white/10 rounded-full text-gray-400 hover:text-white transition-colors"
+                                >
+                                    <span className="material-symbols-outlined">close</span>
+                                </button>
+                            </div>
+                            <div className="overflow-y-auto p-4 md:p-8 bg-[#0f0f13]">
+                                <CertificateDisplay
+                                    studentName={user?.name || 'Estudiante'}
+                                    studentDni={user?.dni || ''}
+                                    courseName={viewingCertificate.title}
+                                    completionDate={new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
             </section>
         </div>
     );

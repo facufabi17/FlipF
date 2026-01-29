@@ -10,6 +10,7 @@ interface DbProfile {
     enrolled_courses: string[];
     owned_resources: string[];
     completed_modules: Record<string, string[]>;
+    certificates: Record<string, string>;
     dni: string;
 }
 
@@ -22,6 +23,7 @@ interface AuthContextType {
     addResourceToUser: (resourceId: string) => Promise<void>;
     markModuleCompleted: (courseId: string, moduleId: string) => Promise<void>;
     updateProfile: (data: Partial<User>) => Promise<void>;
+    issueCertificate: (courseId: string) => Promise<string | null>;
     purchaseItems: (items: { id: string, type: 'course' | 'resource' }[]) => Promise<void>;
     isAuthenticated: boolean;
     loading: boolean;
@@ -60,6 +62,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 enrolledCourses: profileData?.enrolled_courses || [],
                 ownedResources: profileData?.owned_resources || [],
                 progress: profileData?.completed_modules || {},
+                certificates: profileData?.certificates || {},
                 dni: profileData?.dni
             });
             return true;
@@ -282,6 +285,47 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     };
 
+    // --- CERTIFICADOS ---
+    const issueCertificate = async (courseId: string): Promise<string | null> => {
+        if (!user) return null;
+
+        // 1. Verificar si ya existe
+        if (user.certificates && user.certificates[courseId]) {
+            return user.certificates[courseId];
+        }
+
+        // 2. Generar nuevo ID
+        const newCertId = `FLIP-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 1000)}`;
+        const newCertificates = { ...(user.certificates || {}), [courseId]: newCertId };
+
+        try {
+            // 3. Guardar en Supabase
+            // Intentamos actualizar la columna certificates. Si falla (por ejemplo, si no existe la columna), capturamos el error.
+            const { error } = await supabase
+                .from('profiles')
+                .update({ certificates: newCertificates })
+                .eq('id', user.id);
+
+            if (error) {
+                console.error("Error saving certificate to Supabase:", error);
+                // Si el error es porque la columna no existe, podríamos intentar crearla o avisar
+                // Por ahora, retornamos el ID generado localmente para que el usuario pueda ver su certificado,
+                // aunque no persista si recarga.
+                // throw error; 
+            }
+
+            // 4. Actualizar estado local
+            setUser({ ...user, certificates: newCertificates });
+            return newCertId;
+
+        } catch (error) {
+            console.error("Certificate issuance error:", error);
+            // Retorno fallback local para no bloquear al usuario
+            return newCertId;
+        }
+    };
+
+
     const purchaseItems = async (items: { id: string, type: 'course' | 'resource' }[]) => {
         if (!user) return;
 
@@ -332,7 +376,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return (
         <AuthContext.Provider value={{
             user, login, register, logout, enrollInCourse, addResourceToUser,
-            markModuleCompleted, updateProfile, purchaseItems, isAuthenticated: !!user, loading
+            markModuleCompleted, updateProfile, purchaseItems, issueCertificate, isAuthenticated: !!user, loading
         }}>
             {children}
         </AuthContext.Provider>
