@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { CONTACT_INFO } from '../info';
 
 const Footer: React.FC = () => {
     return (
@@ -25,20 +26,21 @@ const Footer: React.FC = () => {
                         <Link to="/" className="text-gray-400 text-sm hover:text-primary transition-colors">Inicio</Link>
                         <Link to="/recursos-gratis" className="text-gray-400 text-sm hover:text-primary transition-colors">Recursos Gratis</Link>
                         <Link to="/recursos-pago" className="text-gray-400 text-sm hover:text-primary transition-colors">Recursos de Pago</Link>
-                        <Link to="/academia" className="text-gray-400 text-sm hover:text-primary transition-colors">Academia</Link>
+                        <Link to="/academia" className="text-gray-400 text-sm hover:text-primary transition-colors">Cursos</Link>
                         <Link to="/consultas" className="text-gray-400 text-sm hover:text-primary transition-colors">Consultas</Link>
                         <Link to="/login" className="text-primary font-medium text-sm hover:text-accent transition-colors">Login Alumnos</Link>
                     </div>
                     <div className="flex flex-col gap-3">
                         <h4 className="text-white font-bold text-sm">Compañía</h4>
                         <Link to="/nosotros" className="text-gray-400 text-sm hover:text-primary transition-colors">Nosotros</Link>
-                        <a className="text-gray-400 text-sm hover:text-primary transition-colors" href="#">Carreras</a>
-                        <a className="text-gray-400 text-sm hover:text-primary transition-colors" href="mailto:contacto@flip.agency">Contacto Corporativo</a>
+                        <a className="text-gray-400 text-sm hover:text-primary transition-colors" href="#">Carreras?</a>
+                        <a className="text-gray-400 text-sm hover:text-primary transition-colors" href="#">Trabaja Con Nosotros?</a>
+                        <a className="text-gray-400 text-sm hover:text-primary transition-colors" href={`mailto:${CONTACT_INFO.email}`}>Email Corporativo</a>
                     </div>
                     <div className="flex flex-col gap-3">
                         <h4 className="text-white font-bold text-sm">Legal</h4>
-                        <a className="text-gray-400 text-sm hover:text-primary transition-colors" href="#">Privacidad</a>
-                        <a className="text-gray-400 text-sm hover:text-primary transition-colors" href="#">Términos</a>
+                        <Link to="/privacidad" className="text-gray-400 text-sm hover:text-primary transition-colors" >Privacidad</Link>
+                        <Link to="/terminos" className="text-gray-400 text-sm hover:text-primary transition-colors" >Términos</Link>
                     </div>
                 </div>
             </div>

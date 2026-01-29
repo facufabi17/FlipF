@@ -21,9 +21,13 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import UserProfile from './pages/UserProfile';
 import Help from './pages/Help';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
+import UpdatePassword from './pages/UpdatePassword';
 import { ToastMessage } from './types';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import AuthHandler from './context/AuthHandler';
 
 //const { data: todos } = await supabase.from('todos').select()
 
@@ -49,6 +53,7 @@ const App: React.FC = () => {
         <AuthProvider>
             <CartProvider>
                 <HashRouter>
+                    <AuthHandler />
                     <div className="flex flex-col min-h-screen">
                         <Navbar />
 
@@ -70,6 +75,9 @@ const App: React.FC = () => {
                                 <Route path="/mis-recursos" element={<MyResources />} />
                                 <Route path="/perfil" element={<UserProfile onShowToast={showToast} />} />
                                 <Route path="/ayuda" element={<Help />} />
+                                <Route path="/privacidad" element={<Privacy />} />
+                                <Route path="/terminos" element={<Terms />} />
+                                <Route path="/actualizar-password" element={<UpdatePassword />} />
 
                                 <Route path="/aula-virtual/:id" element={<CoursePlayer />} />
 

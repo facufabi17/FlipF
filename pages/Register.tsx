@@ -13,6 +13,7 @@ const Register: React.FC<RegisterProps> = ({ onShowToast }) => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [dni, setDni] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -25,7 +26,7 @@ const Register: React.FC<RegisterProps> = ({ onShowToast }) => {
 
         setLoading(true);
         try {
-            const result = await register(name, email, password);
+            const result = await register(name, email, password, dni);
             if (result.success) {
                 onShowToast('¡Cuenta creada! Por favor verifica tu email para continuar.', 'success');
                 navigate('/');
@@ -81,6 +82,24 @@ const Register: React.FC<RegisterProps> = ({ onShowToast }) => {
                                         placeholder="••••••••"
                                         className="w-full rounded-lg border border-white/10 bg-surface-dark px-4 py-3 text-white placeholder-gray-500 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
                                     />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                                        DNI / Identificación <span className="text-gray-500 text-xs">(Opcional)</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={dni}
+                                        onChange={(e) => {
+                                            const val = e.target.value.replace(/[^0-9]/g, '');
+                                            setDni(val);
+                                        }}
+                                        placeholder="Solo números"
+                                        className="w-full rounded-lg border border-white/10 bg-surface-dark px-4 py-3 text-white placeholder-gray-500 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
+                                    />
+                                    <p className="text-xs text-yellow-500/80 mt-1">
+                                        ⚠️ Esta información no se podrá modificar una vez guardada.
+                                    </p>
                                 </div>
                                 <button type="submit" disabled={loading} className="w-full bg-primary hover:bg-purple-600 text-white font-bold py-3.5 rounded-lg transition-all shadow-lg shadow-primary/20 disabled:opacity-50">
                                     {loading ? 'Creando cuenta...' : 'Registrarse'}

@@ -92,7 +92,8 @@ export interface User {
     name: string;
     email: string;
     password?: string;
-    enrolledCourses: string[]; 
+    enrolledCourses: string[];
     ownedResources: string[]; // Lista de IDs de recursos comprados
-    progress?: Record<string, string[]>; 
+    progress?: Record<string, string[]>;
+    dni?: string;
 }

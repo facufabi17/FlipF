@@ -12,6 +12,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
 
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
+    const [dni, setDni] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -26,6 +27,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
         } else if (user) {
             setName(user.name || '');
             setEmail(user.email || '');
+            setDni(user.dni || '');
         }
     }, [isAuthenticated, user, navigate, loading]);
 
@@ -41,7 +43,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
         e.preventDefault();
         try {
             const emailChanged = user && email !== user.email;
-            await updateProfile({ name, email });
+            await updateProfile({ name, email, dni });
 
             if (emailChanged) {
                 onShowToast('Información actualizada. Por favor verifica tu nuevo email.', 'success');
@@ -166,6 +168,29 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
                                             disabled={editingMode !== 'info'}
                                             className="w-full rounded-lg border border-white/10 bg-surface-dark px-4 py-3 text-white focus:border-primary focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                                         />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-gray-300">
+                                            DNI / Identificación
+                                            {user?.dni && <span className="ml-2 text-xs text-green-500 font-bold">(Verificado)</span>}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={dni}
+                                            onChange={(e) => {
+                                                const val = e.target.value.replace(/[^0-9]/g, '');
+                                                setDni(val);
+                                            }}
+                                            disabled={!!user?.dni || editingMode !== 'info'}
+                                            placeholder={user?.dni ? user.dni : "Ingresa tu DNI"}
+                                            className={`w-full rounded-lg border border-white/10 bg-surface-dark px-4 py-3 text-white focus:border-primary focus:outline-none 
+                                                ${!!user?.dni ? 'opacity-50 cursor-not-allowed text-gray-400' : 'placeholder-gray-500'}`}
+                                        />
+                                        {!user?.dni && editingMode === 'info' && (
+                                            <p className="text-xs text-yellow-500/80 mt-1">
+                                                ⚠️ Una vez guardado, el DNI será permanente y no podrás modificarlo.
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                             </form>

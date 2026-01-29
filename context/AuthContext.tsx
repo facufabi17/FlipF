@@ -10,12 +10,13 @@ interface DbProfile {
     enrolled_courses: string[];
     owned_resources: string[];
     completed_modules: Record<string, string[]>;
+    dni: string;
 }
 
 interface AuthContextType {
     user: User | null;
     login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
-    register: (name: string, email: string, password: string) => Promise<{ success: boolean; message: string }>;
+    register: (name: string, email: string, password: string, dni?: string) => Promise<{ success: boolean; message: string }>;
     logout: () => Promise<void>;
     enrollInCourse: (courseId: string) => Promise<void>;
     addResourceToUser: (resourceId: string) => Promise<void>;
@@ -58,7 +59,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 name: profileData?.full_name || supabaseUser.user_metadata?.full_name || 'Usuario',
                 enrolledCourses: profileData?.enrolled_courses || [],
                 ownedResources: profileData?.owned_resources || [],
-                progress: profileData?.completed_modules || {}
+                progress: profileData?.completed_modules || {},
+                dni: profileData?.dni
             });
             return true;
         } catch (err) {
@@ -129,12 +131,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         };
     }, []);
 
-    const register = async (name: string, email: string, password: string) => {
+    const register = async (name: string, email: string, password: string, dni?: string) => {
         const { error } = await supabase.auth.signUp({
             email,
             password,
             options: {
-                data: { full_name: name }
+                data: {
+                    full_name: name,
+                    ...(dni ? { dni } : {})
+                }
             }
         });
 
@@ -254,11 +259,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 }
             }
 
-            // 2. Actualizar Perfil Público (Nombre)
-            if (data.name && data.name !== user.name) {
+            // 2. Actualizar Perfil Público (Nombre y DNI)
+            if ((data.name && data.name !== user.name) || (data.dni && data.dni !== user.dni)) {
+                const updates: any = {};
+                if (data.name) updates.full_name = data.name;
+                if (data.dni) updates.dni = data.dni;
+
                 const { error: profileError } = await supabase
                     .from('profiles')
-                    .update({ full_name: data.name })
+                    .update(updates)
                     .eq('id', user.id);
 
                 if (profileError) throw profileError;

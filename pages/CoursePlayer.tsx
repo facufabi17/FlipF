@@ -109,7 +109,8 @@ const CoursePlayer: React.FC = () => {
                     <p className="text-xl text-gray-500 mb-8 uppercase tracking-widest">de Finalización</p>
 
                     <p className="text-lg text-gray-600 mb-2">Este certificado se otorga a</p>
-                    <h2 className="text-3xl md:text-4xl font-bold text-black border-b-2 border-gray-300 pb-2 mb-6 inline-block min-w-[300px]">{user?.name}</h2>
+                    <h2 className="text-3xl md:text-4xl font-bold text-black border-b-2 border-gray-300 pb-2 mb-2 inline-block min-w-[300px]">{user?.name}</h2>
+                    {user?.dni && <p className="text-sm text-gray-500 mb-6">DNI: {user.dni}</p>}
 
                     <p className="text-lg text-gray-600 mb-2">Por haber completado satisfactoriamente el curso</p>
                     <h3 className="text-2xl font-bold text-primary mb-10">{selectedCourse.title}</h3>
@@ -208,7 +209,19 @@ const CoursePlayer: React.FC = () => {
 
                         <div className="mt-8 px-2">
                             <button
-                                onClick={() => isCertificateUnlocked() && setViewMode('certificate')}
+                                onClick={() => {
+                                    if (!isCertificateUnlocked()) return;
+                                    if (!user?.dni) {
+                                        // Asumimos que hay un toast disponible vía props o contexto, pero CoursePlayer no recibe onShowToast actualmente.
+                                        // Usaremos alert temporalmente o agregaremos un mensaje visible.
+                                        // Nota: CoursePlayer no tiene onShowToast.
+                                        // Opcion: Agregar un mensaje en el UI o redirigir.
+                                        alert("Debes completar tu DNI en tu Perfil para emitir el certificado.");
+                                        navigate('/perfil');
+                                        return;
+                                    }
+                                    setViewMode('certificate');
+                                }}
                                 disabled={!isCertificateUnlocked()}
                                 className={`w-full py-4 rounded-xl border border-dashed flex flex-col items-center justify-center gap-2 transition-all
                                     ${isCertificateUnlocked()
@@ -355,7 +368,14 @@ const CoursePlayer: React.FC = () => {
                                                         Siguiente Módulo
                                                     </button>
                                                 ) : (
-                                                    <button onClick={() => setViewMode('certificate')} className="bg-tech text-black px-6 py-2 rounded-lg font-bold hover:bg-cyan-400">
+                                                    <button onClick={() => {
+                                                        if (!user?.dni) {
+                                                            alert("DNI requerido para el certificado. Ve a tu perfil.");
+                                                            navigate('/perfil');
+                                                        } else {
+                                                            setViewMode('certificate');
+                                                        }
+                                                    }} className="bg-tech text-black px-6 py-2 rounded-lg font-bold hover:bg-cyan-400">
                                                         Ver Certificado
                                                     </button>
                                                 )}
