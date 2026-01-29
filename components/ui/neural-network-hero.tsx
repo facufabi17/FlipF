@@ -296,7 +296,7 @@ export default function NeuralNetworkHero({
     );
 
     return (
-        <section ref={sectionRef} className="relative w-full overflow-hidden min-h-screen">
+        <section ref={sectionRef} className="relative w-full overflow-hidden">
             <ShaderBackground />
 
             <div className="relative mx-auto flex max-w-7xl flex-col items-center text-center gap-6 px-4 pb-24 pt-10 sm:gap-6 sm:pt-20 md:px-10 lg:px-16 z-10">
