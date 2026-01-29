@@ -172,6 +172,7 @@ const Navbar: React.FC = () => {
                     <Link to="/recursos-gratis" onClick={() => setMobileMenuOpen(false)} className="text-gray-300 hover:text-white">Recursos Gratis</Link>
                     <Link to="/recursos-pago" onClick={() => setMobileMenuOpen(false)} className="text-gray-300 hover:text-white">Recursos de Pago</Link>
                     <Link to="/academia" onClick={() => setMobileMenuOpen(false)} className="text-gray-300 hover:text-white">Academia</Link>
+                    <Link to="/consultas" onClick={() => setMobileMenuOpen(false)} className="text-gray-300 hover:text-white">Consultas</Link>
 
                     {isAuthenticated && (
                         <>
