@@ -24,6 +24,29 @@ const CertificateDisplay: React.FC<CertificateDisplayProps> = ({
 }) => {
     const certificateRef = useRef<HTMLDivElement>(null);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [signatureSvg, setSignatureSvg] = useState<string | null>(null);
+
+    // Fetch and process SVG signature for PDF compatibility
+    React.useEffect(() => {
+        const fetchSignature = async () => {
+            try {
+                const response = await fetch('/firma-facundo.svg');
+                if (response.ok) {
+                    let svgText = await response.text();
+                    // Force white color directly in SVG attributes to bypass html2canvas filter limitations
+                    svgText = svgText.replace(/fill="[^"]*"/g, 'fill="#FFFFFF"');
+                    // Add fill if missing in path
+                    svgText = svgText.replace(/<path/g, '<path fill="#FFFFFF"');
+                    // Remove existing styles to avoid conflicts
+                    svgText = svgText.replace(/style="[^"]*"/g, '');
+                    setSignatureSvg(svgText);
+                }
+            } catch (error) {
+                console.error('Error loading signature:', error);
+            }
+        };
+        fetchSignature();
+    }, []);
 
     // Generate a fallback ID if not provided
     const certId = uniqueId || `FLIP-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 1000)}`;
@@ -33,21 +56,26 @@ const CertificateDisplay: React.FC<CertificateDisplayProps> = ({
         setIsGenerating(true);
 
         try {
+            // 1. Capturar en alta resolución
             const canvas = await html2canvas(certificateRef.current, {
-                scale: 3, // Increased quality
+                scale: 2, // Higher scale for better quality
                 useCORS: true,
                 backgroundColor: '#1a1a1a',
                 logging: false,
                 allowTaint: true,
             });
 
-            const imgData = canvas.toDataURL('image/png');
-            // A4 Landscape: 297mm x 210mm
-            const pdf = new jsPDF('l', 'mm', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
+            const imgData = canvas.toDataURL('image/png', 1.0); // Max quality
 
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            // 2. Crear PDF con las dimensiones EXACTAS de la imagen (elimina bordes blancos)
+            const pdf = new jsPDF({
+                orientation: 'landscape',
+                unit: 'px',
+                format: [canvas.width, canvas.height]
+            });
+
+            // 3. Agregar imagen cubriendo todo el PDF
+            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
             pdf.save(`Certificado-${courseName.replace(/\s+/g, '-')}.pdf`);
         } catch (error) {
             console.error('Error generating PDF:', error);
@@ -64,11 +92,12 @@ const CertificateDisplay: React.FC<CertificateDisplayProps> = ({
         const params = new URLSearchParams({
             startTask: 'CERTIFICATION_NAME',
             name: courseName,
-            organizationName: 'Flip Manager',
+            organizationId: '71874092',
+            organizationName: 'Flip Manager | Agencia de Marketing Digital',
             issueYear: new Date().getFullYear().toString(),
             issueMonth: (new Date().getMonth() + 1).toString(),
             certId: certId,
-            // certUrl: 'https://flipmanager.com', // TODO: Add actual validation URL if available
+            certUrl: `https://flipmanager.com/#/verify/${certId}`,
         });
 
         window.open(`${baseUrl}?${params.toString()}`, '_blank');
@@ -116,7 +145,7 @@ const CertificateDisplay: React.FC<CertificateDisplayProps> = ({
                                 <span className="text-2xl font-bold tracking-widest uppercase font-display">Flip Manager</span>
                             </div>
 
-                            <h1 className="text-5xl md:text-6xl font-display font-bold uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-primary via-white to-primary mb-2 shadow-sm">
+                            <h1 className="text-5xl md:text-6xl font-display font-bold uppercase tracking-widest text-white mb-2 shadow-sm drop-shadow-lg">
                                 Certificado
                             </h1>
                             <p className="text-xl md:text-2xl text-gray-400 uppercase tracking-[0.5em] font-light">de Finalización</p>
@@ -145,13 +174,23 @@ const CertificateDisplay: React.FC<CertificateDisplayProps> = ({
                         {/* Footer */}
                         <div className="flex justify-between items-end w-full mt-12 z-10 px-8">
                             <div className="text-center">
-                                <div className="mb-2">
-                                    {/* Digital Signature Placeholder */}
-                                    <div className="h-12 flex items-end justify-center">
-                                        <span className="font-dancing text-3xl text-gray-300 transform -rotate-6 translate-y-2 opacity-80">
-                                            {directorName}
-                                        </span>
-                                    </div>
+                                <div className="mb-2 relative h-8 w-24 flex items-end justify-center mx-auto">
+                                    {/* Digital Signature - Inline SVG for PDF Compatibility */}
+                                    {signatureSvg ? (
+                                        <div
+                                            className="absolute bottom-0 w-full h-full flex items-end justify-center translate-y-2 select-none"
+                                            dangerouslySetInnerHTML={{ __html: signatureSvg }}
+                                            style={{
+                                                transform: 'translateY(10px) scale(1.2)',
+                                            }}
+                                        />
+                                    ) : (
+                                        <div id="signature-fallback" className="h-full w-full flex items-end justify-center">
+                                            <span className="font-dancing text-3xl text-gray-300 transform -rotate-6 translate-y-2 opacity-80 whitespace-nowrap">
+                                                {directorName}
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="w-64 h-px bg-gray-500 mb-2"></div>
                                 <p className="text-sm font-bold text-white uppercase">{directorName}</p>
@@ -162,7 +201,7 @@ const CertificateDisplay: React.FC<CertificateDisplayProps> = ({
                                 {/* Real QR Code */}
                                 <div className="bg-white p-2 rounded-lg shadow-lg">
                                     <QRCodeSVG
-                                        value={`https://flipmanager.com/verify/${certId}`}
+                                        value={`https://flipmanager.com/#/verify/${certId}`}
                                         size={80}
                                         level="M"
                                         fgColor="#000000"
