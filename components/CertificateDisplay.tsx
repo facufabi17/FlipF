@@ -97,7 +97,7 @@ const CertificateDisplay: React.FC<CertificateDisplayProps> = ({
             issueYear: new Date().getFullYear().toString(),
             issueMonth: (new Date().getMonth() + 1).toString(),
             certId: certId,
-            certUrl: `https://flipmanager.com/#/verify/${certId}`,
+            certUrl: `https://flip-f.vercel.app/#/verify/${certId}`,
         });
 
         window.open(`${baseUrl}?${params.toString()}`, '_blank');

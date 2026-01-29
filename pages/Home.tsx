@@ -70,7 +70,6 @@ const Home: React.FC = () => {
                     </div>
 
                     <div className="order-1 md:order-2">
-                        <span className="text-[#00F5F1] font-bold tracking-widest uppercase text-sm mb-2 block">Nivel DIY &bull; Do It Yourself</span>
                         <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Herramientas de <span className="text-[#00F5F1]">Ejecución Inmediata</span></h2>
                         <p className="text-gray-400 text-lg mb-6 leading-relaxed">
                             No te damos teoría abstracta. Usamos <strong>Andragogía</strong> (aprendizaje práctico para adultos) para entregarte sistemas que puedes implementar hoy mismo.
@@ -101,7 +100,6 @@ const Home: React.FC = () => {
 
                 <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center relative z-10">
                     <div>
-                        <span className="text-[#842DB4] font-bold tracking-widest uppercase text-sm mb-2 block">Nivel DFY &bull; Done For You</span>
                         <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Gestionamos tu <span className="text-[#842DB4]">Crecimiento</span></h2>
                         <p className="text-gray-400 text-lg mb-6 leading-relaxed">
                             ¿Necesitas resultados sin la curva de aprendizaje? Usamos en tu negocio las mismas estrategias de alto nivel que enseñamos en nuestra academia.
