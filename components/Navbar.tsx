@@ -55,6 +55,8 @@ const Navbar: React.FC = () => {
                 {/* Desktop Nav */}
                 <nav className="hidden md:flex items-center gap-8">
                     <Link to="/" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Inicio</Link>
+                    <Link to="/academia" className="text-sm font-medium text-[#00F5F1] hover:text-white transition-colors">Academia</Link>
+                    <Link to="/consultas" className="text-sm font-medium text-[#842DB4] hover:text-white transition-colors">Consultas</Link>
                     {/* Recursos Dropdown */}
                     <div className="relative group h-full flex items-center">
                         <button className="text-sm font-medium text-gray-300 hover:text-white transition-colors flex items-center gap-1 py-4">
@@ -68,9 +70,6 @@ const Navbar: React.FC = () => {
                             <Link to="/recursos-pago" className="w-full text-left block px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors">Recursos de Pago</Link>
                         </div>
                     </div>
-
-                    <Link to="/academia" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Academia</Link>
-                    <Link to="/consultas" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Consultas</Link>
                     <Link to="/nosotros" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Nosotros</Link>
 
                 </nav>
@@ -171,8 +170,8 @@ const Navbar: React.FC = () => {
                     <Link to="/nosotros" onClick={() => setMobileMenuOpen(false)} className="text-gray-300 hover:text-white">Nosotros</Link>
                     <Link to="/recursos-gratis" onClick={() => setMobileMenuOpen(false)} className="text-gray-300 hover:text-white">Recursos Gratis</Link>
                     <Link to="/recursos-pago" onClick={() => setMobileMenuOpen(false)} className="text-gray-300 hover:text-white">Recursos de Pago</Link>
-                    <Link to="/academia" onClick={() => setMobileMenuOpen(false)} className="text-gray-300 hover:text-white">Academia</Link>
-                    <Link to="/consultas" onClick={() => setMobileMenuOpen(false)} className="text-gray-300 hover:text-white">Consultas</Link>
+                    <Link to="/academia" onClick={() => setMobileMenuOpen(false)} className="text-[#00F5F1] hover:text-white">Academia</Link>
+                    <Link to="/consultas" onClick={() => setMobileMenuOpen(false)} className="text-[#842DB4] hover:text-white">Consultas</Link>
 
                     {isAuthenticated && (
                         <>

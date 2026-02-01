@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import emailjs from '@emailjs/browser';
-import NeuralNetworkHero from '../components/ui/neural-network-hero';
+import NeuralNetworkHero from "../components/Fondos/AnimacionVioleta";
 
 interface ConsultingProps {
   onShowToast: (text: string) => void;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import FlowGradient from '../components/ui/flow-gradient-hero-section';
+import FlowGradient from "../components/Fondos/AnimacionEntrada";
 
 const Home: React.FC = () => {
     return (

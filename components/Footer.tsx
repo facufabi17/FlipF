@@ -4,7 +4,7 @@ import { CONTACT_INFO } from '../info';
 
 const Footer: React.FC = () => {
     return (
-        <footer className="w-full border-t border-white/5 bg-black/40 mt-20 pt-12 pb-8">
+        <footer className="w-full border-t border-white/5 bg-black/40 pt-12 pb-8">
             <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between gap-8">
                 <div className="flex flex-col gap-4 max-w-xs">
                     <div className="flex items-center gap-2">
