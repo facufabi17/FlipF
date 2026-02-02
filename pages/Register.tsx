@@ -10,7 +10,8 @@ const Register: React.FC<RegisterProps> = ({ onShowToast }) => {
     const navigate = useNavigate();
     const { register } = useAuth();
 
-    const [name, setName] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [dni, setDni] = useState('');
@@ -19,14 +20,14 @@ const Register: React.FC<RegisterProps> = ({ onShowToast }) => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!name || !email || !password) {
+        if (!firstName || !lastName || !email || !password) {
             onShowToast('Por favor completa todos los campos', 'error');
             return;
         }
 
         setLoading(true);
         try {
-            const result = await register(name, email, password, dni);
+            const result = await register(firstName, lastName, email, password, dni);
             if (result.success) {
                 onShowToast('¡Cuenta creada! Por favor verifica tu email para continuar.', 'success');
                 navigate('/');
@@ -53,15 +54,27 @@ const Register: React.FC<RegisterProps> = ({ onShowToast }) => {
 
                         <form onSubmit={handleSubmit}>
                             <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-1">Nombre Completo</label>
-                                    <input
-                                        type="text"
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                        placeholder="John Doe"
-                                        className="w-full rounded-lg border border-white/10 bg-surface-dark px-4 py-3 text-white placeholder-gray-500 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
-                                    />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-1">Nombre</label>
+                                        <input
+                                            type="text"
+                                            value={firstName}
+                                            onChange={(e) => setFirstName(e.target.value)}
+                                            placeholder="Juan"
+                                            className="w-full rounded-lg border border-white/10 bg-surface-dark px-4 py-3 text-white placeholder-gray-500 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-1">Apellido</label>
+                                        <input
+                                            type="text"
+                                            value={lastName}
+                                            onChange={(e) => setLastName(e.target.value)}
+                                            placeholder="Pérez"
+                                            className="w-full rounded-lg border border-white/10 bg-surface-dark px-4 py-3 text-white placeholder-gray-500 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
+                                        />
+                                    </div>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-1">Correo Electrónico</label>

@@ -89,7 +89,9 @@ export interface CartItem {
 
 export interface User {
     id: string;
-    name: string;
+    name: string;      // Deprecated: use firstName + lastName
+    firstName?: string;
+    lastName?: string;
     email: string;
     password?: string;
     enrolledCourses: string[];

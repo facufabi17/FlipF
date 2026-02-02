@@ -6,6 +6,8 @@ import { supabase } from '../lib/supabase';
 interface DbProfile {
     id: string;
     full_name: string;
+    first_name?: string;
+    last_name?: string;
     email: string;
     enrolled_courses: string[];
     owned_resources: string[];
@@ -17,7 +19,7 @@ interface DbProfile {
 interface AuthContextType {
     user: User | null;
     login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
-    register: (name: string, email: string, password: string, dni?: string) => Promise<{ success: boolean; message: string }>;
+    register: (firstName: string, lastName: string, email: string, password: string, dni?: string) => Promise<{ success: boolean; message: string }>;
     logout: () => Promise<void>;
     enrollInCourse: (courseId: string) => Promise<void>;
     addResourceToUser: (resourceId: string) => Promise<void>;
@@ -58,7 +60,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setUser({
                 id: supabaseUser.id,
                 email: supabaseUser.email || '',
-                name: profileData?.full_name || supabaseUser.user_metadata?.full_name || 'Usuario',
+                name: profileData?.full_name || supabaseUser.user_metadata?.full_name || 'Usuario', // Fallback
+                firstName: profileData?.first_name || supabaseUser.user_metadata?.first_name,
+                lastName: profileData?.last_name || supabaseUser.user_metadata?.last_name,
                 enrolledCourses: profileData?.enrolled_courses || [],
                 ownedResources: profileData?.owned_resources || [],
                 progress: profileData?.completed_modules || {},
@@ -134,13 +138,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         };
     }, []);
 
-    const register = async (name: string, email: string, password: string, dni?: string) => {
+    const register = async (firstName: string, lastName: string, email: string, password: string, dni?: string) => {
         const { error } = await supabase.auth.signUp({
             email,
             password,
             options: {
                 data: {
-                    full_name: name,
+                    full_name: `${firstName} ${lastName}`.trim(),
+                    first_name: firstName,
+                    last_name: lastName,
                     ...(dni ? { dni } : {})
                 }
             }
@@ -262,10 +268,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 }
             }
 
-            // 2. Actualizar Perfil Público (Nombre y DNI)
-            if ((data.name && data.name !== user.name) || (data.dni && data.dni !== user.dni)) {
+            // 2. Actualizar Perfil Público (Nombre, Apellido y DNI)
+            if ((data.name && data.name !== user.name) || (data.dni && data.dni !== user.dni) || data.firstName || data.lastName) {
                 const updates: any = {};
-                if (data.name) updates.full_name = data.name;
+                // Si viene name antiguo, tratamos de guess? Mejor no tocar si no es explicito.
+                // Pero si viene firstName/lastName, actualizamos full_name también
+                if (data.firstName) updates.first_name = data.firstName;
+                if (data.lastName) updates.last_name = data.lastName;
+
+                // Sincronizar full_name si cambian las partes
+                const newFirst = data.firstName || user.firstName || '';
+                const newLast = data.lastName || user.lastName || '';
+                if (data.firstName || data.lastName) {
+                    updates.full_name = `${newFirst} ${newLast}`.trim();
+                } else if (data.name) {
+                    updates.full_name = data.name;
+                }
+
                 if (data.dni) updates.dni = data.dni;
 
                 const { error: profileError } = await supabase

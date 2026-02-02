@@ -12,7 +12,8 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
     const { user, updateProfile, isAuthenticated, loading } = useAuth();
     const navigate = useNavigate();
 
-    const [name, setName] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [dni, setDni] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -30,7 +31,8 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
         if (!isAuthenticated) {
             navigate('/login');
         } else if (user) {
-            setName(user.name || '');
+            setFirstName(user.firstName || '');
+            setLastName(user.lastName || '');
             setEmail(user.email || '');
             setDni(user.dni || '');
         }
@@ -48,7 +50,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
         e.preventDefault();
         try {
             const emailChanged = user && email !== user.email;
-            await updateProfile({ name, email, dni });
+            await updateProfile({ firstName, lastName, email, dni });
 
             if (emailChanged) {
                 onShowToast('Información actualizada. Por favor verifica tu nuevo email.', 'success');
@@ -88,7 +90,8 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
     const cancelEditing = () => {
         setEditingMode('none');
         if (user) {
-            setName(user.name || '');
+            setFirstName(user.firstName || '');
+            setLastName(user.lastName || '');
             setEmail(user.email || '');
         }
         setNewPassword('');
@@ -111,7 +114,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
                             </div>
                             <div className="size-16 rounded-full bg-gradient-to-br from-primary to-accent p-[2px]">
                                 <div className="w-full h-full rounded-full bg-[#1b131f] flex items-center justify-center">
-                                    <span className="font-bold text-white text-2xl">{name.charAt(0).toUpperCase()}</span>
+                                    <span className="font-bold text-white text-2xl">{(firstName || user?.name || '?').charAt(0).toUpperCase()}</span>
                                 </div>
                             </div>
                         </div>
@@ -155,11 +158,21 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium text-gray-300">Nombre Completo</label>
+                                        <label className="text-sm font-medium text-gray-300">Nombre</label>
                                         <input
                                             type="text"
-                                            value={name}
-                                            onChange={(e) => setName(e.target.value)}
+                                            value={firstName}
+                                            onChange={(e) => setFirstName(e.target.value)}
+                                            disabled={editingMode !== 'info'}
+                                            className="w-full rounded-lg border border-white/10 bg-surface-dark px-4 py-3 text-white focus:border-primary focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-gray-300">Apellido</label>
+                                        <input
+                                            type="text"
+                                            value={lastName}
+                                            onChange={(e) => setLastName(e.target.value)}
                                             disabled={editingMode !== 'info'}
                                             className="w-full rounded-lg border border-white/10 bg-surface-dark px-4 py-3 text-white focus:border-primary focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                                         />
@@ -285,7 +298,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
                             </div>
                             <div className="overflow-y-auto p-4 md:p-8 bg-[#0f0f13]">
                                 <CertificateDisplay
-                                    studentName={user?.name || 'Estudiante'}
+                                    studentName={`${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.name || 'Estudiante'}
                                     studentDni={user?.dni || ''}
                                     courseName={viewingCertificate.title}
                                     completionDate={new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}

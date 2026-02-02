@@ -95,11 +95,11 @@ const MyCertificates: React.FC = () => {
 
                         <div className="p-4 md:p-8">
                             <CertificateDisplay
-                                studentName={user?.name || 'Estudiante'}
+                                studentName={`${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.name || 'Estudiante'}
                                 studentDni={user?.dni || ''}
+                                uniqueId={selectedCert.certId}
                                 courseName={COURSES.find(c => c.id === selectedCert.courseId)?.title || 'Curso'}
                                 completionDate={new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
-                                uniqueId={selectedCert.certId}
                             />
                         </div>
                     </div>

@@ -98,10 +98,10 @@ const Navbar: React.FC = () => {
                                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                                 className="flex items-center gap-2 md:gap-3 focus:outline-none group p-1 md:pr-2 rounded-full hover:bg-white/5 transition-colors"
                             >
-                                <span className="text-sm font-medium text-white hidden md:block group-hover:text-primary transition-colors">{user?.name}</span>
+                                <span className="text-sm font-medium text-white hidden md:block group-hover:text-primary transition-colors">{user?.firstName || user?.name}</span>
                                 <div className="size-9 md:size-10 rounded-full bg-gradient-to-br from-primary to-accent p-[2px] shadow-lg shadow-primary/20">
                                     <div className="w-full h-full rounded-full bg-[#1b131f] flex items-center justify-center">
-                                        <span className="font-bold text-white text-sm md:text-base">{user?.name?.charAt(0).toUpperCase() || 'U'}</span>
+                                        <span className="font-bold text-white text-sm md:text-base">{(user?.firstName || user?.name || 'U').charAt(0).toUpperCase()}</span>
                                     </div>
                                 </div>
                                 <span className={`material-symbols-outlined text-gray-400 transition-transform duration-300 ${userMenuOpen ? 'rotate-180' : ''}`}>expand_more</span>
