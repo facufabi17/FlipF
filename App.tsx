@@ -1,36 +1,39 @@
 //import { supabase } from './lib/supabase';
 
-import React, { useState } from 'react';
-import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
+import React, { useState, Suspense, lazy } from 'react';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
 import { Toast } from './components/Toast';
-import Home from './pages/Home';
-import About from './pages/About';
-import FreeResources from './pages/FreeResources';
-import PaidResources from './pages/PaidResources';
-import Academy from './pages/Academy';
-import CourseDetails from './pages/CourseDetails';
-import Checkout from './pages/Checkout';
-import MyCourses from './pages/Usuario/MyCourses';
-import MyCertificates from './pages/Usuario/MyCertificates';
-import VerifyCertificate from './pages/VerifyCertificate';
-import MyResources from './pages/Usuario/MyResources';
-import CoursePlayer from './pages/CoursePlayer';
-import Consulting from './pages/Consulting';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import UserProfile from './pages/Usuario/UserProfile';
-import Help from './pages/Help';
-import Privacy from './pages/Term&Priv/Privacy';
-import Terms from './pages/Term&Priv/Terms';
-import UpdatePassword from './pages/UpdatePassword';
 import { ToastMessage } from './types';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import AuthHandler from './context/AuthHandler';
 import ScrollToTop from './components/ScrollToTop';
+import LoadingSpinner from './components/LoadingSpinner';
+
+// Lazy Load Pages
+const Home = lazy(() => import('./pages/Home'));
+const About = lazy(() => import('./pages/About'));
+const FreeResources = lazy(() => import('./pages/FreeResources'));
+const PaidResources = lazy(() => import('./pages/PaidResources'));
+const Academy = lazy(() => import('./pages/Academy'));
+const CourseDetails = lazy(() => import('./pages/CourseDetails'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const MyCourses = lazy(() => import('./pages/Usuario/MyCourses'));
+const MyCertificates = lazy(() => import('./pages/Usuario/MyCertificates'));
+const VerifyCertificate = lazy(() => import('./pages/VerifyCertificate'));
+const MyResources = lazy(() => import('./pages/Usuario/MyResources'));
+const CoursePlayer = lazy(() => import('./pages/CoursePlayer'));
+const Consulting = lazy(() => import('./pages/Consulting'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const UserProfile = lazy(() => import('./pages/Usuario/UserProfile'));
+const Help = lazy(() => import('./pages/Help'));
+const Privacy = lazy(() => import('./pages/Term&Priv/Privacy'));
+const Terms = lazy(() => import('./pages/Term&Priv/Terms'));
+const UpdatePassword = lazy(() => import('./pages/UpdatePassword'));
 
 //const { data: todos } = await supabase.from('todos').select()
 
@@ -53,35 +56,37 @@ const App: React.FC = () => {
                         <Navbar />
 
                         <main className="flex-1 w-full relative">
-                            <Routes>
-                                <Route path="/" element={<Home />} />
-                                <Route path="/nosotros" element={<About />} />
-                                <Route path="/recursos-gratis" element={<FreeResources />} />
-                                <Route path="/recursos-pago" element={<PaidResources onShowToast={showToast} />} />
+                            <Suspense fallback={<LoadingSpinner />}>
+                                <Routes>
+                                    <Route path="/" element={<Home />} />
+                                    <Route path="/nosotros" element={<About />} />
+                                    <Route path="/recursos-gratis" element={<FreeResources />} />
+                                    <Route path="/recursos-pago" element={<PaidResources onShowToast={showToast} />} />
 
-                                <Route path="/academia" element={<Academy />} />
-                                <Route path="/academia/:id" element={<CourseDetails onShowToast={showToast} />} />
+                                    <Route path="/academia" element={<Academy />} />
+                                    <Route path="/academia/:id" element={<CourseDetails onShowToast={showToast} />} />
 
-                                {/* Checkout maneja Carrito (sin id) y Compra Directa (con id) */}
-                                <Route path="/checkout" element={<Checkout onShowToast={showToast} />} />
-                                <Route path="/checkout/:id" element={<Checkout onShowToast={showToast} />} />
+                                    {/* Checkout maneja Carrito (sin id) y Compra Directa (con id) */}
+                                    <Route path="/checkout" element={<Checkout onShowToast={showToast} />} />
+                                    <Route path="/checkout/:id" element={<Checkout onShowToast={showToast} />} />
 
-                                <Route path="/mis-cursos" element={<MyCourses />} />
-                                <Route path="/mis-certificados" element={<MyCertificates />} />
-                                <Route path="/verify/:id" element={<VerifyCertificate />} />
-                                <Route path="/mis-recursos" element={<MyResources />} />
-                                <Route path="/perfil" element={<UserProfile onShowToast={showToast} />} />
-                                <Route path="/ayuda" element={<Help />} />
-                                <Route path="/privacidad" element={<Privacy />} />
-                                <Route path="/terminos" element={<Terms />} />
-                                <Route path="/actualizar-password" element={<UpdatePassword />} />
+                                    <Route path="/mis-cursos" element={<MyCourses />} />
+                                    <Route path="/mis-certificados" element={<MyCertificates />} />
+                                    <Route path="/verify/:id" element={<VerifyCertificate />} />
+                                    <Route path="/mis-recursos" element={<MyResources />} />
+                                    <Route path="/perfil" element={<UserProfile onShowToast={showToast} />} />
+                                    <Route path="/ayuda" element={<Help />} />
+                                    <Route path="/privacidad" element={<Privacy />} />
+                                    <Route path="/terminos" element={<Terms />} />
+                                    <Route path="/actualizar-password" element={<UpdatePassword />} />
 
-                                <Route path="/aula-virtual/:id" element={<CoursePlayer />} />
+                                    <Route path="/aula-virtual/:id" element={<CoursePlayer />} />
 
-                                <Route path="/consultas" element={<Consulting onShowToast={showToast} />} />
-                                <Route path="/login" element={<Login onShowToast={showToast} />} />
-                                <Route path="/register" element={<Register onShowToast={showToast} />} />
-                            </Routes>
+                                    <Route path="/consultas" element={<Consulting onShowToast={showToast} />} />
+                                    <Route path="/login" element={<Login onShowToast={showToast} />} />
+                                    <Route path="/register" element={<Register onShowToast={showToast} />} />
+                                </Routes>
+                            </Suspense>
                         </main>
 
                         <Footer />

@@ -248,7 +248,7 @@ export default function FlowGradient({ className = "" }: FlowGradientProps) {
     return (
         <div
             ref={containerRef}
-            className={`absolute inset-0 w-full h-full -z-10 bg-[#0a0e27] ${className}`}
+            className={`absolute inset-0 w-full h-full z-0 bg-[#0a0e27] ${className}`}
         />
     );
 }

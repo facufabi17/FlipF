@@ -19,107 +19,14 @@
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
     rel="stylesheet" />
 
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <!-- Meta Description & SEO -->
+  <meta name="description"
+    content="Flip | Agencia de Marketing Digital. Transformación de negocios y entrenamiento de expertos con estrategias digitales de alto impacto." />
 
-  <!-- Theme Config -->
-  <script>
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
-            "primary": "#842db4",
-            "accent": "#FF007F",
-            "background-light": "#f7f6f8",
-            "background-dark": "#1b131f",
-            "surface-dark": "#291d2f",
-            "surface-darker": "#150f18",
-            "border-dark": "#392942",
-            "text-muted": "#b39ac1",
-            "cta": "#FF007F",
-            "tech": "#00F5F1",
-            "card-bg": "#291d2f",
-            "card-hover": "#34243b",
-            "border-color": "#523a5f"
-          },
-          fontFamily: {
-            "display": ["Space Grotesk", "sans-serif"],
-            "body": ["Noto Sans", "sans-serif"]
-          },
-          backgroundImage: {
-            'grid-pattern': "linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px)"
-          },
-          animation: {
-            'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
-            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-          },
-          keyframes: {
-            fadeInUp: {
-              '0%': { opacity: '0', transform: 'translateY(20px)' },
-              '100%': { opacity: '1', transform: 'translateY(0)' },
-            }
-          },
-          boxShadow: {
-            'cyan-glow': '0 0 20px rgba(0, 245, 241, 0.5)',
-          }
-        },
-      },
-    }
-  </script>
-  <style>
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy"
+    content="upgrade-insecure-requests; default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://sdk.mercadopago.com https://www.google.com https://www.gstatic.com https://esm.sh; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.mercadopago.com https://events.mercadopago.com https://generativelanguage.googleapis.com https://*.supabase.co wss://*.supabase.co https://esm.sh;">
 
-    ::-webkit-scrollbar-track {
-      background: #1b131f;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #392942;
-      border-radius: 4px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: #523a5f;
-    }
-
-    body {
-      font-family: "Space Grotesk", "Noto Sans", sans-serif;
-    }
-
-    .material-symbols-outlined {
-      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24
-    }
-
-    .text-gradient {
-      background: linear-gradient(to right, #842db4, #c084fc);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .glass-card {
-      background: rgba(30, 30, 30, 0.6);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-  </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-router-dom": "https://esm.sh/react-router-dom@^7.12.0",
-
-    "@emailjs/browser": "https://esm.sh/@emailjs/browser@^4.4.1",
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.39.0"
-  }
-}
-</script>
   <link rel="stylesheet" href="/index.css">
 </head>
 
