@@ -1,8 +1,8 @@
 'use client';
 
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useState, useEffect } from 'react';
 import { Canvas, useFrame, extend, ThreeElement } from '@react-three/fiber';
-import { shaderMaterial } from '@react-three/drei';
+import { shaderMaterial, PerformanceMonitor } from '@react-three/drei';
 import * as THREE from 'three';
 
 import { useGSAP } from '@gsap/react';
@@ -190,6 +190,9 @@ function ShaderPlane() {
 
 export default function AnimacionCian() {
   const canvasRef = useRef<HTMLDivElement | null>(null);
+  const [dpr, setDpr] = useState(1.5);
+  const [isInView, setIsInView] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   const camera = useMemo(() => ({ position: [0, 0, 1] as [number, number, number], fov: 75, near: 0.1, far: 1000 }), []);
 
@@ -215,16 +218,45 @@ export default function AnimacionCian() {
     { scope: canvasRef }
   );
 
+  // Defer initialization to prioritize React/GSAP
+  useEffect(() => {
+    const t = setTimeout(() => setIsReady(true), 200);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Intersection Observer for visibility
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsInView(entry.isIntersecting),
+      { rootMargin: "100px" }
+    );
+    observer.observe(canvasRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // Mobile detection for initial DPR
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const isMobile = window.matchMedia("(max-width: 768px)").matches;
+      setDpr(isMobile ? 1 : 1.5);
+    }
+  }, []);
+
   return (
     <div ref={canvasRef} className="bg-black absolute inset-0 -z-10 w-full h-full" aria-hidden>
-      <Canvas
-        camera={camera}
-        gl={{ antialias: true, alpha: false }}
-        dpr={[1, 2]}
-        style={{ width: '100%', height: '100%' }}
-      >
-        <ShaderPlane />
-      </Canvas>
+      {isReady && (
+        <Canvas
+          camera={camera}
+          gl={{ antialias: false, alpha: false, powerPreference: "high-performance" }}
+          dpr={dpr}
+          frameloop={isInView ? "always" : "never"}
+          style={{ width: '100%', height: '100%' }}
+        >
+          <PerformanceMonitor onChange={({ factor }) => setDpr(Math.max(0.5, 1.5 * factor))} />
+          <ShaderPlane />
+        </Canvas>
+      )}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/20" />
     </div>
   );

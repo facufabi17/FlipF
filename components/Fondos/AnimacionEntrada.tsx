@@ -1,6 +1,10 @@
 "use client";
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+
+// Colores de la marca Flip
+// Cian: #00F5F1 -> (0, 0.96, 0.945)
+// Púrpura: #842DB4 -> (0.518, 0.176, 0.706)
 
 interface FlowGradientProps {
     className?: string;
@@ -10,7 +14,6 @@ class TouchTexture {
     size = 64; width = 64; height = 64; maxAge = 64; radius = 0.1; speed = 1 / 64;
     trail: any[] = []; last: any = null;
     canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D; texture: any;
-
     constructor() {
         this.canvas = document.createElement("canvas");
         this.canvas.width = this.width; this.canvas.height = this.height;
@@ -19,29 +22,18 @@ class TouchTexture {
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.texture = new THREE.Texture(this.canvas);
     }
-
     update() {
-        // OPTIMIZATION: Solo actualizar si hay puntos activos
-        if (this.trail.length === 0) return;
-
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
         for (let i = this.trail.length - 1; i >= 0; i--) {
             const p = this.trail[i];
             const f = p.force * this.speed * (1 - p.age / this.maxAge);
             p.x += p.vx * f; p.y += p.vy * f; p.age++;
-
-            if (p.age > this.maxAge) {
-                this.trail.splice(i, 1);
-            } else {
-                this.drawPoint(p);
-            }
+            if (p.age > this.maxAge) this.trail.splice(i, 1);
+            else this.drawPoint(p);
         }
-
         this.texture.needsUpdate = true;
     }
-
     addTouch(point: any) {
         let force = 0, vx = 0, vy = 0;
         if (this.last) {
@@ -54,22 +46,19 @@ class TouchTexture {
         this.last = { x: point.x, y: point.y };
         this.trail.push({ x: point.x, y: point.y, age: 0, force, vx, vy });
     }
-
     drawPoint(p: any) {
         const pos = { x: p.x * this.width, y: (1 - p.y) * this.height };
         let intensity = p.age < this.maxAge * 0.3
             ? Math.sin((p.age / (this.maxAge * 0.3)) * (Math.PI / 2))
             : -((1 - (p.age - this.maxAge * 0.3) / (this.maxAge * 0.7)) * ((1 - (p.age - this.maxAge * 0.3) / (this.maxAge * 0.7)) - 2));
         intensity *= p.force;
-
+        // Usamos vectores de color para el rastro
         const color = `${((p.vx + 1) / 2) * 255}, ${((p.vy + 1) / 2) * 255}, ${intensity * 255}`;
         const radius = this.radius * this.width;
-
         this.ctx.shadowOffsetX = this.size * 5;
         this.ctx.shadowOffsetY = this.size * 5;
         this.ctx.shadowBlur = radius;
         this.ctx.shadowColor = `rgba(${color},${0.2 * intensity})`;
-
         this.ctx.beginPath();
         this.ctx.fillStyle = "rgba(255,0,0,1)";
         this.ctx.arc(pos.x - this.size * 5, pos.y - this.size * 5, radius, 0, Math.PI * 2);
@@ -81,27 +70,28 @@ class GradientBackground {
     mesh: any = null; uniforms: any; sceneManager: any; isPaused = false;
     constructor(sceneManager: any) {
         this.sceneManager = sceneManager;
+        // Configuración de colores personalizados para Flip
         this.uniforms = {
             uTime: { value: 0 },
             uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-            uColor1: { value: new THREE.Vector3(0.0, 0.96, 0.945) },
-            uColor2: { value: new THREE.Vector3(0.518, 0.176, 0.706) },
-            uColor3: { value: new THREE.Vector3(0.0, 0.8, 0.9) },
-            uColor4: { value: new THREE.Vector3(0.4, 0.1, 0.6) },
+            // Mix de Cian (#00F5F1) y Púrpura (#842DB4)
+            uColor1: { value: new THREE.Vector3(0.0, 0.96, 0.945) }, // Cian
+            uColor2: { value: new THREE.Vector3(0.518, 0.176, 0.706) }, // Púrpura
+            uColor3: { value: new THREE.Vector3(0.0, 0.8, 0.9) }, // Variación Cian
+            uColor4: { value: new THREE.Vector3(0.4, 0.1, 0.6) }, // Variación Púrpura
             uColor5: { value: new THREE.Vector3(0.0, 0.96, 0.945) },
             uColor6: { value: new THREE.Vector3(0.518, 0.176, 0.706) },
-            uSpeed: { value: 0.5 },
+            uSpeed: { value: 0.5 }, // Velocidad ajustada para ser sutil
             uIntensity: { value: 1.5 },
             uTouchTexture: { value: null },
             uGrainIntensity: { value: 0.05 },
-            uDarkNavy: { value: new THREE.Vector3(0.05, 0.05, 0.08) },
+            uDarkNavy: { value: new THREE.Vector3(0.05, 0.05, 0.08) }, // Fondo muy oscuro
             uGradientSize: { value: 0.45 },
             uGradientCount: { value: 8.0 },
             uColor1Weight: { value: 0.6 },
             uColor2Weight: { value: 0.8 }
         };
     }
-
     init() {
         const viewSize = this.sceneManager.getViewSize();
         const geometry = new THREE.PlaneGeometry(viewSize.width, viewSize.height, 1, 1);
@@ -180,45 +170,36 @@ class App {
     renderer: any; camera: any; scene: any; clock: any;
     touchTexture: TouchTexture; gradientBackground: GradientBackground;
     animationId: number | null = null; container: HTMLElement;
-    isVisible: boolean = true;
-
     constructor(container: HTMLElement) {
         this.container = container;
-        this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true }); // OPTIMIZATION: antialias false
-
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); // Alpha true para transparencia si es necesario
         this.renderer.setSize(container.clientWidth, container.clientHeight);
-
-        // OPTIMIZATION: Limit pixel ratio
-        const maxPixelRatio = window.matchMedia("(max-width: 768px)").matches ? 1.0 : 1.5;
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, maxPixelRatio));
-
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         container.appendChild(this.renderer.domElement);
         this.camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 10000);
         this.camera.position.z = 50;
         this.scene = new THREE.Scene();
+        // No establecemos background color a la escena, dejamos que el shader o el contenedor manejen el fondo
         this.clock = new THREE.Clock();
         this.touchTexture = new TouchTexture();
         this.gradientBackground = new GradientBackground(this);
         this.gradientBackground.uniforms.uTouchTexture.value = this.touchTexture.texture;
         this.init();
     }
-
     getViewSize() {
         const fov = (this.camera.fov * Math.PI) / 180;
         const height = Math.abs(this.camera.position.z * Math.tan(fov / 2) * 2);
         return { width: height * this.camera.aspect, height };
     }
-
     init() {
         this.gradientBackground.init();
         const c = this.container;
-        const onMove = (x: number, y: number) => {
-            // Only update texture when moving
-            this.touchTexture.addTouch({ x: x / c.clientWidth, y: 1 - y / c.clientHeight });
-        };
+        const onMove = (x: number, y: number) => { this.touchTexture.addTouch({ x: x / c.clientWidth, y: 1 - y / c.clientHeight }); };
 
+        // Listeners agregados directamente al contenedor
         c.addEventListener("mousemove", (e) => onMove(e.offsetX, e.offsetY));
         c.addEventListener("touchmove", (e) => {
+            // Necesario para móviles
             const rect = c.getBoundingClientRect();
             if (e.touches[0]) {
                 onMove(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
@@ -232,59 +213,18 @@ class App {
             this.renderer.setSize(c.clientWidth, c.clientHeight);
             this.gradientBackground.onResize(c.clientWidth, c.clientHeight);
         });
-
-        // Start loop
-        this.start();
+        this.tick();
     }
-
-    start() {
-        if (!this.animationId) {
-            this.isVisible = true;
-            this.clock.start();
-            this.tick();
-        }
-    }
-
-    stop() {
-        if (this.animationId) {
-            cancelAnimationFrame(this.animationId);
-            this.animationId = null;
-            this.isVisible = false;
-        }
-    }
-
     tick() {
-        // OPTIMIZATION: Pause if not visible or page hidden
-        if (this.isVisible && !document.hidden && document.visibilityState === 'visible') {
-            const delta = Math.min(this.clock.getDelta(), 0.1);
-            this.touchTexture.update();
-            this.gradientBackground.update(delta);
-            this.renderer.render(this.scene, this.camera);
-        }
-
+        const delta = Math.min(this.clock.getDelta(), 0.1);
+        this.touchTexture.update();
+        this.gradientBackground.update(delta);
+        this.renderer.render(this.scene, this.camera);
         this.animationId = requestAnimationFrame(() => this.tick());
     }
-
-    setVisible(visible: boolean) {
-        if (visible) {
-            if (!this.isVisible) {
-                this.isVisible = true;
-                this.clock.start();
-            }
-        } else {
-            this.isVisible = false;
-            this.clock.stop();
-        }
-    }
-
     cleanup() {
-        this.stop();
+        if (this.animationId) cancelAnimationFrame(this.animationId);
         this.renderer.dispose();
-        // Clean up textures and geometries to free GPU memory
-        this.gradientBackground.mesh?.geometry.dispose();
-        this.gradientBackground.mesh?.material.dispose();
-        this.touchTexture.texture.dispose();
-
         if (this.container && this.renderer.domElement && this.container.contains(this.renderer.domElement)) {
             this.container.removeChild(this.renderer.domElement);
         }
@@ -293,44 +233,16 @@ class App {
 
 export default function FlowGradient({ className = "" }: FlowGradientProps) {
     const containerRef = useRef<HTMLDivElement>(null);
-    const appRef = useRef<App | null>(null);
+    const appRef = useRef<any>(null);
 
     useEffect(() => {
-        // OPTIMIZATION: Defer creation slightly to let React main thread settle
-        const timer = setTimeout(() => {
-            const container = containerRef.current;
-            if (!container) return;
+        const container = containerRef.current;
+        if (!container) return;
 
-            // OPTIMIZATION: Intersection Observer for Lazy Initialization
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        // Init if not exists
-                        if (!appRef.current) {
-                            appRef.current = new App(container);
-                        }
-                        // Resume
-                        appRef.current.setVisible(true);
-                    } else {
-                        // Pause
-                        if (appRef.current) {
-                            appRef.current.setVisible(false);
-                        }
-                    }
-                });
-            }, {
-                rootMargin: "200px" // Pre-load slightly before view
-            });
+        if (appRef.current) appRef.current.cleanup();
+        appRef.current = new App(container);
 
-            observer.observe(container);
-
-            return () => {
-                observer.disconnect();
-                if (appRef.current) appRef.current.cleanup();
-            };
-        }, 100); // 100ms defer
-
-        return () => clearTimeout(timer);
+        return () => { if (appRef.current) appRef.current.cleanup(); };
     }, []);
 
     return (
