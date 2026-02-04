@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import emailjs from '@emailjs/browser';
 import NeuralNetworkHero from "../components/Fondos/AnimacionVioleta";
+import { CONTACT_INFO } from '../info';
 
 interface ConsultingProps {
   onShowToast: (text: string) => void;
@@ -70,19 +71,47 @@ const Consulting: React.FC<ConsultingProps> = ({ onShowToast }) => {
         <NeuralNetworkHero
           title="DEJA DE HACERLO SOLO."
           description="No solo te enseñamos a crecer. Construimos los sistemas contigo. Consigue la alianza estratégica que necesitas para superar el estancamiento."
-          ctaButtons={[
-            { text: "Contactanos", onClick: handleScroll, primary: true }
-          ]}
-          microDetails={["Estrategia", "Infraestructura", "Crecimiento"]}
         >
           <h1 className="text-5xl font-black leading-tight text-white sm:text-6xl lg:text-8xl mt-2 mb-2">
             <span className="text-gradient">EMPIEZA A CONSTRUIR JUNTOS.</span>
           </h1>
+
+          <div className="flex flex-wrap items-center justify-center gap-4 mt-8">
+            <button
+              onClick={handleScroll}
+              className="group px-5 py-2 bg-[#842DB4] text-white font-bold text-xs md:text-sm rounded-full hover:bg-white hover:text-black transition-all duration-300 shadow-[0_0_20px_rgba(132,45,180,0.5)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] flex items-center gap-2"
+            >
+              Solicitar Espacio
+              <span className="material-symbols-outlined text-lg group-hover:translate-y-1 transition-transform">
+                arrow_downward
+              </span>
+            </button>
+            <a
+              href={CONTACT_INFO.whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group px-5 py-2 bg-transparent text-white font-bold text-xs md:text-sm rounded-full border border-white/20 hover:bg-white/10 hover:border-[#842DB4]/50 transition-all duration-300 flex items-center gap-2 backdrop-blur-sm"
+            >
+              Hablar por WhatsApp
+              <span className="material-symbols-outlined text-lg group-hover:scale-110 transition-transform">
+                chat
+              </span>
+            </a>
+          </div>
+
+          <div className="mt-8 animate-fade-in-up delay-300">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#842DB4]/10 border border-[#842DB4]/20 backdrop-blur-md hover:bg-[#842DB4]/20 transition-all duration-300 cursor-default">
+              <span className="material-symbols-outlined text-[#842DB4] text-sm md:text-base">verified</span>
+              <span className="text-[10px] md:text-xs font-medium text-gray-200 tracking-wide">
+                <span className="text-white font-bold">Estrategia</span> + <span className="text-white font-bold">Infraestructura</span> + <span className="text-white font-bold">Crecimiento</span>
+              </span>
+            </div>
+          </div>
         </NeuralNetworkHero>
-      </div>
+      </div >
 
       {/* Trust Indicators - Keep them below Hero or integrate if needed, for now keeping below */}
-      <div className="bg-black py-8 flex flex-wrap justify-center gap-8 opacity-80 border-b border-white/10">
+      < div className="bg-black py-8 flex flex-wrap justify-center gap-8 opacity-80 border-b border-white/10" >
         <div className="flex items-center gap-2 text-white/80">
           <span className="material-symbols-outlined">verified</span>
           <span className="text-sm font-bold tracking-wide">Con la Confianza de Muchos Creadores</span>
@@ -92,10 +121,10 @@ const Consulting: React.FC<ConsultingProps> = ({ onShowToast }) => {
           <span className="material-symbols-outlined">trending_up</span>
           <span className="text-sm font-bold tracking-wide">Más Ingresos Generados</span>
         </div>
-      </div>
+      </div >
 
       {/* Value Proposition & Roadmap Section */}
-      <section className="relative w-full bg-surface-darker py-24">
+      < section className="relative w-full bg-surface-darker py-24" >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid gap-16 lg:grid-cols-2 lg:gap-24 items-start">
 
@@ -179,7 +208,7 @@ const Consulting: React.FC<ConsultingProps> = ({ onShowToast }) => {
             </div>
           </div>
         </div>
-      </section>
+      </section >
 
       <section className="w-full bg-background-dark py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -346,7 +375,7 @@ const Consulting: React.FC<ConsultingProps> = ({ onShowToast }) => {
         </div>
       </section>
 
-    </div>
+    </div >
   );
 };
 

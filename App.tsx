@@ -30,6 +30,7 @@ import { ToastMessage } from './types';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import AuthHandler from './context/AuthHandler';
+import ScrollToTop from './components/ScrollToTop';
 
 //const { data: todos } = await supabase.from('todos').select()
 
@@ -55,6 +56,7 @@ const App: React.FC = () => {
         <AuthProvider>
             <CartProvider>
                 <HashRouter>
+                    <ScrollToTop />
                     <AuthHandler />
                     <div className="flex flex-col min-h-screen">
                         <Navbar />

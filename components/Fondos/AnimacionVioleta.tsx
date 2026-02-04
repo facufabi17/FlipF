@@ -262,6 +262,7 @@ export default function NeuralNetworkHero({
     const ctaRef = useRef<HTMLDivElement | null>(null);
     const badgeRef = useRef<HTMLDivElement | null>(null);
     const microRef = useRef<HTMLUListElement | null>(null);
+    const childrenRef = useRef<HTMLDivElement | null>(null);
 
     useGSAP(
         () => {
@@ -271,6 +272,7 @@ export default function NeuralNetworkHero({
             if (badgeRef.current) gsap.set(badgeRef.current, { autoAlpha: 0, y: -8 });
             if (headerRef.current) gsap.set(headerRef.current, { autoAlpha: 0, y: 20 });
             if (paraRef.current) gsap.set(paraRef.current, { autoAlpha: 0, y: 20 });
+            if (childrenRef.current) gsap.set(childrenRef.current, { autoAlpha: 0, y: 20 });
             if (ctaRef.current) gsap.set(ctaRef.current, { autoAlpha: 0, y: 20 });
             if (microRef.current) gsap.set(microRef.current, { autoAlpha: 0, y: 10 });
 
@@ -286,6 +288,9 @@ export default function NeuralNetworkHero({
 
             if (paraRef.current) {
                 tl.to(paraRef.current, { autoAlpha: 1, y: 0, duration: 0.5 }, '-=0.4');
+            }
+            if (childrenRef.current) {
+                tl.to(childrenRef.current, { autoAlpha: 1, y: 0, duration: 0.5 }, '-=0.3');
             }
             if (ctaRef.current) {
                 tl.to(ctaRef.current, { autoAlpha: 1, y: 0, duration: 0.5 }, '-=0.3');
@@ -310,7 +315,7 @@ export default function NeuralNetworkHero({
                     {description}
                 </p>
 
-                {children && <div className="w-full mt-4">{children}</div>}
+                {children && <div ref={childrenRef} className="w-full mt-4">{children}</div>}
 
                 {ctaButtons && (
                     <div ref={ctaRef} className="flex flex-wrap items-center justify-center gap-3 pt-2">

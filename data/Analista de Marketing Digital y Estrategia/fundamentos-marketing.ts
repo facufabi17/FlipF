@@ -1,22 +1,23 @@
 import { Course } from '../../types';
 
-export const COURSE_MARKETING: Course = {
-    id: 'c1',
-    title: 'Plan de Marketing Digital',
-    description: 'Estrategias Efectivas que Impulsen el Crecimiento. Aprende a estructurar campañas desde cero.',
-    price: 30000,
+export const FUNDAMENTOS_MARKETING: Course = {
+    id: 'mkt-fundamentals',
+    title: 'Fundamentos del Marketing de Resultados',
+    description: 'Cómo alinear los objetivos de negocio con el ecosistema digital actual.',
+    price: 45000,
     category: 'Marketing',
+    level: 'Principiante',
     image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800',
     modules: [
         {
             id: 'mod1',
             title: 'Módulo 1: Elaboración de un Plan de Marketing',
             lessons: [
-                { 
+                {
                     id: 'l1-1',
-                    title: 'Concepto y beneficios', 
+                    title: 'Concepto y beneficios',
                     duration: '45 min',
-                    videoUrl: 'https://www.youtube.com/embed/ScMzIvxBSi4?si=placeholder', 
+                    videoUrl: 'https://www.youtube.com/embed/ScMzIvxBSi4?si=placeholder',
                     textContent: `
                         <p>Para desarrollar un plan efectivo, sigue estos pasos críticos:</p>
                         <ul class="list-disc pl-5 space-y-2 mt-4">
@@ -29,9 +30,9 @@ export const COURSE_MARKETING: Course = {
                     description: 'Analizaremos los pilares fundamentales de una estrategia digital exitosa.',
                     resources: [{ title: 'PDF', url: '#', type: 'pdf' }]
                 },
-                { 
+                {
                     id: 'l1-2',
-                    title: 'Pasos para desarrollar un plan (Lectura)', 
+                    title: 'Pasos para desarrollar un plan (Lectura)',
                     duration: '15 min read',
                     // Ejemplo de lección SOLO TEXTO
                     textContent: `
@@ -87,9 +88,9 @@ export const COURSE_MARKETING: Course = {
             id: 'mod2',
             title: 'Módulo 2: Identificar necesidades',
             lessons: [
-                { 
+                {
                     id: 'l2-1',
-                    title: 'Comprender al cliente', 
+                    title: 'Comprender al cliente',
                     duration: '90 min',
                     videoUrl: 'https://www.youtube.com/embed/placeholder3',
                     description: 'La importancia de la empatía en el proceso de venta.',
