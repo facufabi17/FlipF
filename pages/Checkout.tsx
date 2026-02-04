@@ -17,8 +17,8 @@ const STEPS = [
 const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { isAuthenticated, user, updateProfile } = useAuth();
-    const { cart, total, removeFromCart, getCheckoutItems, activeCoupon, applyCoupon, removeCoupon, discount, totalAfterDiscount } = useCart();
+    const { isAuthenticated, user, updateProfile, purchaseItems, loading } = useAuth();
+    const { cart, total, removeFromCart, clearCart, getCheckoutItems, activeCoupon, applyCoupon, removeCoupon, discount, totalAfterDiscount } = useCart();
 
     // Estado del Stepper
     const [currentStep, setCurrentStep] = useState(1);
@@ -34,7 +34,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     });
 
     // Estado de Pago
-    const [paymentMethod, setPaymentMethod] = useState<'transferencia' | 'mercadopago' | 'mobbex' | null>(null);
+    const [paymentMethod, setPaymentMethod] = useState<'transferencia' | 'mercadopago' | 'mobbex' | 'prueba' | null>(null);
     const [couponInput, setCouponInput] = useState('');
 
     const directCourse = id ? COURSES.find(c => c.id === id) : null;
@@ -45,6 +45,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
 
     const courses = itemsToShow.filter(i => i.type === 'course');
     const resources = itemsToShow.filter(i => i.type === 'resource');
+    const isEmpty = !directCourse && cart.length === 0;
 
     // Scroll top al cambiar de paso
     useEffect(() => {
@@ -53,6 +54,12 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
 
     // Cargar datos de usuario
     useEffect(() => {
+        // Solo redirigir si YA terminó de cargar y NO está autenticado
+        if (!loading && !isAuthenticated) {
+            navigate('/login');
+            return;
+        }
+
         if (isAuthenticated && user) {
             setFormData(prev => ({
                 ...prev,
@@ -61,16 +68,14 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 email: user.email || '',
                 dni: user.dni || ''
             }));
-        } else if (!isAuthenticated) {
-            navigate('/login');
         }
-    }, [isAuthenticated, user, navigate]);
+    }, [isAuthenticated, user, navigate, loading]);
 
     // Handlers
     const handleNext = async () => {
         if (currentStep === 1) {
             // Validar carrito no vacío
-            if (!directCourse && cart.length === 0) {
+            if (isEmpty) {
                 onShowToast('El carrito está vacío', 'error');
                 return;
             }
@@ -98,6 +103,38 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 onShowToast('Selecciona un método de pago', 'error');
                 return;
             }
+
+            if (paymentMethod === 'prueba') {
+                try {
+                    // 1. Preparar items para la compra
+                    const itemsToPurchase = directCourse
+                        ? [{ id: directCourse.id, type: 'course' as const }]
+                        : cart.map(item => ({ id: item.id, type: item.type }));
+
+                    // 2. Procesar compra con AuthContext (Actualiza Supabase)
+                    await purchaseItems(itemsToPurchase);
+
+                    // 3. Limpiar carrito si no es compra directa
+                    if (!directCourse) {
+                        clearCart();
+                        // Remover cupón
+                        if (activeCoupon) removeCoupon();
+                    }
+
+                    onShowToast('¡Compra realizada con éxito!', 'success');
+
+                    // 4. Redirigir según el tipo de compra
+                    setTimeout(() => {
+                        navigate('/mis-cursos');
+                    }, 2000);
+
+                } catch (error) {
+                    console.error("Error al procesar la compra", error);
+                    onShowToast('Hubo un error al procesar tu compra. Intenta de nuevo.', 'error');
+                }
+                return;
+            }
+
             // Mock de finalización
             console.log("Procesando pago con:", paymentMethod);
             onShowToast('Redirigiendo a plataforma de pago...', 'success');
@@ -115,13 +152,49 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
         }
     };
 
+    if (loading) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-background space-y-4">
+                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-gray-400 font-medium">Cargando...</p>
+            </div>
+        );
+    }
+
+    if (isEmpty) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-background px-4 py-12 text-center animate-fade-in">
+                <div className="w-24 h-24 bg-surface-dark rounded-full flex items-center justify-center mb-6 border border-white/5">
+                    <span className="material-symbols-outlined text-4xl text-gray-500">shopping_cart_off</span>
+                </div>
+                <h2 className="text-3xl font-bold text-white mb-3">Tu carrito está vacío</h2>
+                <p className="text-gray-400 mb-8 max-w-md">Parece que aún no has agregado ningún curso o recurso. Explora nuestro contenido para potenciar tu carrera.</p>
+                <div className="flex flex-col sm:flex-row gap-4">
+                    <button
+                        onClick={() => navigate('/academia')}
+                        className="px-6 py-3 bg-primary text-black font-bold rounded-xl shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] transition-all flex items-center gap-2"
+                    >
+                        <span className="material-symbols-outlined">school</span>
+                        Explorar Cursos
+                    </button>
+                    <button
+                        onClick={() => navigate('/recursos-pago')}
+                        className="px-6 py-3 bg-surface-dark border border-white/10 text-white font-bold rounded-xl hover:bg-white/5 hover:border-primary/50 transition-all flex items-center gap-2"
+                    >
+                        <span className="material-symbols-outlined text-purple-400">folder_open</span>
+                        Recursos
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="animate-fade-in min-h-screen pb-24 md:pb-0 relative text-white">
             <div className="max-w-6xl mx-auto p-6 lg:p-12">
 
                 {/* Stepper Header */}
-                <div className="flex justify-between items-center mb-12 relative">
-                    <div className="absolute top-1/2 left-0 w-full h-0.5 bg-white/10 -z-10"></div>
+                <div className="flex justify-around items-center mb-12 relative">
                     {STEPS.map((step) => {
                         const isActive = step.number === currentStep;
                         const isCompleted = step.number < currentStep;
@@ -346,9 +419,26 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                         </div>
                                         <div className="flex-1">
                                             <h4 className="font-bold text-white text-lg mb-1">Mobbex (Tarjeta TUYA)</h4>
-                                            <p className="text-gray-400 text-sm">Pagá conMobbex, Paga con TUYA (NBCH).</p>
+                                            <p className="text-gray-400 text-sm">Pagá con Mobbex, Paga con TUYA (NBCH).</p>
                                         </div>
                                         <span className="font-bold text-xl tracking-wider text-purple-400">mobbex</span>
+                                    </button>
+
+                                    {/* Opción Prueba */}
+                                    <button
+                                        onClick={() => setPaymentMethod('prueba')}
+                                        className={`group relative p-6 rounded-2xl border transition-all duration-300 text-left flex items-center gap-6
+                                            ${paymentMethod === 'prueba' ? 'bg-surface-dark border-primary shadow-[0_0_30px_rgba(34,211,238,0.1)]' : 'bg-surface-dark border-white/10 hover:border-white/30'}`}
+                                    >
+                                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors
+                                            ${paymentMethod === 'prueba' ? 'border-primary' : 'border-gray-500'}`}>
+                                            {paymentMethod === 'prueba' && <div className="w-3 h-3 rounded-full bg-primary"></div>}
+                                        </div>
+                                        <div className="flex-1">
+                                            <h4 className="font-bold text-white text-lg mb-1">Prueba</h4>
+                                            <p className="text-gray-400 text-sm">Realizar una compra de prueba (Éxito inmediato).</p>
+                                        </div>
+                                        <span className="material-symbols-outlined text-2xl text-yellow-500">bug_report</span>
                                     </button>
                                 </div>
                             </div>
@@ -428,8 +518,11 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                     onClick={handleNext}
                                     className="w-full hidden lg:block py-4 bg-primary hover:bg-primary-dark text-black font-bold rounded-xl transition-all transform hover:scale-[1.02] shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)]"
                                 >
-                                    {currentStep === 1 ? 'Continuar a Información' :
-                                        currentStep === 2 ? 'Continuar a Pago' : 'Finalizar Pedido'}
+                                    {currentStep < 3 ? (
+                                        <span className="flex items-center justify-center gap-2">
+                                            Continuar <span className="material-symbols-outlined">arrow_forward</span>
+                                        </span>
+                                    ) : 'Finalizar Pedido'}
                                 </button>
 
                                 <div className="mt-4 flex justify-center lg:justify-start">
@@ -468,8 +561,11 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                         onClick={handleNext}
                         className="px-6 py-3 bg-primary text-black font-bold rounded-xl shadow-[0_0_15px_rgba(34,211,238,0.3)]"
                     >
-                        {currentStep === 1 ? 'Continuar' :
-                            currentStep === 2 ? 'Siguiente' : 'Finalizar'}
+                        {currentStep < 3 ? (
+                            <div className="flex items-center gap-2">
+                                Continuar <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                            </div>
+                        ) : 'Finalizar'}
                     </button>
                 </div>
             </div>

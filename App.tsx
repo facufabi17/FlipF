@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import ChatBot from './components/ChatBot';
+import WhatsAppButton from './components/WhatsAppButton';
 import { Toast } from './components/Toast';
 import Home from './pages/Home';
 import About from './pages/About';
@@ -34,16 +34,7 @@ import ScrollToTop from './components/ScrollToTop';
 
 //const { data: todos } = await supabase.from('todos').select()
 
-// Componente auxiliar para manejar la visibilidad del ChatBot
-const ChatBotWithVisibility: React.FC = () => {
-    const location = useLocation();
-    // Rutas donde no debe aparecer el ChatBot
-    const hiddenPrefixes = ['/mis-cursos', '/aula-virtual'];
-    const shouldHide = hiddenPrefixes.some(prefix => location.pathname.startsWith(prefix));
 
-    if (shouldHide) return null;
-    return <ChatBot />;
-};
 
 const App: React.FC = () => {
     const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
@@ -94,7 +85,7 @@ const App: React.FC = () => {
                         </main>
 
                         <Footer />
-                        <ChatBotWithVisibility />
+                        <WhatsAppButton />
                         <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
                     </div>
                 </HashRouter>
