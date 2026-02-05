@@ -3,6 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { COURSES } from '../data/courses';
+import { initMercadoPago } from '@mercadopago/sdk-react';
+
+// Inicializar Mercado Pago
+initMercadoPago(import.meta.env.VITE_MP_PUBLIC_KEY, {
+    locale: 'es-AR'
+});
 
 interface CheckoutProps {
     onShowToast: (text: string, type?: 'success' | 'error') => void;
@@ -36,6 +42,8 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     // Estado de Pago
     const [paymentMethod, setPaymentMethod] = useState<'transferencia' | 'mercadopago' | 'mobbex' | 'prueba' | null>(null);
     const [couponInput, setCouponInput] = useState('');
+    const [preferenceId, setPreferenceId] = useState<string | null>(null);
+    const [loadingMP, setLoadingMP] = useState(false);
 
     const directCourse = id ? COURSES.find(c => c.id === id) : null;
     const finalTotal = directCourse ? directCourse.price : totalAfterDiscount;
@@ -47,6 +55,34 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     const resources = itemsToShow.filter(i => i.type === 'resource');
     const isEmpty = !directCourse && cart.length === 0;
 
+    useEffect(() => {
+        if (paymentMethod === 'mercadopago' && !preferenceId) {
+            setLoadingMP(true);
+
+            const itemsToPurchase = directCourse
+                ? [{ id: directCourse.id, title: directCourse.title, price: directCourse.price, quantity: 1 }]
+                : cart.map(item => ({ id: item.id, title: item.title, price: item.price, quantity: 1 }));
+
+            fetch('/api/create-preference', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    items: itemsToPurchase,
+                    baseUrl: window.location.origin
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.id) setPreferenceId(data.id);
+                })
+                .catch(err => {
+                    console.error("Error creating preference", err);
+                    onShowToast("Error al inicializar pago", "error");
+                })
+                .finally(() => setLoadingMP(false));
+        }
+    }, [paymentMethod, preferenceId, directCourse, cart, onShowToast]);
+
     // Scroll top al cambiar de paso
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -54,7 +90,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
 
     // Cargar datos de usuario
     useEffect(() => {
-        // Solo redirigir si YA terminó de cargar y NO está autenticado
+        // Solo redirigir si YA terminÃ³ de cargar y NO estÃ¡ autenticado
         if (!loading && !isAuthenticated) {
             navigate('/login');
             return;
@@ -72,11 +108,148 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     }, [isAuthenticated, user, navigate, loading]);
 
     // Handlers
+    // Ref para el contenedor del brick
+    const brickContainerRef = React.useRef<HTMLDivElement>(null);
+
+    // Inicializar Brick con Vanilla JS SDK
+    useEffect(() => {
+        if (paymentMethod === 'mercadopago' && preferenceId && brickContainerRef.current) {
+            // Limpiar controller previo si existe
+            if (window.paymentBrickController) {
+                window.paymentBrickController.unmount();
+                window.paymentBrickController = null;
+            }
+
+            setLoadingMP(true);
+
+            const mp = new window.MercadoPago(import.meta.env.VITE_MP_PUBLIC_KEY, {
+                locale: 'es-AR'
+            });
+
+            const bricksBuilder = mp.bricks();
+
+            const renderBrick = async () => {
+                const settings = {
+                    initialization: {
+                        amount: Math.round(finalTotal),
+                        preferenceId: preferenceId,
+                        payer: {
+                            firstName: formData.firstName,
+                            lastName: formData.lastName,
+                            email: formData.email,
+                        },
+                    },
+                    customization: {
+                        paymentMethods: {
+                            ticket: "all",
+                            bankTransfer: "all",
+                            creditCard: "all",
+                            debitCard: "all",
+                            mercadoPago: "all",
+                        },
+                        visual: {
+                            style: {
+                                theme: 'default',
+                            },
+                            hidePaymentButton: true,
+                        }
+                    },
+                    callbacks: {
+                        onReady: () => {
+                            setLoadingMP(false);
+                            console.log("Brick ready");
+                        },
+                        onError: (error: any) => {
+                            console.error("Brick Error:", error);
+                            setLoadingMP(false);
+                            onShowToast("Error al cargar el formulario de pago", "error");
+                        },
+                    },
+                };
+
+                try {
+                    const controller = await bricksBuilder.create('payment', 'paymentBrick_container', settings);
+                    window.paymentBrickController = controller;
+                } catch (e) {
+                    console.error("Error creating brick", e);
+                }
+            };
+
+            renderBrick();
+        }
+
+        return () => {
+            if (window.paymentBrickController) {
+                window.paymentBrickController.unmount();
+                window.paymentBrickController = null;
+            }
+        };
+    }, [paymentMethod, preferenceId, finalTotal, formData, brickContainerRef]);
+
+    const processMercadoPagoPayment = async () => {
+        if (!window.paymentBrickController) return;
+
+        try {
+            // Mostrar overlay de carga
+            onShowToast('Procesando pago...', 'success');
+
+            // Obtener datos del formulario del Brick
+            const { formData } = await window.paymentBrickController.getFormData();
+
+            if (!formData) {
+                onShowToast('Por favor completa todos los datos del pago', 'error');
+                return;
+            }
+
+            console.log("Pago Brick Data:", formData);
+
+            // Enviar a nuestro backend
+            const response = await fetch("/api/process-payment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData),
+            });
+
+            const result = await response.json();
+
+            if (result.error) {
+                console.error("Payment Error:", result);
+                onShowToast('Error al procesar el pago: ' + (result.details?.message || result.error), 'error');
+                return;
+            }
+
+            console.log("Payment Success:", result);
+
+            // Compra exitosa: registrar items
+            const itemsToPurchase = directCourse
+                ? [{ id: directCourse.id, type: 'course' as const }]
+                : cart.map(item => ({ id: item.id, type: item.type }));
+
+            await purchaseItems(itemsToPurchase);
+
+            if (!directCourse) {
+                clearCart();
+                if (activeCoupon) removeCoupon();
+            }
+
+            if (result.status === 'approved') {
+                navigate('/mis-cursos');
+                onShowToast('Â¡Pago exitoso!', 'success');
+            } else {
+                onShowToast('Pago ' + result.status, 'error');
+            }
+
+        } catch (error) {
+            console.error("Network Error:", error);
+            onShowToast('Error de conexiÃ³n al procesar el pago', 'error');
+        }
+    };
+
     const handleNext = async () => {
         if (currentStep === 1) {
-            // Validar carrito no vacío
+            // Validar carrito no vacÃ­o
             if (isEmpty) {
-                onShowToast('El carrito está vacío', 'error');
+                onShowToast('El carrito estÃ¡ vacÃ­o', 'error');
                 return;
             }
             setCurrentStep(2);
@@ -86,9 +259,9 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 onShowToast('Por favor completa todos los campos obligatorios', 'error');
                 return;
             }
-            // Si el DNI es nuevo (no estaba en user.dni), se guardará al finalizar o aquí mismo?
+            // Si el DNI es nuevo (no estaba en user.dni), se guardarÃ¡ al finalizar o aquÃ­ mismo?
             // El requerimiento dice: "DNI debe ser solo lectura si ya existe".
-            // Podríamos intentar guardarlo ahora si es nuevo para asegurar persistencia antes del pago.
+            // PodrÃ­amos intentar guardarlo ahora si es nuevo para asegurar persistencia antes del pago.
             if (user && !user.dni && formData.dni) {
                 try {
                     await updateProfile({ dni: formData.dni });
@@ -100,7 +273,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
             setCurrentStep(3);
         } else if (currentStep === 3) {
             if (!paymentMethod) {
-                onShowToast('Selecciona un método de pago', 'error');
+                onShowToast('Selecciona un mÃ©todo de pago', 'error');
                 return;
             }
 
@@ -117,13 +290,13 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                     // 3. Limpiar carrito si no es compra directa
                     if (!directCourse) {
                         clearCart();
-                        // Remover cupón
+                        // Remover cupÃ³n
                         if (activeCoupon) removeCoupon();
                     }
 
-                    onShowToast('¡Compra realizada con éxito!', 'success');
+                    onShowToast('Â¡Compra realizada con Ã©xito!', 'success');
 
-                    // 4. Redirigir según el tipo de compra
+                    // 4. Redirigir segÃºn el tipo de compra
                     setTimeout(() => {
                         navigate('/mis-cursos');
                     }, 2000);
@@ -135,12 +308,12 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 return;
             }
 
-            // Mock de finalización
+            // Mock de finalizaciÃ³n
             console.log("Procesando pago con:", paymentMethod);
             onShowToast('Redirigiendo a plataforma de pago...', 'success');
-            // Aquí iría la redirección real. Por ahora simulamos.
+            // AquÃ­ irÃ­a la redirecciÃ³n real. Por ahora simulamos.
 
-            // Si quisieramos "reservar" o algo, lo haríamos acá.
+            // Si quisieramos "reservar" o algo, lo harÃ­amos acÃ¡.
         }
     };
 
@@ -167,8 +340,8 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 <div className="w-24 h-24 bg-surface-dark rounded-full flex items-center justify-center mb-6 border border-white/5">
                     <span className="material-symbols-outlined text-4xl text-gray-500">shopping_cart_off</span>
                 </div>
-                <h2 className="text-3xl font-bold text-white mb-3">Tu carrito está vacío</h2>
-                <p className="text-gray-400 mb-8 max-w-md">Parece que aún no has agregado ningún curso o recurso. Explora nuestro contenido para potenciar tu carrera.</p>
+                <h2 className="text-3xl font-bold text-white mb-3">Tu carrito estÃ¡ vacÃ­o</h2>
+                <p className="text-gray-400 mb-8 max-w-md">Parece que aÃºn no has agregado ningÃºn curso o recurso. Explora nuestro contenido para potenciar tu carrera.</p>
                 <div className="flex flex-col sm:flex-row gap-4">
                     <button
                         onClick={() => navigate('/academia')}
@@ -214,13 +387,13 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                    {/* Columna Principal - Contenido Dinámico */}
+                    {/* Columna Principal - Contenido DinÃ¡mico */}
                     <div className="lg:col-span-2 space-y-6">
 
                         {/* PASO 1: CARRITO */}
                         {currentStep === 1 && (
                             <div className="animate-fade-in space-y-8">
-                                {/* Sección Cursos */}
+                                {/* SecciÃ³n Cursos */}
                                 {(directCourse || courses.length > 0) && (
                                     <div className="bg-surface-dark border border-white/5 rounded-2xl p-6">
                                         <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
@@ -249,7 +422,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                     </div>
                                 )}
 
-                                {/* Sección Recursos */}
+                                {/* SecciÃ³n Recursos */}
                                 {!directCourse && resources.length > 0 && (
                                     <div className="bg-surface-dark border border-white/5 rounded-2xl p-6">
                                         <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
@@ -278,10 +451,10 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                             </div>
                         )}
 
-                        {/* PASO 2: INFORMACIÓN */}
+                        {/* PASO 2: INFORMACIÃ“N */}
                         {currentStep === 2 && (
                             <div className="animate-fade-in bg-surface-dark border border-white/5 rounded-2xl p-8">
-                                <h3 className="text-2xl font-bold text-white mb-6">Datos de Facturación</h3>
+                                <h3 className="text-2xl font-bold text-white mb-6">Datos de FacturaciÃ³n</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <label className="text-sm text-gray-400">Nombre</label>
@@ -322,7 +495,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                                 type="text"
                                                 value={formData.dni}
                                                 onChange={(e) => setFormData({ ...formData, dni: e.target.value })}
-                                                readOnly={!!user?.dni} // Bloqueado si ya existía en el usuario original
+                                                readOnly={!!user?.dni} // Bloqueado si ya existÃ­a en el usuario original
                                                 placeholder="Ingresa tu DNI"
                                                 className={`w-full bg-black/20 border rounded-lg p-3 text-white transition-colors
                                                     ${user?.dni ? 'border-white/10 text-gray-400 cursor-not-allowed' : 'border-primary/50 focus:border-primary'}`}
@@ -334,11 +507,11 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                                 </span>
                                             )}
                                         </div>
-                                        {!user?.dni && <p className="text-xs text-primary/80">* Este dato se vinculará a tu cuenta y no podrá modificarse posteriormente.</p>}
+                                        {!user?.dni && <p className="text-xs text-primary/80">* Este dato se vincularÃ¡ a tu cuenta y no podrÃ¡ modificarse posteriormente.</p>}
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-sm text-gray-400">Dirección</label>
+                                        <label className="text-sm text-gray-400">DirecciÃ³n</label>
                                         <input
                                             type="text"
                                             value={formData.address}
@@ -348,7 +521,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-sm text-gray-400">Código Postal</label>
+                                        <label className="text-sm text-gray-400">CÃ³digo Postal</label>
                                         <input
                                             type="text"
                                             value={formData.zipCode}
@@ -364,10 +537,10 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                         {/* PASO 3: PAGO */}
                         {currentStep === 3 && (
                             <div className="animate-fade-in space-y-6">
-                                <h3 className="text-2xl font-bold text-white mb-4">Seleccioná tu método de pago</h3>
+                                <h3 className="text-2xl font-bold text-white mb-4">SeleccionÃ¡ tu mÃ©todo de pago</h3>
 
                                 <div className="grid grid-cols-1 gap-4">
-                                    {/* Opción Transferencia */}
+                                    {/* OpciÃ³n Transferencia */}
                                     <button
                                         onClick={() => setPaymentMethod('transferencia')}
                                         className={`group relative p-6 rounded-2xl border transition-all duration-300 text-left flex items-center gap-6 overflow-hidden
@@ -382,12 +555,12 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                                 <h4 className="font-bold text-white text-lg">Transferencia Bancaria</h4>
                                                 <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs font-bold rounded">10% OFF</span>
                                             </div>
-                                            <p className="text-gray-400 text-sm">Transferí directamente a nuestra cuenta bancaria.</p>
+                                            <p className="text-gray-400 text-sm">TransferÃ­ directamente a nuestra cuenta bancaria.</p>
                                         </div>
                                         <span className="material-symbols-outlined text-4xl text-gray-600 group-hover:text-white transition-colors">account_balance</span>
                                     </button>
 
-                                    {/* Opción Mercado Pago */}
+                                    {/* OpciÃ³n Mercado Pago */}
                                     <button
                                         onClick={() => setPaymentMethod('mercadopago')}
                                         className={`group relative p-6 rounded-2xl border transition-all duration-300 text-left flex items-center gap-6
@@ -407,166 +580,200 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                         </div>
                                     </button>
 
-                                    {/* Opción Mobbex */}
+                                    {/* Renderizado Condicional del Brick de Mercado Pago */}
+                                    {paymentMethod === 'mercadopago' && (
+                                        <div className="mt-4 animate-fade-in bg-white p-4 rounded-xl">
+                                            {loadingMP && (
+                                                <div className="flex justify-center p-8">
+                                                    <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                                </div>
+                                            )}
+                                            {/* Container para el brick vanilla */}
+                                            <div id="paymentBrick_container" ref={brickContainerRef}></div>
+                                        </div>
+                                    )}
+
+
+
+                                    {/* Botón de Acción Principal Desktop */}
                                     <button
-                                        onClick={() => setPaymentMethod('mobbex')}
-                                        className={`group relative p-6 rounded-2xl border transition-all duration-300 text-left flex items-center gap-6
-                                            ${paymentMethod === 'mobbex' ? 'bg-surface-dark border-primary shadow-[0_0_30px_rgba(34,211,238,0.1)]' : 'bg-surface-dark border-white/10 hover:border-white/30'}`}
+                                        onClick={() => {
+                                            if (currentStep === 3 && paymentMethod === 'mercadopago') {
+                                                processMercadoPagoPayment();
+                                            } else {
+                                                handleNext();
+                                            }
+                                        }}
+                                        className="w-full hidden lg:block py-4 bg-primary hover:bg-primary-dark text-black font-bold rounded-xl transition-all transform hover:scale-[1.02] shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)]"
                                     >
-                                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors
-                                            ${paymentMethod === 'mobbex' ? 'border-primary' : 'border-gray-500'}`}>
-                                            {paymentMethod === 'mobbex' && <div className="w-3 h-3 rounded-full bg-primary"></div>}
-                                        </div>
-                                        <div className="flex-1">
-                                            <h4 className="font-bold text-white text-lg mb-1">Mobbex (Tarjeta TUYA)</h4>
-                                            <p className="text-gray-400 text-sm">Pagá con Mobbex, Paga con TUYA (NBCH).</p>
-                                        </div>
-                                        <span className="font-bold text-xl tracking-wider text-purple-400">mobbex</span>
+                                        {currentStep < 3 ? (
+                                            <span className="flex items-center justify-center gap-2">
+                                                Continuar <span className="material-symbols-outlined">arrow_forward</span>
+                                            </span>
+                                        ) : (
+                                            'Finalizar Pedido'
+                                        )}
                                     </button>
 
-                                    {/* Opción Prueba */}
-                                    <button
-                                        onClick={() => setPaymentMethod('prueba')}
-                                        className={`group relative p-6 rounded-2xl border transition-all duration-300 text-left flex items-center gap-6
-                                            ${paymentMethod === 'prueba' ? 'bg-surface-dark border-primary shadow-[0_0_30px_rgba(34,211,238,0.1)]' : 'bg-surface-dark border-white/10 hover:border-white/30'}`}
-                                    >
-                                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors
-                                            ${paymentMethod === 'prueba' ? 'border-primary' : 'border-gray-500'}`}>
-                                            {paymentMethod === 'prueba' && <div className="w-3 h-3 rounded-full bg-primary"></div>}
-                                        </div>
-                                        <div className="flex-1">
-                                            <h4 className="font-bold text-white text-lg mb-1">Prueba</h4>
-                                            <p className="text-gray-400 text-sm">Realizar una compra de prueba (Éxito inmediato).</p>
-                                        </div>
-                                        <span className="material-symbols-outlined text-2xl text-yellow-500">bug_report</span>
-                                    </button>
+                                    <div className="mt-4 flex justify-center lg:justify-start">
+                                        <button
+                                            onClick={handleBack}
+                                            className="text-sm text-gray-500 hover:text-white flex items-center gap-1 transition-colors"
+                                        >
+                                            <span className="material-symbols-outlined text-sm">arrow_back</span>
+                                            Volver al paso anterior
+                                        </button>
+                                    </div>
                                 </div>
+
+                                <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 flex gap-3 text-primary/80 text-xs">
+                                    <span className="material-symbols-outlined text-lg">shield</span>
+                                    <div>
+                                        <p className="font-bold mb-1">Garantía de Satisfacción</p>
+                                        <p>Tenés 7 días para probar el contenido. Si no es lo que esperabas, te devolvemos tu dinero.</p>
+                                    </div>
+                                </div>
+
                             </div>
                         )}
                     </div>
 
-                    {/* Columna Lateral - Resumen Sticky */}
+                    {/* Columna Lateral - Resumen */}
                     <div className="lg:col-span-1">
-                        <div className="sticky top-24 space-y-6">
+                        <div className="bg-surface-dark border border-white/5 rounded-2xl p-6 sticky top-8">
+                            <h3 className="text-xl font-bold text-white mb-6">Resumen de Compra</h3>
 
-                            {/* Resumen de Costos */}
-                            <div className="bg-surface-dark border border-white/5 rounded-2xl p-6 shadow-xl">
-                                <h3 className="text-lg font-bold text-white mb-6">Resumen</h3>
-
-                                <div className="space-y-3 mb-6">
-                                    <div className="flex justify-between text-gray-400">
-                                        <span>Subtotal</span>
-                                        <span>${total.toLocaleString()}</span>
+                            <div className="space-y-4 mb-6">
+                                {directCourse ? (
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="text-gray-400">1 x {directCourse.title}</span>
+                                        <span className="text-white font-bold">${directCourse.price.toLocaleString()}</span>
                                     </div>
-                                    {discount > 0 && (
-                                        <div className="flex justify-between text-primary">
-                                            <span>Descuento</span>
-                                            <span>-${discount.toLocaleString()}</span>
+                                ) : (
+                                    cart.map(item => (
+                                        <div key={item.id} className="flex justify-between items-center text-sm">
+                                            <span className="text-gray-400">1 x {item.title}</span>
+                                            <span className="text-white font-bold">${item.price.toLocaleString()}</span>
                                         </div>
-                                    )}
-                                    {paymentMethod === 'transferencia' && (
-                                        <div className="flex justify-between text-green-400">
-                                            <span>Descuento Transferencia</span>
-                                            <span>-${(finalTotal * 0.10).toLocaleString()}</span>
-                                        </div>
-                                    )}
-                                    <div className="border-t border-white/10 pt-3 flex justify-between items-end">
-                                        <span className="text-white font-medium">Total</span>
-                                        <span className="text-3xl font-bold text-primary">
+                                    ))
+                                )}
+
+                                <div className="border-t border-white/10 my-4"></div>
+
+                                <div className="flex justify-between items-center text-gray-400">
+                                    <span>Subtotal</span>
+                                    <span>${finalTotal.toLocaleString()}</span>
+                                </div>
+
+                                {paymentMethod === 'transferencia' && (
+                                    <div className="flex justify-between items-center text-green-400">
+                                        <span>Descuento Transferencia (10%)</span>
+                                        <span>-${(finalTotal * 0.1).toLocaleString()}</span>
+                                    </div>
+                                )}
+
+                                <div className="flex justify-between items-center text-xl font-bold text-white pt-4 border-t border-white/10">
+                                    <span>Total</span>
+                                    <div className="text-right">
+                                        <span className="text-primary block">
                                             ${paymentMethod === 'transferencia'
                                                 ? (finalTotal * 0.9).toLocaleString()
                                                 : finalTotal.toLocaleString()}
                                         </span>
+                                        {paymentMethod === 'transferencia' && (
+                                            <span className="text-xs text-gray-500 font-normal block line-through">
+                                                ${finalTotal.toLocaleString()}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
+                            </div>
 
-                                {/* Cupón (Solo en paso 1) */}
-                                {currentStep === 1 && (
-                                    <div className="mb-6">
+                            {/* Cupón */}
+                            {!directCourse && (
+                                <div className="mb-6 space-y-2">
+                                    {activeCoupon ? (
+                                        <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 flex justify-between items-center">
+                                            <span className="text-green-400 text-sm font-bold flex items-center gap-2">
+                                                <span className="material-symbols-outlined text-sm">local_offer</span>
+                                                Cupón activado
+                                            </span>
+                                            <button onClick={removeCoupon} className="text-gray-500 hover:text-white">
+                                                <span className="material-symbols-outlined text-sm">close</span>
+                                            </button>
+                                        </div>
+                                    ) : (
                                         <div className="flex gap-2">
                                             <input
+                                                type="text"
+                                                placeholder="Código de cupón"
                                                 value={couponInput}
                                                 onChange={(e) => setCouponInput(e.target.value)}
-                                                placeholder="Código de descuento"
-                                                className="flex-1 bg-black/20 border border-white/10 rounded px-3 py-2 text-sm text-white"
+                                                className="bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-primary flex-1"
                                             />
                                             <button
-                                                onClick={() => {
-                                                    if (!couponInput) return;
-                                                    if (applyCoupon(couponInput)) {
-                                                        onShowToast('Cupón aplicado', 'success');
-                                                    } else {
-                                                        onShowToast('Cupón inválido', 'error');
-                                                    }
-                                                }}
-                                                className="px-3 py-2 bg-white/10 hover:bg-white/20 rounded text-white text-sm font-medium transition-colors"
+                                                onClick={() => applyCoupon(couponInput)}
+                                                className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white text-sm font-bold transition-all"
                                             >
                                                 Aplicar
                                             </button>
                                         </div>
-                                        {activeCoupon && (
-                                            <div className="flex justify-between items-center mt-2 text-xs text-primary">
-                                                <span>Aplicado: {activeCoupon.code}</span>
-                                                <button onClick={() => { removeCoupon(); setCouponInput(''); }} className="underline hover:text-white">Eliminar</button>
-                                            </div>
-                                        )}
-                                    </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Botón de Acción Principal Desktop (Movido aquí para que esté en el sidebar) */}
+                            <button
+                                onClick={() => {
+                                    if (currentStep === 3 && paymentMethod === 'mercadopago') {
+                                        processMercadoPagoPayment();
+                                    } else {
+                                        handleNext();
+                                    }
+                                }}
+                                className={`w-full py-4 font-bold rounded-xl transition-all transform hover:scale-[1.02] shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] mb-4
+                                    ${paymentMethod === 'mercadopago' && currentStep === 3
+                                        ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                                        : 'bg-primary hover:bg-primary-dark text-black'}`}
+                            >
+                                {currentStep < 3 ? (
+                                    <span className="flex items-center justify-center gap-2">
+                                        Continuar <span className="material-symbols-outlined">arrow_forward</span>
+                                    </span>
+                                ) : (
+                                    paymentMethod === 'mercadopago' ? 'Pagar con Mercado Pago' : 'Finalizar Pedido'
                                 )}
+                            </button>
 
-                                {/* Botón de Acción Principal Desktop */}
-                                <button
-                                    onClick={handleNext}
-                                    className="w-full hidden lg:block py-4 bg-primary hover:bg-primary-dark text-black font-bold rounded-xl transition-all transform hover:scale-[1.02] shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)]"
-                                >
-                                    {currentStep < 3 ? (
-                                        <span className="flex items-center justify-center gap-2">
-                                            Continuar <span className="material-symbols-outlined">arrow_forward</span>
-                                        </span>
-                                    ) : 'Finalizar Pedido'}
-                                </button>
-
-                                <div className="mt-4 flex justify-center lg:justify-start">
-                                    <button onClick={handleBack} className="text-sm text-gray-500 hover:text-white flex items-center gap-1 transition-colors">
-                                        <span className="material-symbols-outlined text-sm">arrow_back</span>
-                                        {currentStep === 1 ? 'Volver al inicio' : 'Volver al paso anterior'}
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 flex gap-3 text-primary/80 text-xs">
-                                <span className="material-symbols-outlined text-lg">shield</span>
-                                <div>
-                                    <p className="font-bold mb-1">Garantía de Satisfacción</p>
-                                    <p>Tenés 7 días para probar el contenido. Si no es lo que esperabas, te devolvemos tu dinero.</p>
-                                </div>
-                            </div>
-
+                            <p className="text-xs text-gray-500 text-center">
+                                Al completar la compra, aceptas nuestros términos y condiciones.
+                            </p>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            {/* Sticky Bottom Bar Mobile */}
-            <div className="fixed bottom-0 left-0 w-full bg-surface-dark border-t border-white/10 p-4 lg:hidden z-50">
-                <div className="flex items-center gap-4">
-                    <div className="flex-1">
-                        <p className="text-gray-400 text-xs uppercase">Total a pagar</p>
-                        <p className="text-xl font-bold text-primary">
-                            ${paymentMethod === 'transferencia'
-                                ? (finalTotal * 0.9).toLocaleString()
-                                : finalTotal.toLocaleString()}
-                        </p>
-                    </div>
-                    <button
-                        onClick={handleNext}
-                        className="px-6 py-3 bg-primary text-black font-bold rounded-xl shadow-[0_0_15px_rgba(34,211,238,0.3)]"
-                    >
-                        {currentStep < 3 ? (
-                            <div className="flex items-center gap-2">
-                                Continuar <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                    {/* Sticky Bottom Bar Mobile */}
+                    <div className="fixed bottom-0 left-0 w-full bg-surface-dark border-t border-white/10 p-4 lg:hidden z-50">
+                        <div className="flex items-center gap-4">
+                            <div className="flex-1">
+                                <p className="text-gray-400 text-xs uppercase">Total a pagar</p>
+                                <p className="text-xl font-bold text-primary">
+                                    ${paymentMethod === 'transferencia'
+                                        ? (finalTotal * 0.9).toLocaleString()
+                                        : finalTotal.toLocaleString()}
+                                </p>
                             </div>
-                        ) : 'Finalizar'}
-                    </button>
+                            <button
+                                onClick={handleNext}
+                                className="px-6 py-3 bg-primary text-black font-bold rounded-xl shadow-[0_0_15px_rgba(34,211,238,0.3)]"
+                            >
+                                {currentStep < 3 ? (
+                                    <div className="flex items-center gap-2">
+                                        Continuar <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                                    </div>
+                                ) : paymentMethod === 'mercadopago' ? 'Pagar arriba' : 'Finalizar'}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
