@@ -170,20 +170,54 @@ class App {
     renderer: any; camera: any; scene: any; clock: any;
     touchTexture: TouchTexture; gradientBackground: GradientBackground;
     animationId: number | null = null; container: HTMLElement;
+    isVisible: boolean = false;
+    // Event handlers stored for cleanup
+    private onResize: () => void;
+    private onMouseMove: (e: MouseEvent) => void;
+    private onTouchMove: (e: TouchEvent) => void;
+
     constructor(container: HTMLElement) {
         this.container = container;
-        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); // Alpha true para transparencia si es necesario
+        this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
+
         this.renderer.setSize(container.clientWidth, container.clientHeight);
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const maxPixelRatio = window.matchMedia("(max-width: 768px)").matches ? 1.0 : 1.5;
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, maxPixelRatio));
+
         container.appendChild(this.renderer.domElement);
         this.camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 10000);
         this.camera.position.z = 50;
         this.scene = new THREE.Scene();
-        // No establecemos background color a la escena, dejamos que el shader o el contenedor manejen el fondo
         this.clock = new THREE.Clock();
         this.touchTexture = new TouchTexture();
         this.gradientBackground = new GradientBackground(this);
         this.gradientBackground.uniforms.uTouchTexture.value = this.touchTexture.texture;
+
+        // Initialize handlers
+        this.onResize = () => {
+            if (!this.container) return;
+            this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
+            this.camera.updateProjectionMatrix();
+            this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+            this.gradientBackground.onResize(this.container.clientWidth, this.container.clientHeight);
+        };
+
+        this.onMouseMove = (e: MouseEvent) => {
+            const x = e.offsetX;
+            const y = e.offsetY;
+            this.touchTexture.addTouch({ x: x / this.container.clientWidth, y: 1 - y / this.container.clientHeight });
+        };
+
+        this.onTouchMove = (e: TouchEvent) => {
+            const rect = this.container.getBoundingClientRect();
+            if (e.touches[0]) {
+                const x = e.touches[0].clientX - rect.left;
+                const y = e.touches[0].clientY - rect.top;
+                this.touchTexture.addTouch({ x: x / this.container.clientWidth, y: 1 - y / this.container.clientHeight });
+            }
+        };
+
         this.init();
     }
     getViewSize() {
@@ -193,38 +227,68 @@ class App {
     }
     init() {
         this.gradientBackground.init();
-        const c = this.container;
-        const onMove = (x: number, y: number) => { this.touchTexture.addTouch({ x: x / c.clientWidth, y: 1 - y / c.clientHeight }); };
 
-        // Listeners agregados directamente al contenedor
-        c.addEventListener("mousemove", (e) => onMove(e.offsetX, e.offsetY));
-        c.addEventListener("touchmove", (e) => {
-            // Necesario para móviles
-            const rect = c.getBoundingClientRect();
-            if (e.touches[0]) {
-                onMove(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
-            }
-        });
+        this.container.addEventListener("mousemove", this.onMouseMove);
+        this.container.addEventListener("touchmove", this.onTouchMove);
+        window.addEventListener("resize", this.onResize);
 
-        window.addEventListener("resize", () => {
-            if (!c) return;
-            this.camera.aspect = c.clientWidth / c.clientHeight;
-            this.camera.updateProjectionMatrix();
-            this.renderer.setSize(c.clientWidth, c.clientHeight);
-            this.gradientBackground.onResize(c.clientWidth, c.clientHeight);
-        });
-        this.tick();
+        this.start();
     }
+    start() {
+        if (!this.animationId) {
+            this.isVisible = true;
+            this.clock.start();
+            this.tick();
+        }
+    }
+
+    stop() {
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+            this.animationId = null;
+            this.isVisible = false;
+        }
+    }
+
     tick() {
-        const delta = Math.min(this.clock.getDelta(), 0.1);
-        this.touchTexture.update();
-        this.gradientBackground.update(delta);
-        this.renderer.render(this.scene, this.camera);
+        if (this.isVisible && !document.hidden && document.visibilityState === 'visible') {
+            const delta = Math.min(this.clock.getDelta(), 0.1);
+            this.touchTexture.update();
+            this.gradientBackground.update(delta);
+            this.renderer.render(this.scene, this.camera);
+        }
+
         this.animationId = requestAnimationFrame(() => this.tick());
     }
+
+    setVisible(visible: boolean) {
+        if (visible) {
+            if (!this.isVisible) {
+                this.isVisible = true;
+                this.clock.start();
+            }
+        } else {
+            this.isVisible = false;
+            this.clock.stop();
+        }
+    }
+
     cleanup() {
-        if (this.animationId) cancelAnimationFrame(this.animationId);
+        this.stop();
+
+        // Remove event listeners
+        window.removeEventListener("resize", this.onResize);
+        if (this.container) {
+            this.container.removeEventListener("mousemove", this.onMouseMove);
+            this.container.removeEventListener("touchmove", this.onTouchMove);
+        }
+
         this.renderer.dispose();
+        // Clean up textures and geometries to free GPU memory
+        this.gradientBackground.mesh?.geometry.dispose();
+        this.gradientBackground.mesh?.material.dispose();
+        this.touchTexture.texture.dispose();
+
         if (this.container && this.renderer.domElement && this.container.contains(this.renderer.domElement)) {
             this.container.removeChild(this.renderer.domElement);
         }

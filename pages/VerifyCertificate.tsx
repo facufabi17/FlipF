@@ -44,7 +44,8 @@ const VerifyCertificate: React.FC = () => {
                             studentName: profile.full_name,
                             studentDni: profile.dni,
                             courseName: course?.title || 'Curso no encontrado',
-                            issueDate: new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) // TODO: Si guardamos fecha real, usarla.
+                            issueDate: new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })
+                            // TODO: Si guardamos fecha real, usarla.
                         }
                     });
                 } else {
