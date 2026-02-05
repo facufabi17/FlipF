@@ -109,7 +109,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // B. Escucha de Auth - DEBE SER SÍNCRONO
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             (event, session) => {
-                console.log(`Supabase Auth Event: ${event}`);
+                //console.log(`Supabase Auth Event: ${event}`);
 
                 if (event === 'SIGNED_OUT' || !session) {
                     if (mounted) {

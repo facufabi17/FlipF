@@ -1,85 +1,183 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { FREE_RESOURCES, FreeResource } from '../data/resources';
+import LeadMagnetModal from '../components/LeadMagnetModal';
+
 
 const FreeResources: React.FC = () => {
+    const { isAuthenticated } = useAuth();
+    const [selectedResource, setSelectedResource] = useState<FreeResource | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+    // --- Derived Data ---
+    const categories = useMemo(() => {
+        const cats = new Set(FREE_RESOURCES.map(r => r.type));
+        return Array.from(cats);
+    }, []);
+
+    const filteredResources = useMemo(() => {
+        return FREE_RESOURCES.filter(resource => {
+            // 1. Text Search
+            const matchesSearch = (
+                resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                resource.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                resource.type.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+
+            // 2. Category Filter
+            const matchesCategory = selectedCategory ? resource.type === selectedCategory : true;
+
+            return matchesSearch && matchesCategory;
+        });
+    }, [searchTerm, selectedCategory]);
+
+    const handleDownloadClick = (resource: FreeResource) => {
+        if (isAuthenticated) {
+            window.open(resource.downloadUrl, '_blank');
+        } else {
+            setSelectedResource(resource);
+        }
+    };
+
+    const handleCategoryFilter = (cat: string | null) => {
+        setSelectedCategory(prev => prev === cat ? null : cat);
+    };
+
     return (
-        <div className="animate-fade-in">
-            <div className="relative w-full border-b border-border-dark bg-background-dark">
-                <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: "linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px)", backgroundSize: '40px 40px' }}></div>
-                <div className="relative flex flex-col items-center justify-center px-6 py-20 text-center md:py-32 max-w-5xl mx-auto">
-                    <div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-tech mb-6 backdrop-blur-sm">
-                        <span className="material-symbols-outlined mr-2 text-[16px]">verified</span> Material 100% Gratuito
+        <div className="min-h-screen relative overflow-hidden bg-black text-white font-sans selection:bg-[#00F5F1] selection:text-black">
+
+            {/* --- SECCIÓN 1: HERO --- */}
+            <section className="relative w-full flex flex-col items-center text-center min-h-[50vh] justify-center pb-12 pt-20">
+                {/* Background Animation */}
+                <div className="absolute inset-0 z-0 overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-black"></div>
+                </div>
+
+                <div className="relative z-10 w-full max-w-4xl px-6 flex flex-col items-center">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00F5F1]/10 border border-[#00F5F1]/20 backdrop-blur-md mb-6 animate-fade-in-up">
+                        <span className="material-symbols-outlined text-[#00F5F1] text-sm">verified</span>
+                        <span className="text-xs font-bold text-[#00F5F1] tracking-wide uppercase">Material 100% Gratuito</span>
                     </div>
-                    <h1 className="text-4xl md:text-6xl font-black leading-[1.1] tracking-[-0.033em] mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/70">
-                        Recursos Gratuitos para Creadores
+
+                    <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight animate-fade-in-up delay-100">
+                        Herramientas para <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-[#00F5F1] to-[#00F5F1]">Escalar tu Agencia.</span>
                     </h1>
-                    <p className="text-text-muted text-lg md:text-xl font-normal max-w-2xl mb-10 leading-relaxed">
-                        Descarga herramientas tácticas, hojas de trabajo y guías operativas diseñadas para escalar tu negocio digital hoy mismo. Sin trucos.
+
+                    <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-in-up delay-200">
+                        Descarga tácticas probadas, plantillas operativas y sistemas que usamos internamente. Sin teoría, solo ejecución.
                     </p>
-                    <div className="w-full max-w-lg relative group">
-                        <form className="relative flex w-full items-center rounded-xl border border-border-dark bg-surface-dark p-2 shadow-2xl">
-                            <div className="flex h-12 w-12 items-center justify-center text-text-muted">
-                                <span className="material-symbols-outlined">mail</span>
-                            </div>
-                            <input className="h-full flex-1 bg-transparent px-2 text-white placeholder-text-muted focus:outline-none text-base border-none focus:ring-0" placeholder="Tu mejor correo electrónico" required type="email"/>
-                            <button className="flex h-12 items-center justify-center rounded-lg bg-primary px-6 text-base font-bold text-white shadow-md hover:bg-primary/90 transition-all whitespace-nowrap" type="button">Suscribirse</button>
-                        </form>
+                </div>
+            </section>
+
+            {/* --- SECCIÓN 2: WORKSPACE & FILTROS --- */}
+            <div className="relative z-10 max-w-7xl mx-auto px-6 py-12 pb-24">
+
+                {/* --- SEARCH & FILTER UI --- */}
+                <div className="mb-12 space-y-6 animate-fade-in-up delay-300">
+                    <div className="flex flex-col md:flex-row gap-6 items-end justify-between">
+                        {/* Search Bar */}
+                        <div className="relative w-full md:max-w-xl">
+                            <input
+                                type="text"
+                                placeholder="Buscar recurso..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full bg-[#0a0a0a]/80 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#00F5F1]/50 focus:ring-1 focus:ring-[#00F5F1]/50 transition-all font-medium"
+                            />
+                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                        </div>
+
+                        {/* Category Filters */}
+                        <div className="flex flex-wrap gap-2 w-full md:w-auto justify-start md:justify-end">
+                            <button
+                                onClick={() => handleCategoryFilter(null)}
+                                className={`px-4 py-2 rounded-lg text-xs font-bold border transition-all ${!selectedCategory ? 'bg-[#00F5F1] text-black border-[#00F5F1]' : 'bg-white/5 text-gray-300 border-white/5 hover:border-white/20'}`}
+                            >
+                                Todos
+                            </button>
+                            {categories.map(cat => (
+                                <button
+                                    key={cat}
+                                    onClick={() => handleCategoryFilter(cat)}
+                                    className={`px-4 py-2 rounded-lg text-xs font-bold border transition-all ${selectedCategory === cat ? 'bg-[#00F5F1]/20 text-[#00F5F1] border-[#00F5F1]' : 'bg-white/5 text-gray-300 border-white/5 hover:border-white/20'}`}
+                                >
+                                    {cat}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
+
+                {/* --- GRID DE RECURSOS --- */}
+                {filteredResources.length === 0 ? (
+                    <div className="text-center py-20 border border-white/5 rounded-2xl bg-white/5 mx-auto max-w-2xl animate-fade-in">
+                        <span className="material-symbols-outlined text-gray-500 text-5xl mb-4">folder_off</span>
+                        <h3 className="text-xl font-bold text-white mb-2">No encontramos recursos</h3>
+                        <p className="text-gray-400">Intenta con otra búsqueda o categoría.</p>
+                        <button
+                            onClick={() => { setSearchTerm(''); setSelectedCategory(null); }}
+                            className="mt-6 text-[#00F5F1] hover:underline font-bold"
+                        >
+                            Ver todos los recursos
+                        </button>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {filteredResources.map((resource, index) => (
+                            <div
+                                key={resource.id}
+                                className="group relative flex flex-col bg-gray-900/40 backdrop-blur-sm border border-white/5 rounded-2xl overflow-hidden hover:border-[#00F5F1]/50 transition-all duration-500 hover:shadow-[0_0_30px_-10px_rgba(0,245,241,0.15)] hover:-translate-y-1"
+                                style={{ animationDelay: `${index * 100}ms` }}
+                            >
+                                {/* Image & Type */}
+                                <div className="relative aspect-video w-full overflow-hidden">
+                                    <div className="absolute top-3 left-3 z-10">
+                                        <span className="inline-flex items-center rounded-md bg-black/60 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur-md border border-white/10 uppercase tracking-wider">
+                                            {resource.type}
+                                        </span>
+                                    </div>
+                                    <div
+                                        className="h-full w-full bg-cover bg-center transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100"
+                                        style={{ backgroundImage: `url("${resource.image}")` }}
+                                    ></div>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent"></div>
+                                </div>
+
+                                {/* Content */}
+                                <div className="flex flex-1 flex-col p-6">
+                                    <h3 className="mb-3 text-xl font-bold text-white group-hover:text-[#00F5F1] transition-colors leading-tight">
+                                        {resource.title}
+                                    </h3>
+                                    <p className="mb-6 text-sm text-gray-400 leading-relaxed line-clamp-3">
+                                        {resource.description}
+                                    </p>
+
+                                    <div className="mt-auto pt-4 border-t border-white/5">
+                                        <button
+                                            onClick={() => handleDownloadClick(resource)}
+                                            className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/5 border border-white/10 py-3 text-sm font-bold text-white transition-all hover:bg-[#00F5F1] hover:text-black hover:border-[#00F5F1] group/btn"
+                                        >
+                                            <span className="material-symbols-outlined text-lg transition-transform group-hover/btn:-translate-y-0.5">
+                                                {resource.type === 'Template' ? 'content_copy' : 'download'}
+                                            </span>
+                                            {resource.type === 'Template' ? 'Duplicar Plantilla' : 'Descargar Ahora'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
-            
-            <div className="w-full max-w-7xl mx-auto px-6 py-12">
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 border-b border-border-dark pb-6">
-                    <div>
-                        <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Herramientas Destacadas</h2>
-                        <p className="text-text-muted text-sm md:text-base">Seleccionadas a mano para maximizar tu productividad.</p>
-                    </div>
-                </div>
-                {/* Grid Recursos Gratis */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* Item 1 */}
-                    <div className="group relative flex flex-col overflow-hidden rounded-xl border border-border-dark bg-surface-dark transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10">
-                        <div className="relative aspect-video w-full overflow-hidden bg-surface-dark">
-                             <div className="absolute top-3 left-3 z-10 flex gap-2">
-                                <span className="inline-flex items-center rounded bg-black/50 px-2 py-1 text-xs font-medium text-white backdrop-blur-md border border-white/10">PDF</span>
-                            </div>
-                            <div className="h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: 'linear-gradient(to top, rgba(27, 19, 32, 0.9) 0%, rgba(27, 19, 32, 0) 50%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuC5CM7rICU3OPbJP2WY94Ey3XzO0oztRZ4GkulbTgDk5S4B2WCl3vbvqytzGLxBkdrwbHG4Ro0um1_e38oIGfTiupXdFSN1YZBjLG1lf8D6iRwvjBrlrconzfFNx_IaB1rCBCO4DUqzsPvbxAsi3Q9gPGflhS5qL87QYK2m0FzdNpsQ9-VJHGzzEfIP8eW0Tw9WQJmIzTinZxVMYAqgualf0QZ5-Fj0E9ydtbivn2yWGfoFcn7Mi3y3J9N0-7oJULtbnevCMMk-rII")' }}></div>
-                        </div>
-                        <div className="flex flex-1 flex-col p-5">
-                            <h3 className="mb-2 text-xl font-bold text-white group-hover:text-primary transition-colors">Hoja de Trabajo del Avatar</h3>
-                            <p className="mb-6 text-sm text-text-muted line-clamp-3">Define quién es tu comprador perfecto en 15 minutos.</p>
-                            <button className="mt-auto flex w-full items-center justify-center gap-2 rounded-lg bg-white/5 border border-white/10 py-2.5 text-sm font-bold text-white transition-all hover:bg-primary">Descargar Ahora</button>
-                        </div>
-                    </div>
-                    {/* Item 2 */}
-                    <div className="group relative flex flex-col overflow-hidden rounded-xl border border-border-dark bg-surface-dark transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10">
-                        <div className="relative aspect-video w-full overflow-hidden bg-surface-dark">
-                            <div className="absolute top-3 left-3 z-10 flex gap-2">
-                                <span className="inline-flex items-center rounded bg-black/50 px-2 py-1 text-xs font-medium text-white backdrop-blur-md border border-white/10">Notion</span>
-                            </div>
-                            <div className="h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: 'linear-gradient(to top, rgba(27, 19, 32, 0.9) 0%, rgba(27, 19, 32, 0) 50%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuAZPFBULjM_lizrfkE1khtGAySyqmOWCRMeBOUT9jUJn4wqZwZnIVEvq3GU111BYMjA7yWkdzKNmJXiph-bOQzKk2HfzjBRZH3oxfnHWLpZ6kjBv3Sj4MSk6M-GWW4UwnWMjw5VsIm0C0MUAj8EhQhdSBUisLtiaH64UEIR7XIUKb5X98lRD8_c5KThWVoF2CNpgTvnX6Au6W3TqDmE7mx0ObOfepZcQOVbSwvGHHjd_CZ0VvEpYPJVghs-o37wrCveSxMuWpbcraM")' }}></div>
-                        </div>
-                        <div className="flex flex-1 flex-col p-5">
-                            <h3 className="mb-2 text-xl font-bold text-white group-hover:text-primary transition-colors">Dashboard de Contenidos</h3>
-                            <p className="mb-6 text-sm text-text-muted line-clamp-3">Organiza tu calendario editorial con esta plantilla de Notion.</p>
-                            <button className="mt-auto flex w-full items-center justify-center gap-2 rounded-lg bg-white/5 border border-white/10 py-2.5 text-sm font-bold text-white transition-all hover:bg-primary">Duplicar Plantilla</button>
-                        </div>
-                    </div>
-                    {/* Item 3 */}
-                    <div className="group relative flex flex-col overflow-hidden rounded-xl border border-border-dark bg-surface-dark transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10">
-                        <div className="relative aspect-video w-full overflow-hidden bg-surface-dark">
-                            <div className="absolute top-3 left-3 z-10 flex gap-2">
-                                <span className="inline-flex items-center rounded bg-black/50 px-2 py-1 text-xs font-medium text-white backdrop-blur-md border border-white/10">Excel</span>
-                            </div>
-                            <div className="h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: 'linear-gradient(to top, rgba(27, 19, 32, 0.9) 0%, rgba(27, 19, 32, 0) 50%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuBs9_5l2SQEqk35_RH9Eqkc0RvAQjPehJ19Huu1AngWiK4p2mZHkXJ4WKmoDeob5cR_GLymfhnBSidv0GzF53CKo2STUEnyL0yuW9H5TZ2CuuIZPh9IygYRrYo3GDLm_3Ns-FayRk5UAffg4_aNV_imMBV89ZPtYlPJaLYsAXzov2QPqJu0Z6g_PZPFO2JRU5cQvM3dUv8bgVog2CHOQMrvmq4mca8UoqWTAsG_8B6jvuzcBMnpDUQK21mrGyAgf3VxblsPAE9k0fc")' }}></div>
-                        </div>
-                        <div className="flex flex-1 flex-col p-5">
-                            <h3 className="mb-2 text-xl font-bold text-white group-hover:text-primary transition-colors">Calculadora de ROI</h3>
-                            <p className="mb-6 text-sm text-text-muted line-clamp-3">Descubre cuánto realmente ganas por proyecto.</p>
-                            <button className="mt-auto flex w-full items-center justify-center gap-2 rounded-lg bg-white/5 border border-white/10 py-2.5 text-sm font-bold text-white transition-all hover:bg-primary">Descargar Ahora</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+            {/* Modal de Captura */}
+            <LeadMagnetModal
+                resource={selectedResource}
+                isOpen={!!selectedResource}
+                onClose={() => setSelectedResource(null)}
+            />
         </div>
     );
 };

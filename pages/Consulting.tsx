@@ -37,20 +37,18 @@ const Consulting: React.FC<ConsultingProps> = ({ onShowToast }) => {
 
     emailjs.sendForm(
 
-      'service_mz9icku',     // Reemplaza con tu Service ID
+      import.meta.env.VITE_EMAILJS_SERVICE_ID,     // Reemplaza con tu Service ID
 
-      'template_44c5yyn',    // Reemplaza con tu Template ID
+      import.meta.env.VITE_EMAILJS_TEMPLATE_ID_CONTACTO,    // Reemplaza con tu Template ID
 
       form.current!,
 
-      'KYQOoh5UrGdE56vpo'      // Reemplaza con tu Public Key
+      import.meta.env.VITE_EMAILJS_PUBLIC_KEY      // Reemplaza con tu Public Key
 
     )
 
-      .then(() => {
-
-        onShowToast('Solicitud enviada');
-
+      .then((result) => {
+        onShowToast('Solicitud enviada correctamente');
         form.current?.reset();
 
       }, (error) => {
