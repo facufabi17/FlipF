@@ -34,6 +34,7 @@ const Help = lazy(() => import('./pages/Help'));
 const Privacy = lazy(() => import('./pages/Term&Priv/Privacy'));
 const Terms = lazy(() => import('./pages/Term&Priv/Terms'));
 const UpdatePassword = lazy(() => import('./pages/UpdatePassword'));
+const PagoAprobado = lazy(() => import('./pages/PagoAprobado'));
 
 //const { data: todos } = await supabase.from('todos').select()
 
@@ -69,6 +70,7 @@ const App: React.FC = () => {
                                     {/* Checkout maneja Carrito (sin id) y Compra Directa (con id) */}
                                     <Route path="/checkout" element={<Checkout onShowToast={showToast} />} />
                                     <Route path="/checkout/:id" element={<Checkout onShowToast={showToast} />} />
+                                    <Route path="/pago_apro" element={<PagoAprobado />} />
 
                                     <Route path="/mis-cursos" element={<MyCourses />} />
                                     <Route path="/mis-certificados" element={<MyCertificates />} />

@@ -45,6 +45,10 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     const [preferenceId, setPreferenceId] = useState<string | null>(null);
     const [loadingMP, setLoadingMP] = useState(false);
 
+    // Estados para Pago Externo (Polling)
+    const [isWaitingPayment, setIsWaitingPayment] = useState(false);
+    const [externalPaymentId, setExternalPaymentId] = useState<string | null>(null);
+
     const directCourse = id ? COURSES.find(c => c.id === id) : null;
     const finalTotal = directCourse ? directCourse.price : totalAfterDiscount;
     const itemsToShow = directCourse
@@ -106,6 +110,106 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
             }));
         }
     }, [isAuthenticated, user, navigate, loading]);
+
+
+    // Restaurar estado de persistencia al montar
+    useEffect(() => {
+        const storedPaymentId = sessionStorage.getItem('pendingPaymentId');
+        const storedIsWaiting = sessionStorage.getItem('isPaymentInProgress');
+        const storedTimestamp = sessionStorage.getItem('paymentTimestamp');
+
+        if (storedPaymentId && storedIsWaiting === 'true' && storedTimestamp) {
+            const now = Date.now();
+            const timestamp = parseInt(storedTimestamp, 10);
+            const oneHour = 60 * 60 * 1000;
+
+            if (now - timestamp < oneHour) {
+                setExternalPaymentId(storedPaymentId);
+                setIsWaitingPayment(true);
+                onShowToast('Restaurando sesión de pago...', 'success');
+            } else {
+                // Limpiar si es muy viejo
+                sessionStorage.removeItem('pendingPaymentId');
+                sessionStorage.removeItem('isPaymentInProgress');
+                sessionStorage.removeItem('paymentTimestamp');
+            }
+        }
+    }, [onShowToast]);
+
+    // Polling optimizado con Visibility API
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+
+        const checkStatus = async () => {
+            if (!externalPaymentId) return;
+
+            try {
+                const res = await fetch(`/api/check-payment-status?payment_id=${externalPaymentId}`);
+                const data = await res.json();
+
+                console.log("Polling payment status:", data.status);
+
+                if (data.status === 'approved') {
+                    // Limpiar persistencia
+                    sessionStorage.removeItem('pendingPaymentId');
+                    sessionStorage.removeItem('isPaymentInProgress');
+                    sessionStorage.removeItem('paymentTimestamp');
+
+                    clearInterval(interval);
+                    setIsWaitingPayment(false);
+
+                    // Compra exitosa
+                    const itemsToPurchase = directCourse
+                        ? [{ id: directCourse.id, type: 'course' as const }]
+                        : cart.map(item => ({ id: item.id, type: item.type }));
+
+                    await purchaseItems(itemsToPurchase);
+
+                    if (!directCourse) {
+                        clearCart();
+                        if (activeCoupon) removeCoupon();
+                    }
+
+                    navigate('/pago_apro');
+                    onShowToast('¡Pago exitoso!', 'success');
+                } else if (data.status === 'rejected') {
+                    // Limpiar persistencia
+                    sessionStorage.removeItem('pendingPaymentId');
+                    sessionStorage.removeItem('isPaymentInProgress');
+                    sessionStorage.removeItem('paymentTimestamp');
+
+                    clearInterval(interval);
+                    setIsWaitingPayment(false);
+                    onShowToast('El pago fue rechazado. Intenta nuevamente.', 'error');
+                }
+            } catch (error) {
+                console.error("Error polling payment status:", error);
+            }
+        };
+
+        if (isWaitingPayment && externalPaymentId) {
+            // Check inmediato al activar
+            checkStatus();
+
+            // Intervalo regular
+            interval = setInterval(checkStatus, 3000);
+
+            // Listener de visibilidad para check inmediato al volver
+            const handleVisibilityChange = () => {
+                if (document.visibilityState === 'visible') {
+                    console.log("Tab visible, checking status immediately...");
+                    checkStatus();
+                }
+            };
+
+            document.addEventListener("visibilitychange", handleVisibilityChange);
+
+            return () => {
+                clearInterval(interval);
+                document.removeEventListener("visibilitychange", handleVisibilityChange);
+            };
+        }
+    }, [isWaitingPayment, externalPaymentId, directCourse, cart, navigate, purchaseItems, clearCart, activeCoupon, onShowToast]);
 
     // Handlers
     // Ref para el contenedor del brick
@@ -190,58 +294,87 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
         if (!window.paymentBrickController) return;
 
         try {
-            // Mostrar overlay de carga
             onShowToast('Procesando pago...', 'success');
 
-            // Obtener datos del formulario del Brick
-            const { formData } = await window.paymentBrickController.getFormData();
+            // 1. Obtener datos del formulario del Brick (Esto valida los campos)
+            const result = await window.paymentBrickController.getFormData()
+                .catch((error: any) => {
+                    // Capturamos error de validación del Brick (ej: campos vacíos)
+                    console.warn("Brick Validation Error:", error);
+                    return null;
+                });
 
-            if (!formData) {
-                onShowToast('Por favor completa todos los datos del pago', 'error');
+            // Si falla la validación o no hay datos, cortamos aquí
+            if (!result || !result.formData) {
+                onShowToast('Por favor revisá los datos del formulario.', 'error');
                 return;
             }
 
+            const { formData } = result;
             console.log("Pago Brick Data:", formData);
 
-            // Enviar a nuestro backend
+            // 2. Enviar a nuestro backend
             const response = await fetch("/api/process-payment", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),
             });
 
-            const result = await response.json();
+            const paymentResult = await response.json();
 
-            if (result.error) {
-                console.error("Payment Error:", result);
-                onShowToast('Error al procesar el pago: ' + (result.details?.message || result.error), 'error');
+            if (paymentResult.error) {
+                console.error("Payment Error:", paymentResult);
+                onShowToast('Error al procesar el pago: ' + (paymentResult.details?.message || paymentResult.error), 'error');
                 return;
             }
 
-            console.log("Payment Success:", result);
+            console.log("Payment Success Result:", paymentResult);
 
-            // Compra exitosa: registrar items
-            const itemsToPurchase = directCourse
-                ? [{ id: directCourse.id, type: 'course' as const }]
-                : cart.map(item => ({ id: item.id, type: item.type }));
+            // 3. Manejar Resultado
+            if (paymentResult.status === 'approved') {
+                // Pago Aprobado Inmediato (Tarjeta exitosa o Dinero en cuenta inmediato)
+                const itemsToPurchase = directCourse
+                    ? [{ id: directCourse.id, type: 'course' as const }]
+                    : cart.map(item => ({ id: item.id, type: item.type }));
 
-            await purchaseItems(itemsToPurchase);
+                await purchaseItems(itemsToPurchase);
 
-            if (!directCourse) {
-                clearCart();
-                if (activeCoupon) removeCoupon();
-            }
+                if (!directCourse) {
+                    clearCart();
+                    if (activeCoupon) removeCoupon();
+                }
 
-            if (result.status === 'approved') {
-                navigate('/mis-cursos');
-                onShowToast('Â¡Pago exitoso!', 'success');
+                navigate('/pago_apro');
+                onShowToast('¡Pago exitoso!', 'success');
+
+            } else if (paymentResult.status === 'in_process' || paymentResult.status === 'pending') {
+                // Pago Pendiente / Externo (Wallet, Rapipago, etc.)
+
+                // Si es Wallet o similar, MP devuelve point_of_interaction.
+                if (paymentResult.point_of_interaction?.type === 'redirect') {
+                    // Abrir link en nueva pestaña si viene data
+                    if (paymentResult.point_of_interaction.transaction_data?.ticket_url) {
+                        window.open(paymentResult.point_of_interaction.transaction_data.ticket_url, '_blank');
+                    }
+                }
+
+                // Activar Polling y Overlay con Persistencia
+                const paymentIdStr = paymentResult.id.toString();
+                setExternalPaymentId(paymentIdStr);
+                setIsWaitingPayment(true);
+
+                // Guardar en SessionStorage
+                sessionStorage.setItem('pendingPaymentId', paymentIdStr);
+                sessionStorage.setItem('isPaymentInProgress', 'true');
+                sessionStorage.setItem('paymentTimestamp', Date.now().toString());
+
             } else {
-                onShowToast('Pago ' + result.status, 'error');
+                onShowToast('Pago ' + paymentResult.status, 'error');
             }
 
         } catch (error) {
             console.error("Network Error:", error);
-            onShowToast('Error de conexiÃ³n al procesar el pago', 'error');
+            onShowToast('Error de conexión al procesar el pago', 'error');
         }
     };
 
@@ -715,7 +848,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                                 onClick={() => applyCoupon(couponInput)}
                                                 className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white text-sm font-bold transition-all"
                                             >
-                                                Aplicar
+                                                <span className="material-symbols-outlined text-sm">check</span>
                                             </button>
                                         </div>
                                     )}
@@ -776,6 +909,31 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                     </div>
                 </div>
             </div>
+
+            {/* Overlay de Espera de Pago Externo */}
+            {isWaitingPayment && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center p-4">
+                    <div className="bg-surface-dark border border-primary/30 p-8 rounded-2xl max-w-md w-full text-center shadow-[0_0_50px_rgba(34,211,238,0.2)] animate-fade-in">
+                        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+                        <h3 className="text-2xl font-bold text-white mb-2">Esperando confirmación...</h3>
+                        <p className="text-gray-400 mb-6">
+                            Por favor completá el pago en la ventana emergente.
+                            Detectaremos automáticamente cuando finalices.
+                        </p>
+                        <button
+                            onClick={() => {
+                                setIsWaitingPayment(false);
+                                sessionStorage.removeItem('pendingPaymentId');
+                                sessionStorage.removeItem('isPaymentInProgress');
+                                sessionStorage.removeItem('paymentTimestamp');
+                            }}
+                            className="text-sm text-gray-500 hover:text-white underline"
+                        >
+                            Cancelar y volver
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
