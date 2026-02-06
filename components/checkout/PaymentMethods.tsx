@@ -92,20 +92,7 @@ const PaymentMethods = forwardRef<HTMLDivElement, PaymentMethodsProps>(({
 
 
                 {/* Botón de Acción Principal Desktop */}
-                <button
-                    onClick={onMainAction}
-                    disabled={loadingMP && currentStep === 3 && paymentMethod === 'mercadopago'}
-                    className="w-full hidden lg:block py-4 bg-primary hover:bg-primary-dark text-black font-bold rounded-xl transition-all transform hover:scale-[1.02] shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)]"
-                >
-                    {currentStep < 3 ? (
-                        <span className="flex items-center justify-center gap-2">
-                            Continuar <span className="material-symbols-outlined">arrow_forward</span>
-                        </span>
-                    ) : (
-                        loadingMP && paymentMethod === 'mercadopago' ? 'Cargando...' :
-                            'Finalizar Pedido'
-                    )}
-                </button>
+
 
                 <div className="mt-4 flex justify-center lg:justify-start">
                     <button
