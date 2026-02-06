@@ -42,7 +42,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const client = new MercadoPagoConfig({ accessToken });
 
         const { items, baseUrl } = req.body;
-        const origin = baseUrl || 'https://flip-f.vercel.app/#';
+        const appOrigin = (baseUrl || 'https://flip-f.vercel.app').replace(/\/$/, '').replace(/#$/, '');
 
         console.error('--- Debug Create Preference (STDERR) ---');
         console.error('Token (masked):', `${accessToken.substring(0, 10)}...${accessToken.substring(accessToken.length - 5)}`);
@@ -63,11 +63,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             })),
             external_reference: externalReference,
             back_urls: {
-                success: `${origin}/payment-success`,
-                failure: `${origin}/checkout`,
-                pending: `${origin}/checkout`,
+                success: `${appOrigin}/#/pago_apro`,
+                failure: `${appOrigin}/#/checkout`,
+                pending: `${appOrigin}/#/checkout`,
             },
-            ...(!origin.includes('localhost') && !origin.includes('127.0.0.1')
+            ...(!appOrigin.includes('localhost') && !appOrigin.includes('127.0.0.1')
                 ? { auto_return: 'approved' }
                 : {}
             ),
