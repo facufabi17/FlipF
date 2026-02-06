@@ -1,10 +1,16 @@
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-// Initialize Mercado Pago
-const client = new MercadoPagoConfig({
-    accessToken: process.env.MP_ACCESS_TOKEN || process.env.VITE_MP_ACCESS_TOKEN || ''
-});
+
+
+// Helper para UUID seguro sin dependencias de Node
+// Helper para UUID seguro sin dependencias de Node
+function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
 
 // Vercel Handler
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -27,16 +33,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
+        // Initialize Mercado Pago inside handler to ensure env vars are loaded
+        const accessToken = process.env.MP_ACCESS_TOKEN || process.env.VITE_MP_ACCESS_TOKEN || '';
+        if (!accessToken) {
+            throw new Error("Missing MP_ACCESS_TOKEN in server environment");
+        }
+
+        const client = new MercadoPagoConfig({ accessToken });
+
         const { items, baseUrl } = req.body;
         const origin = baseUrl || 'https://flip-f.vercel.app';
 
         console.error('--- Debug Create Preference (STDERR) ---');
-        const token = client.accessToken;
-        console.error('Token (masked):', token ? `${token.substring(0, 10)}...${token.substring(token.length - 5)}` : 'MISSING');
+        console.error('Token (masked):', `${accessToken.substring(0, 10)}...${accessToken.substring(accessToken.length - 5)}`);
 
         if (!items || !Array.isArray(items)) {
             return res.status(400).json({ error: 'Items are required' });
         }
+
+        const externalReference = generateUUID();
 
         const body = {
             items: items.map((item: any) => ({
@@ -46,12 +61,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 unit_price: Number(item.price),
                 currency_id: 'ARS',
             })),
+            external_reference: externalReference,
             back_urls: {
-                success: `${origin}/mis-cursos`,
+                success: `${origin}/payment-success`,
                 failure: `${origin}/checkout`,
                 pending: `${origin}/checkout`,
             },
-            // auto_return: 'approved',
+            // auto_return disabled temporarily to resolve localhost/origin validation issues.
+            // Polling mechanism handles the success state.
+            // ...(!origin.includes('localhost') && !origin.includes('127.0.0.1')
+            //     ? { auto_return: 'approved' }
+            //     : {}
+            // ),
         };
 
         console.error('Preference Body:', JSON.stringify(body, null, 2));
@@ -60,14 +81,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const result = await preference.create({ body });
 
         console.error('Preference Created ID:', result.id);
-        return res.status(200).json({ id: result.id });
+        return res.status(200).json({
+            id: result.id,
+            init_point: result.init_point,
+            external_reference: externalReference
+        });
     } catch (error: any) {
         console.error('Error creating preference:', error);
-        // Log detailed Mercado Pago error if available
-        if (error.cause) {
-            console.error('Error cause:', JSON.stringify(error.cause, null, 2));
-        }
-        return res.status(500).json({ error: 'Internal Server Error' });
+        const errorMsg = error.message || 'Unknown error';
+        const errorCause = error.cause ? JSON.stringify(error.cause) : undefined;
+
+        return res.status(500).json({
+            error: 'Internal Server Error',
+            details: errorMsg,
+            cause: errorCause
+        });
     }
 }
 

@@ -35,6 +35,7 @@ const Privacy = lazy(() => import('./pages/Term&Priv/Privacy'));
 const Terms = lazy(() => import('./pages/Term&Priv/Terms'));
 const UpdatePassword = lazy(() => import('./pages/UpdatePassword'));
 const PagoAprobado = lazy(() => import('./pages/PagoAprobado'));
+const PaymentSuccess = lazy(() => import('./pages/PaymentSuccess'));
 
 //const { data: todos } = await supabase.from('todos').select()
 
@@ -86,7 +87,9 @@ const App: React.FC = () => {
 
                                     <Route path="/consultas" element={<Consulting onShowToast={showToast} />} />
                                     <Route path="/login" element={<Login onShowToast={showToast} />} />
+                                    <Route path="/login" element={<Login onShowToast={showToast} />} />
                                     <Route path="/register" element={<Register onShowToast={showToast} />} />
+                                    <Route path="/payment-success" element={<PaymentSuccess />} />
                                 </Routes>
                             </Suspense>
                         </main>

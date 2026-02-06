@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -30,8 +30,6 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     const [currentStep, setCurrentStep] = useState(1);
 
     // Estado del Formulario
-
-    // Estado del Formulario
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -40,35 +38,6 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
         address: '',
         zipCode: ''
     });
-
-    // Cargar datos persistidos (Step y Form) al montar
-    useEffect(() => {
-        try {
-            // Restaurar Step
-            const savedStep = sessionStorage.getItem('checkout_step');
-            if (savedStep) {
-                setCurrentStep(parseInt(savedStep, 10));
-            }
-
-            // Restaurar Form
-            const savedForm = sessionStorage.getItem('checkout_form');
-            if (savedForm) {
-                setFormData(JSON.parse(savedForm));
-            }
-        } catch (e) {
-            console.error("Error restoring session data", e);
-        }
-    }, []);
-
-    // Persistir Step al cambiar
-    useEffect(() => {
-        sessionStorage.setItem('checkout_step', currentStep.toString());
-    }, [currentStep]);
-
-    // Persistir Form al cambiar
-    useEffect(() => {
-        sessionStorage.setItem('checkout_form', JSON.stringify(formData));
-    }, [formData]);
 
     // Estado de Pago
     const [paymentMethod, setPaymentMethod] = useState<'transferencia' | 'mercadopago' | 'mobbex' | 'prueba' | null>(null);
@@ -79,8 +48,6 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     // Estados para Pago Externo (Polling)
     const [isWaitingPayment, setIsWaitingPayment] = useState(false);
     const [externalPaymentId, setExternalPaymentId] = useState<string | null>(null);
-    const [externalReference, setExternalReference] = useState<string | null>(null); // Nuevo polling robusto
-    const [initPoint, setInitPoint] = useState<string | null>(null); // URL para redirección PRO
 
     const directCourse = id ? COURSES.find(c => c.id === id) : null;
     const finalTotal = directCourse ? directCourse.price : totalAfterDiscount;
@@ -93,8 +60,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     const isEmpty = !directCourse && cart.length === 0;
 
     useEffect(() => {
-        // Obtenemos preferencia si no tenemos ID O si somos MP y no tenemos Init Point (para Wallet)
-        if (paymentMethod === 'mercadopago' && (!preferenceId || !initPoint)) {
+        if (paymentMethod === 'mercadopago' && !preferenceId) {
             setLoadingMP(true);
 
             const itemsToPurchase = directCourse
@@ -109,18 +75,9 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                     baseUrl: window.location.origin
                 })
             })
-                .then(async res => {
-                    const data = await res.json();
-                    if (!res.ok) {
-                        console.error('SERVER ERROR DETAILS:', data);
-                        throw new Error(data.details || data.error || 'Error creating preference');
-                    }
-                    return data;
-                })
+                .then(res => res.json())
                 .then(data => {
                     if (data.id) setPreferenceId(data.id);
-                    if (data.init_point) setInitPoint(data.init_point);
-                    if (data.external_reference) setExternalReference(data.external_reference);
                 })
                 .catch(err => {
                     console.error("Error creating preference", err);
@@ -154,51 +111,25 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
         }
     }, [isAuthenticated, user, navigate, loading]);
 
-    const handleManualSuccess = () => {
-        // Fallback manual por si falla el sync
-        const itemsToPurchase = directCourse
-            ? [{ id: directCourse.id, type: 'course' as const }]
-            : cart.map(item => ({ id: item.id, type: item.type }));
-
-        purchaseItems(itemsToPurchase).then(() => {
-            if (!directCourse) {
-                clearCart();
-                if (activeCoupon) removeCoupon();
-            }
-            setIsWaitingPayment(false);
-            sessionStorage.removeItem('pendingPaymentId');
-            sessionStorage.removeItem('isPaymentInProgress');
-            sessionStorage.removeItem('paymentTimestamp');
-
-            navigate('/pago_apro');
-            onShowToast('Pago confirmado manualmente.', 'success');
-        });
-    };
 
     // Restaurar estado de persistencia al montar
     useEffect(() => {
         const storedPaymentId = sessionStorage.getItem('pendingPaymentId');
-        const storedReference = sessionStorage.getItem('pendingReference');
         const storedIsWaiting = sessionStorage.getItem('isPaymentInProgress');
+        const storedTimestamp = sessionStorage.getItem('paymentTimestamp');
 
-        // Verificamos si hay un pago pendiente en curso
-        if ((storedPaymentId || storedReference) && storedIsWaiting === 'true') {
-            const storedTimestamp = sessionStorage.getItem('paymentTimestamp');
+        if (storedPaymentId && storedIsWaiting === 'true' && storedTimestamp) {
             const now = Date.now();
+            const timestamp = parseInt(storedTimestamp, 10);
             const oneHour = 60 * 60 * 1000;
 
-            // Validación de expiración (1 hora)
-            if (storedTimestamp && (now - parseInt(storedTimestamp, 10) < oneHour)) {
-                console.log("Restaurando sesión de pago:", storedPaymentId || storedReference);
-                if (storedPaymentId) setExternalPaymentId(storedPaymentId);
-                if (storedReference) setExternalReference(storedReference);
+            if (now - timestamp < oneHour) {
+                setExternalPaymentId(storedPaymentId);
                 setIsWaitingPayment(true);
                 onShowToast('Restaurando sesión de pago...', 'success');
             } else {
-                // Limpiar si expiró o no tiene timestamp
-                console.log("Sesión de pago expirada o inválida, limpiando...");
+                // Limpiar si es muy viejo
                 sessionStorage.removeItem('pendingPaymentId');
-                sessionStorage.removeItem('pendingReference');
                 sessionStorage.removeItem('isPaymentInProgress');
                 sessionStorage.removeItem('paymentTimestamp');
             }
@@ -206,98 +137,67 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     }, [onShowToast]);
 
     // Polling optimizado con Visibility API
-    const isProcessingRef = useRef(false);
-
     useEffect(() => {
         let interval: NodeJS.Timeout;
 
         const checkStatus = async () => {
-            if ((!externalPaymentId && !externalReference) || isProcessingRef.current) return;
+            if (!externalPaymentId) return;
 
             try {
-                // Consulta inmediata al endpoint (soporta ID o Referencia)
-                let query = externalPaymentId
-                    ? `payment_id=${externalPaymentId}`
-                    : `external_reference=${externalReference}`;
-
-                const res = await fetch(`/api/check-payment-status?${query}`);
+                const res = await fetch(`/api/check-payment-status?payment_id=${externalPaymentId}`);
                 const data = await res.json();
 
                 console.log("Polling payment status:", data.status);
 
-                // Si encontramos un ID gracias a la referencia, lo guardamos para optimizar futuras consultas
-                if (data.id && !externalPaymentId) {
-                    setExternalPaymentId(data.id);
-                    sessionStorage.setItem('pendingPaymentId', data.id);
-                }
-
-                if (data.status === 'approved' || data.status === 'accredited') {
-                    // Detener procesamiento inmediato
-                    isProcessingRef.current = true;
-                    clearInterval(interval);
-                    setIsWaitingPayment(false);
-
-                    // Limpiar persistencia (Autolimpieza éxito)
+                if (data.status === 'approved') {
+                    // Limpiar persistencia
                     sessionStorage.removeItem('pendingPaymentId');
-                    sessionStorage.removeItem('pendingReference');
                     sessionStorage.removeItem('isPaymentInProgress');
                     sessionStorage.removeItem('paymentTimestamp');
 
-                    // Compra exitosa logic...
+                    clearInterval(interval);
+                    setIsWaitingPayment(false);
+
+                    // Compra exitosa
                     const itemsToPurchase = directCourse
                         ? [{ id: directCourse.id, type: 'course' as const }]
                         : cart.map(item => ({ id: item.id, type: item.type }));
 
-                    // Intentar guardar la compra, pero NO bloquear la redirección si falla
-                    // (La prioridad es mostrar el éxito al usuario que ya pagó)
-                    try {
-                        await purchaseItems(itemsToPurchase);
+                    await purchaseItems(itemsToPurchase);
 
-                        if (!directCourse) {
-                            clearCart();
-                            if (activeCoupon) removeCoupon();
-                        }
-                    } catch (err) {
-                        console.error("Warning: Failed to update profile after successful payment", err);
-                        // Idealmente aquí se enviaría a una cola de reintentos
+                    if (!directCourse) {
+                        clearCart();
+                        if (activeCoupon) removeCoupon();
                     }
 
                     navigate('/pago_apro');
                     onShowToast('¡Pago exitoso!', 'success');
-
                 } else if (data.status === 'rejected') {
-                    // Detener procesamiento inmediato
-                    isProcessingRef.current = true;
-                    clearInterval(interval);
-                    setIsWaitingPayment(false);
-
-                    // Limpiar persistencia (Autolimpieza rechazo)
+                    // Limpiar persistencia
                     sessionStorage.removeItem('pendingPaymentId');
-                    sessionStorage.removeItem('pendingReference');
                     sessionStorage.removeItem('isPaymentInProgress');
                     sessionStorage.removeItem('paymentTimestamp');
 
+                    clearInterval(interval);
+                    setIsWaitingPayment(false);
                     onShowToast('El pago fue rechazado. Intenta nuevamente.', 'error');
-                    // Resetear flag por si quiere reintentar
-                    setTimeout(() => { isProcessingRef.current = false; }, 1000);
                 }
-                // Si sigue pending/in_process, el intervalo continuará
             } catch (error) {
                 console.error("Error polling payment status:", error);
             }
         };
 
-        if (isWaitingPayment && (externalPaymentId || externalReference)) {
-            // 1. Check inmediato al montar/activar estado
+        if (isWaitingPayment && externalPaymentId) {
+            // Check inmediato al activar
             checkStatus();
 
-            // 2. Intervalo regular de 3 segundos
+            // Intervalo regular
             interval = setInterval(checkStatus, 3000);
 
-            // 3. Listener de Visibility: Chequeo inmediato al volver a la pestaña
+            // Listener de visibilidad para check inmediato al volver
             const handleVisibilityChange = () => {
                 if (document.visibilityState === 'visible') {
-                    console.log("Tab visible (regreso del usuario), forzando check inmediato...");
+                    console.log("Tab visible, checking status immediately...");
                     checkStatus();
                 }
             };
@@ -309,43 +209,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 document.removeEventListener("visibilitychange", handleVisibilityChange);
             };
         }
-    }, [isWaitingPayment, externalPaymentId, externalReference, directCourse, cart, navigate, purchaseItems, clearCart, activeCoupon, onShowToast]);
-
-    // Listener para sincronización de Pestañas (Wallet Redirect Success)
-    useEffect(() => {
-        const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === 'mp_payment_success' && e.newValue) {
-                console.log("¡Pago exitoso detectado en otra pestaña!");
-
-                // Limpiar flag
-                localStorage.removeItem('mp_payment_success');
-
-                // Ejecutar lógica de éxito
-                const itemsToPurchase = directCourse
-                    ? [{ id: directCourse.id, type: 'course' as const }]
-                    : cart.map(item => ({ id: item.id, type: item.type }));
-
-                purchaseItems(itemsToPurchase).then(() => {
-                    if (!directCourse) {
-                        clearCart();
-                        if (activeCoupon) removeCoupon();
-                    }
-                    // Limpiar sesión de pago pendiente
-                    setIsWaitingPayment(false);
-                    sessionStorage.removeItem('pendingPaymentId');
-                    sessionStorage.removeItem('pendingReference');
-                    sessionStorage.removeItem('isPaymentInProgress');
-                    sessionStorage.removeItem('paymentTimestamp');
-
-                    navigate('/pago_apro');
-                    onShowToast('¡Pago exitoso confirmado!', 'success');
-                });
-            }
-        };
-
-        window.addEventListener('storage', handleStorageChange);
-        return () => window.removeEventListener('storage', handleStorageChange);
-    }, [directCourse, cart, purchaseItems, clearCart, activeCoupon, navigate, onShowToast]);
+    }, [isWaitingPayment, externalPaymentId, directCourse, cart, navigate, purchaseItems, clearCart, activeCoupon, onShowToast]);
 
     // Handlers
     // Ref para el contenedor del brick
@@ -353,12 +217,9 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
 
     // Inicializar Brick con Vanilla JS SDK
     useEffect(() => {
-        // Solo inicializar si estamos en el paso 3 (Pago) y el método es Mercado Pago
-        if (currentStep === 3 && paymentMethod === 'mercadopago' && preferenceId && brickContainerRef.current) {
-
-            // Si ya existe controller, no hacemos nada a menos necesitemos update (que no soportamos aun aqui)
+        if (paymentMethod === 'mercadopago' && preferenceId && brickContainerRef.current) {
+            // Limpiar controller previo si existe
             if (window.paymentBrickController) {
-                // Opcional: Podríamos hacer un update si el monto cambió, pero por ahora desmontamos para asegurar consistencia
                 window.paymentBrickController.unmount();
                 window.paymentBrickController = null;
             }
@@ -402,13 +263,6 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                             setLoadingMP(false);
                             console.log("Brick ready");
                         },
-                        onSubmit: async () => {
-                            // Si el usuario clickea algo NATIVO (que no debería estar), lo atrapamos
-                            console.warn("NATIVE BRICK SUBMIT DETECTED - Recapturing flow...");
-                            if (window.paymentBrickController) {
-                                processMercadoPagoPayment();
-                            }
-                        },
                         onError: (error: any) => {
                             console.error("Brick Error:", error);
                             setLoadingMP(false);
@@ -428,89 +282,45 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
             renderBrick();
         }
 
-        // Cleanup al desmontar o cambiar condiciones críticas
         return () => {
-            // Solo desmontamos si salimos del paso 3 o cambiamos de metodo
-            if ((currentStep !== 3 || paymentMethod !== 'mercadopago') && window.paymentBrickController) {
+            if (window.paymentBrickController) {
                 window.paymentBrickController.unmount();
                 window.paymentBrickController = null;
             }
         };
-    }, [currentStep, paymentMethod, preferenceId, finalTotal]); // Eliminamos formData de dependencias directas para evitar re-render al escribir
-
-
+    }, [paymentMethod, preferenceId, finalTotal, formData, brickContainerRef]);
 
     const processMercadoPagoPayment = async () => {
-        console.log(">>> INICIANDO PROCESO DE PAGO (Botón clickeado) <<<");
-
-        if (!window.paymentBrickController) {
-            console.error("!!! ERROR CRÍTICO: Controlador del Brick no encontrado. !!!");
-            onShowToast("Error interno del componente de pago. Por favor recarga la página.", "error");
-            return;
-        }
+        if (!window.paymentBrickController) return;
 
         try {
             onShowToast('Procesando pago...', 'success');
 
             // 1. Obtener datos del formulario del Brick (Esto valida los campos)
-            console.log("STEP 1: Calling getFormData()...");
             const result = await window.paymentBrickController.getFormData()
                 .catch((error: any) => {
-                    console.error("STEP 1 ERROR: getFormData failed", error);
+                    // Capturamos error de validación del Brick (ej: campos vacíos)
+                    console.warn("Brick Validation Error:", error);
                     return null;
                 });
-            console.log("STEP 1 DONE: Result received", result);
 
             // Si falla la validación o no hay datos, cortamos aquí
-            // EXCEPCION: Wallet (account_money) devuelve null en formData.
-            // Estrategia: Redirigir a init_point (Checkout Pro simplificado)
-            if ((!result || !result.formData) && result?.paymentType !== 'wallet_purchase') {
-                console.error("STEP 1 ABORT: No formData returned and not wallet_purchase");
+            if (!result || !result.formData) {
                 onShowToast('Por favor revisá los datos del formulario.', 'error');
                 return;
             }
 
-            // CASO WALLET / REDIRECT
-            if (result?.paymentType === 'wallet_purchase') {
-                console.log("STEP 1 INFO: Wallet purchase detected. Redirecting to Init Point...");
-
-                if (initPoint) {
-                    console.log("Opening Init Point:", initPoint);
-
-                    // Guardar referencia para polling
-                    if (externalReference) {
-                        sessionStorage.setItem('pendingReference', externalReference);
-                        sessionStorage.setItem('isPaymentInProgress', 'true');
-                        sessionStorage.setItem('paymentTimestamp', Date.now().toString());
-                    }
-
-                    window.open(initPoint, 'mp_popup', 'width=1000,height=700,scrollbars=yes,resizable=yes');
-                    setIsWaitingPayment(true);
-                    onShowToast('Continuá el pago en la ventana emergente', 'success');
-                    return; // Terminamos aquí, esperamos el sync por localStorage o polling
-                } else {
-                    console.error("CRITICAL: Init Point not available for Wallet purchase");
-                    onShowToast("Error al iniciar la redirección de pago.", "error");
-                    return;
-                }
-            }
-
-            // CASO CORE (Tarjetas, etc)
-            let payload = result.formData;
-            // Removed manual payload construction for wallet as we use redirect now.
-
-            console.log("STEP 2: Preparing fetch with payload:", payload);
+            const { formData } = result;
+            console.log("Pago Brick Data:", formData);
 
             // 2. Enviar a nuestro backend
             const response = await fetch("/api/process-payment", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
+                body: JSON.stringify(formData),
             });
-            console.log("STEP 2 DONE: Fetch status:", response.status);
 
             const paymentResult = await response.json();
-            console.log("STEP 3: Checkpoint - Payment Result:", paymentResult);
 
             if (paymentResult.error) {
                 console.error("Payment Error:", paymentResult);
@@ -534,23 +344,16 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                     if (activeCoupon) removeCoupon();
                 }
 
-                // Limpiar persistencia por si acaso
-                sessionStorage.removeItem('pendingPaymentId');
-                sessionStorage.removeItem('isPaymentInProgress');
-                sessionStorage.removeItem('paymentTimestamp');
-
                 navigate('/pago_apro');
                 onShowToast('¡Pago exitoso!', 'success');
 
-            } else if (paymentResult.status === 'in_process' || paymentResult.status === 'pending' || paymentResult.status === 'created') {
+            } else if (paymentResult.status === 'in_process' || paymentResult.status === 'pending') {
                 // Pago Pendiente / Externo (Wallet, Rapipago, etc.)
-                console.log("Pago en proceso/pendiente:", paymentResult);
 
                 // Si es Wallet o similar, MP devuelve point_of_interaction.
                 if (paymentResult.point_of_interaction?.type === 'redirect') {
                     // Abrir link en nueva pestaña si viene data
                     if (paymentResult.point_of_interaction.transaction_data?.ticket_url) {
-                        console.log("Abriendo ticket_url:", paymentResult.point_of_interaction.transaction_data.ticket_url);
                         window.open(paymentResult.point_of_interaction.transaction_data.ticket_url, '_blank');
                     }
                 }
@@ -560,15 +363,13 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 setExternalPaymentId(paymentIdStr);
                 setIsWaitingPayment(true);
 
-                // Guardar en SessionStorage INMEDIATAMENTE
+                // Guardar en SessionStorage
                 sessionStorage.setItem('pendingPaymentId', paymentIdStr);
                 sessionStorage.setItem('isPaymentInProgress', 'true');
                 sessionStorage.setItem('paymentTimestamp', Date.now().toString());
-                console.log("Pago iniciado, estado guardado en sessionStorage:", paymentIdStr);
 
             } else {
-                console.error("Estado de pago desconocido:", paymentResult);
-                onShowToast('Estado del pago: ' + paymentResult.status, 'error');
+                onShowToast('Pago ' + paymentResult.status, 'error');
             }
 
         } catch (error) {
@@ -1119,20 +920,17 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                             Por favor completá el pago en la ventana emergente.
                             Detectaremos automáticamente cuando finalices.
                         </p>
-                        <div className="flex flex-col gap-3">
-                            <button
-                                onClick={() => {
-                                    setIsWaitingPayment(false);
-                                    sessionStorage.removeItem('pendingPaymentId');
-                                    sessionStorage.removeItem('pendingReference');
-                                    sessionStorage.removeItem('isPaymentInProgress');
-                                    sessionStorage.removeItem('paymentTimestamp');
-                                }}
-                                className="text-sm text-gray-500 hover:text-white underline"
-                            >
-                                Cancelar y volver
-                            </button>
-                        </div>
+                        <button
+                            onClick={() => {
+                                setIsWaitingPayment(false);
+                                sessionStorage.removeItem('pendingPaymentId');
+                                sessionStorage.removeItem('isPaymentInProgress');
+                                sessionStorage.removeItem('paymentTimestamp');
+                            }}
+                            className="text-sm text-gray-500 hover:text-white underline"
+                        >
+                            Cancelar y volver
+                        </button>
                     </div>
                 </div>
             )}

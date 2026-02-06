@@ -25,14 +25,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-        const { payment_id } = req.query;
+        const { payment_id, external_reference } = req.query;
 
-        if (!payment_id) {
-            return res.status(400).json({ error: 'Falta payment_id' });
+        if (!payment_id && !external_reference) {
+            return res.status(400).json({ error: 'Falta payment_id o external_reference' });
         }
 
-        // Consultar estado en Mercado Pago
-        const paymentStatus = await payment.get({ id: payment_id as string });
+        let paymentStatus;
+
+        if (payment_id) {
+            // Consultar por ID directo
+            paymentStatus = await payment.get({ id: payment_id as string });
+        } else if (external_reference) {
+            // Buscar por referencia externa
+            const searchResult = await payment.search({
+                options: {
+                    external_reference: external_reference as string,
+                    limit: 1,
+                    sort: 'date_created',
+                    criteria: 'desc'
+                }
+            });
+
+            if (searchResult.results && searchResult.results.length > 0) {
+                paymentStatus = searchResult.results[0];
+            } else {
+                return res.status(200).json({ status: 'pending_search', message: 'No payments found yet' });
+            }
+        }
 
         return res.status(200).json({
             id: paymentStatus.id,
