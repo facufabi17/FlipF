@@ -42,7 +42,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const client = new MercadoPagoConfig({ accessToken });
 
         const { items, baseUrl } = req.body;
-        const origin = baseUrl || 'https://flip-f.vercel.app';
+        const origin = baseUrl || 'https://flip-f.vercel.app/#';
 
         console.error('--- Debug Create Preference (STDERR) ---');
         console.error('Token (masked):', `${accessToken.substring(0, 10)}...${accessToken.substring(accessToken.length - 5)}`);
