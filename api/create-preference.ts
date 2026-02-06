@@ -67,12 +67,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 failure: `${origin}/checkout`,
                 pending: `${origin}/checkout`,
             },
-            // auto_return disabled temporarily to resolve localhost/origin validation issues.
-            // Polling mechanism handles the success state.
-            // ...(!origin.includes('localhost') && !origin.includes('127.0.0.1')
-            //     ? { auto_return: 'approved' }
-            //     : {}
-            // ),
+            ...(!origin.includes('localhost') && !origin.includes('127.0.0.1')
+                ? { auto_return: 'approved' }
+                : {}
+            ),
+            binary_mode: true,
         };
 
         console.error('Preference Body:', JSON.stringify(body, null, 2));

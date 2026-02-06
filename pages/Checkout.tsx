@@ -5,6 +5,12 @@ import { useCart } from '../context/CartContext';
 import { COURSES } from '../data/courses';
 import { initMercadoPago } from '@mercadopago/sdk-react';
 
+// Components
+import CheckoutSteps from '../components/checkout/CheckoutSteps';
+import CartSummary from '../components/checkout/CartSummary';
+import BillingForm from '../components/checkout/BillingForm';
+import PaymentMethods from '../components/checkout/PaymentMethods';
+
 // Inicializar Mercado Pago
 initMercadoPago(import.meta.env.VITE_MP_PUBLIC_KEY, {
     locale: 'es-AR'
@@ -24,12 +30,10 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { isAuthenticated, user, updateProfile, purchaseItems, loading } = useAuth();
-    const { cart, total, removeFromCart, clearCart, getCheckoutItems, activeCoupon, applyCoupon, removeCoupon, discount, totalAfterDiscount } = useCart();
+    const { cart, total, removeFromCart, clearCart, activeCoupon, applyCoupon, removeCoupon, discount, totalAfterDiscount } = useCart();
 
     // Estado del Stepper
     const [currentStep, setCurrentStep] = useState(1);
-
-    // Estado del Formulario
 
     // Estado del Formulario
     const [formData, setFormData] = useState({
@@ -72,20 +76,19 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
 
     // Estado de Pago
     const [paymentMethod, setPaymentMethod] = useState<'transferencia' | 'mercadopago' | 'mobbex' | 'prueba' | null>(null);
-    const [couponInput, setCouponInput] = useState('');
     const [preferenceId, setPreferenceId] = useState<string | null>(null);
     const [loadingMP, setLoadingMP] = useState(false);
 
     // Estados para Pago Externo (Polling)
     const [isWaitingPayment, setIsWaitingPayment] = useState(false);
     const [externalPaymentId, setExternalPaymentId] = useState<string | null>(null);
-    const [externalReference, setExternalReference] = useState<string | null>(null); // Nuevo polling robusto
-    const [initPoint, setInitPoint] = useState<string | null>(null); // URL para redirección PRO
+    const [externalReference, setExternalReference] = useState<string | null>(null);
+    const [initPoint, setInitPoint] = useState<string | null>(null);
 
     const directCourse = id ? COURSES.find(c => c.id === id) : null;
     const finalTotal = directCourse ? directCourse.price : totalAfterDiscount;
     const itemsToShow = directCourse
-        ? [{ ...directCourse, type: 'course', quantity: 1 }] // Mock item wrapper
+        ? [{ ...directCourse, type: 'course', quantity: 1 }]
         : cart;
 
     const courses = itemsToShow.filter(i => i.type === 'course');
@@ -154,40 +157,17 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
         }
     }, [isAuthenticated, user, navigate, loading]);
 
-    const handleManualSuccess = () => {
-        // Fallback manual por si falla el sync
-        const itemsToPurchase = directCourse
-            ? [{ id: directCourse.id, type: 'course' as const }]
-            : cart.map(item => ({ id: item.id, type: item.type }));
-
-        purchaseItems(itemsToPurchase).then(() => {
-            if (!directCourse) {
-                clearCart();
-                if (activeCoupon) removeCoupon();
-            }
-            setIsWaitingPayment(false);
-            sessionStorage.removeItem('pendingPaymentId');
-            sessionStorage.removeItem('isPaymentInProgress');
-            sessionStorage.removeItem('paymentTimestamp');
-
-            navigate('/pago_apro');
-            onShowToast('Pago confirmado manualmente.', 'success');
-        });
-    };
-
     // Restaurar estado de persistencia al montar
     useEffect(() => {
         const storedPaymentId = sessionStorage.getItem('pendingPaymentId');
         const storedReference = sessionStorage.getItem('pendingReference');
         const storedIsWaiting = sessionStorage.getItem('isPaymentInProgress');
 
-        // Verificamos si hay un pago pendiente en curso
         if ((storedPaymentId || storedReference) && storedIsWaiting === 'true') {
             const storedTimestamp = sessionStorage.getItem('paymentTimestamp');
             const now = Date.now();
             const oneHour = 60 * 60 * 1000;
 
-            // Validación de expiración (1 hora)
             if (storedTimestamp && (now - parseInt(storedTimestamp, 10) < oneHour)) {
                 console.log("Restaurando sesión de pago:", storedPaymentId || storedReference);
                 if (storedPaymentId) setExternalPaymentId(storedPaymentId);
@@ -195,7 +175,6 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 setIsWaitingPayment(true);
                 onShowToast('Restaurando sesión de pago...', 'success');
             } else {
-                // Limpiar si expiró o no tiene timestamp
                 console.log("Sesión de pago expirada o inválida, limpiando...");
                 sessionStorage.removeItem('pendingPaymentId');
                 sessionStorage.removeItem('pendingReference');
@@ -212,10 +191,11 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
         let interval: NodeJS.Timeout;
 
         const checkStatus = async () => {
+            // Control de Seguridad: Si ya no estamos esperando, cortar.
+            if (!isWaitingPayment && !isProcessingRef.current) return;
             if ((!externalPaymentId && !externalReference) || isProcessingRef.current) return;
 
             try {
-                // Consulta inmediata al endpoint (soporta ID o Referencia)
                 let query = externalPaymentId
                     ? `payment_id=${externalPaymentId}`
                     : `external_reference=${externalReference}`;
@@ -225,31 +205,28 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
 
                 console.log("Polling payment status:", data.status);
 
-                // Si encontramos un ID gracias a la referencia, lo guardamos para optimizar futuras consultas
                 if (data.id && !externalPaymentId) {
                     setExternalPaymentId(data.id);
                     sessionStorage.setItem('pendingPaymentId', data.id);
                 }
 
                 if (data.status === 'approved' || data.status === 'accredited') {
-                    // Detener procesamiento inmediato
+                    // 1. Detener intervalo e impedir re-entradas inmediatamente
                     isProcessingRef.current = true;
                     clearInterval(interval);
                     setIsWaitingPayment(false);
 
-                    // Limpiar persistencia (Autolimpieza éxito)
+                    // 2. Limpiar persistencia inmediatamente
                     sessionStorage.removeItem('pendingPaymentId');
                     sessionStorage.removeItem('pendingReference');
                     sessionStorage.removeItem('isPaymentInProgress');
                     sessionStorage.removeItem('paymentTimestamp');
 
-                    // Compra exitosa logic...
+                    // 3. Actualizar DB (Profile)
                     const itemsToPurchase = directCourse
                         ? [{ id: directCourse.id, type: 'course' as const }]
                         : cart.map(item => ({ id: item.id, type: item.type }));
 
-                    // Intentar guardar la compra, pero NO bloquear la redirección si falla
-                    // (La prioridad es mostrar el éxito al usuario que ya pagó)
                     try {
                         await purchaseItems(itemsToPurchase);
 
@@ -259,42 +236,34 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                         }
                     } catch (err) {
                         console.error("Warning: Failed to update profile after successful payment", err);
-                        // Idealmente aquí se enviaría a una cola de reintentos
                     }
 
-                    navigate('/pago_apro');
+                    // 4. Redirección Forzada
                     onShowToast('¡Pago exitoso!', 'success');
+                    navigate('/pago_apro', { replace: true });
 
                 } else if (data.status === 'rejected') {
-                    // Detener procesamiento inmediato
                     isProcessingRef.current = true;
                     clearInterval(interval);
                     setIsWaitingPayment(false);
 
-                    // Limpiar persistencia (Autolimpieza rechazo)
                     sessionStorage.removeItem('pendingPaymentId');
                     sessionStorage.removeItem('pendingReference');
                     sessionStorage.removeItem('isPaymentInProgress');
                     sessionStorage.removeItem('paymentTimestamp');
 
                     onShowToast('El pago fue rechazado. Intenta nuevamente.', 'error');
-                    // Resetear flag por si quiere reintentar
                     setTimeout(() => { isProcessingRef.current = false; }, 1000);
                 }
-                // Si sigue pending/in_process, el intervalo continuará
             } catch (error) {
                 console.error("Error polling payment status:", error);
             }
         };
 
         if (isWaitingPayment && (externalPaymentId || externalReference)) {
-            // 1. Check inmediato al montar/activar estado
             checkStatus();
+            interval = setInterval(checkStatus, 3000); // Polling cada 3s para evitar saturación
 
-            // 2. Intervalo regular de 3 segundos
-            interval = setInterval(checkStatus, 3000);
-
-            // 3. Listener de Visibility: Chequeo inmediato al volver a la pestaña
             const handleVisibilityChange = () => {
                 if (document.visibilityState === 'visible') {
                     console.log("Tab visible (regreso del usuario), forzando check inmediato...");
@@ -311,16 +280,36 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
         }
     }, [isWaitingPayment, externalPaymentId, externalReference, directCourse, cart, navigate, purchaseItems, clearCart, activeCoupon, onShowToast]);
 
+    // Listener para sincronización de Pestañas (Wallet Redirect Success API)
+    useEffect(() => {
+        // Si Mercado Pago redirige exitosamente a ?status=approved, capturémoslo aquí.
+        const urlParams = new URLSearchParams(window.location.search);
+        const status = urlParams.get('status');
+
+        if (status === 'approved') {
+            onShowToast('Pago detectado en URL', 'success');
+            const itemsToPurchase = directCourse
+                ? [{ id: directCourse.id, type: 'course' as const }]
+                : cart.map(item => ({ id: item.id, type: item.type }));
+
+            purchaseItems(itemsToPurchase).then(() => {
+                if (!directCourse) {
+                    clearCart();
+                    if (activeCoupon) removeCoupon();
+                }
+                navigate('/pago_apro');
+            });
+        }
+    }, [location.search]);
+
+
     // Listener para sincronización de Pestañas (Wallet Redirect Success)
     useEffect(() => {
         const handleStorageChange = (e: StorageEvent) => {
             if (e.key === 'mp_payment_success' && e.newValue) {
                 console.log("¡Pago exitoso detectado en otra pestaña!");
-
-                // Limpiar flag
                 localStorage.removeItem('mp_payment_success');
 
-                // Ejecutar lógica de éxito
                 const itemsToPurchase = directCourse
                     ? [{ id: directCourse.id, type: 'course' as const }]
                     : cart.map(item => ({ id: item.id, type: item.type }));
@@ -330,7 +319,6 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                         clearCart();
                         if (activeCoupon) removeCoupon();
                     }
-                    // Limpiar sesión de pago pendiente
                     setIsWaitingPayment(false);
                     sessionStorage.removeItem('pendingPaymentId');
                     sessionStorage.removeItem('pendingReference');
@@ -348,17 +336,13 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     }, [directCourse, cart, purchaseItems, clearCart, activeCoupon, navigate, onShowToast]);
 
     // Handlers
-    // Ref para el contenedor del brick
-    const brickContainerRef = React.useRef<HTMLDivElement>(null);
+    const brickContainerRef = useRef<HTMLDivElement>(null);
 
     // Inicializar Brick con Vanilla JS SDK
     useEffect(() => {
-        // Solo inicializar si estamos en el paso 3 (Pago) y el método es Mercado Pago
         if (currentStep === 3 && paymentMethod === 'mercadopago' && preferenceId && brickContainerRef.current) {
 
-            // Si ya existe controller, no hacemos nada a menos necesitemos update (que no soportamos aun aqui)
             if (window.paymentBrickController) {
-                // Opcional: Podríamos hacer un update si el monto cambió, pero por ahora desmontamos para asegurar consistencia
                 window.paymentBrickController.unmount();
                 window.paymentBrickController = null;
             }
@@ -388,7 +372,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                             bankTransfer: "all",
                             creditCard: "all",
                             debitCard: "all",
-                            mercadoPago: "all",
+                            mercadoPago: "all", // Wallet
                         },
                         visual: {
                             style: {
@@ -403,7 +387,6 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                             console.log("Brick ready");
                         },
                         onSubmit: async () => {
-                            // Si el usuario clickea algo NATIVO (que no debería estar), lo atrapamos
                             console.warn("NATIVE BRICK SUBMIT DETECTED - Recapturing flow...");
                             if (window.paymentBrickController) {
                                 processMercadoPagoPayment();
@@ -428,101 +411,66 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
             renderBrick();
         }
 
-        // Cleanup al desmontar o cambiar condiciones críticas
         return () => {
-            // Solo desmontamos si salimos del paso 3 o cambiamos de metodo
             if ((currentStep !== 3 || paymentMethod !== 'mercadopago') && window.paymentBrickController) {
                 window.paymentBrickController.unmount();
                 window.paymentBrickController = null;
             }
         };
-    }, [currentStep, paymentMethod, preferenceId, finalTotal]); // Eliminamos formData de dependencias directas para evitar re-render al escribir
-
+    }, [currentStep, paymentMethod, preferenceId, finalTotal]);
 
 
     const processMercadoPagoPayment = async () => {
-        console.log(">>> INICIANDO PROCESO DE PAGO (Botón clickeado) <<<");
+        console.log(">>> INICIANDO PROCESO DE PAGO con Brick Controller <<<");
 
         if (!window.paymentBrickController) {
-            console.error("!!! ERROR CRÍTICO: Controlador del Brick no encontrado. !!!");
-            onShowToast("Error interno del componente de pago. Por favor recarga la página.", "error");
+            console.error("Brick Controller not found");
+            onShowToast("Error interno del componente de pago. Recarga la página.", "error");
             return;
         }
 
         try {
             onShowToast('Procesando pago...', 'success');
+            const result = await window.paymentBrickController.getFormData().catch((e: any) => null);
 
-            // 1. Obtener datos del formulario del Brick (Esto valida los campos)
-            console.log("STEP 1: Calling getFormData()...");
-            const result = await window.paymentBrickController.getFormData()
-                .catch((error: any) => {
-                    console.error("STEP 1 ERROR: getFormData failed", error);
-                    return null;
-                });
-            console.log("STEP 1 DONE: Result received", result);
-
-            // Si falla la validación o no hay datos, cortamos aquí
-            // EXCEPCION: Wallet (account_money) devuelve null en formData.
-            // Estrategia: Redirigir a init_point (Checkout Pro simplificado)
             if ((!result || !result.formData) && result?.paymentType !== 'wallet_purchase') {
-                console.error("STEP 1 ABORT: No formData returned and not wallet_purchase");
                 onShowToast('Por favor revisá los datos del formulario.', 'error');
                 return;
             }
 
             // CASO WALLET / REDIRECT
             if (result?.paymentType === 'wallet_purchase') {
-                console.log("STEP 1 INFO: Wallet purchase detected. Redirecting to Init Point...");
-
                 if (initPoint) {
-                    console.log("Opening Init Point:", initPoint);
-
-                    // Guardar referencia para polling
                     if (externalReference) {
                         sessionStorage.setItem('pendingReference', externalReference);
                         sessionStorage.setItem('isPaymentInProgress', 'true');
                         sessionStorage.setItem('paymentTimestamp', Date.now().toString());
                     }
-
                     window.open(initPoint, 'mp_popup', 'width=1000,height=700,scrollbars=yes,resizable=yes');
                     setIsWaitingPayment(true);
                     onShowToast('Continuá el pago en la ventana emergente', 'success');
-                    return; // Terminamos aquí, esperamos el sync por localStorage o polling
+                    return;
                 } else {
-                    console.error("CRITICAL: Init Point not available for Wallet purchase");
                     onShowToast("Error al iniciar la redirección de pago.", "error");
                     return;
                 }
             }
 
-            // CASO CORE (Tarjetas, etc)
-            let payload = result.formData;
-            // Removed manual payload construction for wallet as we use redirect now.
-
-            console.log("STEP 2: Preparing fetch with payload:", payload);
-
-            // 2. Enviar a nuestro backend
+            // CASO CORE (Tarjetas)
             const response = await fetch("/api/process-payment", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
+                body: JSON.stringify(result.formData),
             });
-            console.log("STEP 2 DONE: Fetch status:", response.status);
 
             const paymentResult = await response.json();
-            console.log("STEP 3: Checkpoint - Payment Result:", paymentResult);
 
             if (paymentResult.error) {
-                console.error("Payment Error:", paymentResult);
                 onShowToast('Error al procesar el pago: ' + (paymentResult.details?.message || paymentResult.error), 'error');
                 return;
             }
 
-            console.log("Payment Success Result:", paymentResult);
-
-            // 3. Manejar Resultado
             if (paymentResult.status === 'approved') {
-                // Pago Aprobado Inmediato (Tarjeta exitosa o Dinero en cuenta inmediato)
                 const itemsToPurchase = directCourse
                     ? [{ id: directCourse.id, type: 'course' as const }]
                     : cart.map(item => ({ id: item.id, type: item.type }));
@@ -534,7 +482,6 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                     if (activeCoupon) removeCoupon();
                 }
 
-                // Limpiar persistencia por si acaso
                 sessionStorage.removeItem('pendingPaymentId');
                 sessionStorage.removeItem('isPaymentInProgress');
                 sessionStorage.removeItem('paymentTimestamp');
@@ -542,32 +489,19 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 navigate('/pago_apro');
                 onShowToast('¡Pago exitoso!', 'success');
 
-            } else if (paymentResult.status === 'in_process' || paymentResult.status === 'pending' || paymentResult.status === 'created') {
-                // Pago Pendiente / Externo (Wallet, Rapipago, etc.)
-                console.log("Pago en proceso/pendiente:", paymentResult);
-
-                // Si es Wallet o similar, MP devuelve point_of_interaction.
-                if (paymentResult.point_of_interaction?.type === 'redirect') {
-                    // Abrir link en nueva pestaña si viene data
-                    if (paymentResult.point_of_interaction.transaction_data?.ticket_url) {
-                        console.log("Abriendo ticket_url:", paymentResult.point_of_interaction.transaction_data.ticket_url);
-                        window.open(paymentResult.point_of_interaction.transaction_data.ticket_url, '_blank');
-                    }
+            } else if (['in_process', 'pending', 'created'].includes(paymentResult.status)) {
+                if (paymentResult.point_of_interaction?.type === 'redirect' && paymentResult.point_of_interaction.transaction_data?.ticket_url) {
+                    window.open(paymentResult.point_of_interaction.transaction_data.ticket_url, '_blank');
                 }
 
-                // Activar Polling y Overlay con Persistencia
                 const paymentIdStr = paymentResult.id.toString();
                 setExternalPaymentId(paymentIdStr);
                 setIsWaitingPayment(true);
-
-                // Guardar en SessionStorage INMEDIATAMENTE
                 sessionStorage.setItem('pendingPaymentId', paymentIdStr);
                 sessionStorage.setItem('isPaymentInProgress', 'true');
                 sessionStorage.setItem('paymentTimestamp', Date.now().toString());
-                console.log("Pago iniciado, estado guardado en sessionStorage:", paymentIdStr);
 
             } else {
-                console.error("Estado de pago desconocido:", paymentResult);
                 onShowToast('Estado del pago: ' + paymentResult.status, 'error');
             }
 
@@ -579,73 +513,24 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
 
     const handleNext = async () => {
         if (currentStep === 1) {
-            // Validar carrito no vacÃ­o
             if (isEmpty) {
-                onShowToast('El carrito estÃ¡ vacÃ­o', 'error');
+                onShowToast('El carrito está vacío', 'error');
                 return;
             }
             setCurrentStep(2);
         } else if (currentStep === 2) {
-            // Validar campos obligatorios
             if (!formData.firstName || !formData.lastName || !formData.email || !formData.dni || !formData.address || !formData.zipCode) {
                 onShowToast('Por favor completa todos los campos obligatorios', 'error');
                 return;
             }
-            // Si el DNI es nuevo (no estaba en user.dni), se guardarÃ¡ al finalizar o aquÃ­ mismo?
-            // El requerimiento dice: "DNI debe ser solo lectura si ya existe".
-            // PodrÃ­amos intentar guardarlo ahora si es nuevo para asegurar persistencia antes del pago.
             if (user && !user.dni && formData.dni) {
                 try {
                     await updateProfile({ dni: formData.dni });
                 } catch (e) {
                     console.error("Error guardando DNI", e);
-                    // No bloqueamos, pero avisamos? O seguimos.
                 }
             }
             setCurrentStep(3);
-        } else if (currentStep === 3) {
-            if (!paymentMethod) {
-                onShowToast('Selecciona un mÃ©todo de pago', 'error');
-                return;
-            }
-
-            if (paymentMethod === 'prueba') {
-                try {
-                    // 1. Preparar items para la compra
-                    const itemsToPurchase = directCourse
-                        ? [{ id: directCourse.id, type: 'course' as const }]
-                        : cart.map(item => ({ id: item.id, type: item.type }));
-
-                    // 2. Procesar compra con AuthContext (Actualiza Supabase)
-                    await purchaseItems(itemsToPurchase);
-
-                    // 3. Limpiar carrito si no es compra directa
-                    if (!directCourse) {
-                        clearCart();
-                        // Remover cupÃ³n
-                        if (activeCoupon) removeCoupon();
-                    }
-
-                    onShowToast('Â¡Compra realizada con Ã©xito!', 'success');
-
-                    // 4. Redirigir segÃºn el tipo de compra
-                    setTimeout(() => {
-                        navigate('/mis-cursos');
-                    }, 2000);
-
-                } catch (error) {
-                    console.error("Error al procesar la compra", error);
-                    onShowToast('Hubo un error al procesar tu compra. Intenta de nuevo.', 'error');
-                }
-                return;
-            }
-
-            // Mock de finalizaciÃ³n
-            console.log("Procesando pago con:", paymentMethod);
-            onShowToast('Redirigiendo a plataforma de pago...', 'success');
-            // AquÃ­ irÃ­a la redirecciÃ³n real. Por ahora simulamos.
-
-            // Si quisieramos "reservar" o algo, lo harÃ­amos acÃ¡.
         }
     };
 
@@ -672,8 +557,8 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 <div className="w-24 h-24 bg-surface-dark rounded-full flex items-center justify-center mb-6 border border-white/5">
                     <span className="material-symbols-outlined text-4xl text-gray-500">shopping_cart_off</span>
                 </div>
-                <h2 className="text-3xl font-bold text-white mb-3">Tu carrito estÃ¡ vacÃ­o</h2>
-                <p className="text-gray-400 mb-8 max-w-md">Parece que aÃºn no has agregado ningÃºn curso o recurso. Explora nuestro contenido para potenciar tu carrera.</p>
+                <h2 className="text-3xl font-bold text-white mb-3">Tu carrito está vacío</h2>
+                <p className="text-gray-400 mb-8 max-w-md">Parece que aún no has agregado ningún curso o recurso.</p>
                 <div className="flex flex-col sm:flex-row gap-4">
                     <button
                         onClick={() => navigate('/academia')}
@@ -694,38 +579,21 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
         );
     }
 
+    // Main Render
     return (
         <div className="animate-fade-in min-h-screen pb-24 md:pb-0 relative text-white">
             <div className="max-w-6xl mx-auto p-6 lg:p-12">
 
-                {/* Stepper Header */}
-                <div className="flex justify-around items-center mb-12 relative">
-                    {STEPS.map((step) => {
-                        const isActive = step.number === currentStep;
-                        const isCompleted = step.number < currentStep;
-                        return (
-                            <div key={step.number} className="flex flex-col items-center gap-2 bg-background px-4">
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition-all duration-300
-                                    ${isActive ? 'bg-primary text-black shadow-[0_0_20px_rgba(34,211,238,0.4)] scale-110' :
-                                        isCompleted ? 'bg-primary/20 text-primary border border-primary' : 'bg-surface text-gray-500 border border-white/10'}`}>
-                                    {isCompleted ? <span className="material-symbols-outlined text-sm font-bold">check</span> : step.number}
-                                </div>
-                                <span className={`text-sm font-medium ${isActive ? 'text-primary' : isCompleted ? 'text-white' : 'text-gray-500'}`}>
-                                    {step.label}
-                                </span>
-                            </div>
-                        );
-                    })}
-                </div>
+                {/* Stepper */}
+                <CheckoutSteps currentStep={currentStep} steps={STEPS} />
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                    {/* Columna Principal - Contenido DinÃ¡mico */}
+                    {/* Columna Principal */}
                     <div className="lg:col-span-2 space-y-6">
 
-                        {/* PASO 1: CARRITO */}
                         {currentStep === 1 && (
                             <div className="animate-fade-in space-y-8">
-                                {/* SecciÃ³n Cursos */}
+                                {/* Cursos */}
                                 {(directCourse || courses.length > 0) && (
                                     <div className="bg-surface-dark border border-white/5 rounded-2xl p-6">
                                         <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
@@ -741,10 +609,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                                         <p className="text-primary font-bold text-lg">${item.price.toLocaleString()}</p>
                                                     </div>
                                                     {!directCourse && (
-                                                        <button
-                                                            onClick={() => removeFromCart(item.id)}
-                                                            className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-500 transition-all"
-                                                        >
+                                                        <button onClick={() => removeFromCart(item.id)} className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-500 transition-all">
                                                             <span className="material-symbols-outlined text-lg">close</span>
                                                         </button>
                                                     )}
@@ -754,7 +619,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                     </div>
                                 )}
 
-                                {/* SecciÃ³n Recursos */}
+                                {/* Recursos */}
                                 {!directCourse && resources.length > 0 && (
                                     <div className="bg-surface-dark border border-white/5 rounded-2xl p-6">
                                         <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
@@ -769,10 +634,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                                         <h4 className="font-bold text-white text-lg">{item.title}</h4>
                                                         <p className="text-primary font-bold text-lg">${item.price.toLocaleString()}</p>
                                                     </div>
-                                                    <button
-                                                        onClick={() => removeFromCart(item.id)}
-                                                        className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-500 transition-all"
-                                                    >
+                                                    <button onClick={() => removeFromCart(item.id)} className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-500 transition-all">
                                                         <span className="material-symbols-outlined text-lg">close</span>
                                                     </button>
                                                 </div>
@@ -783,304 +645,50 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                             </div>
                         )}
 
-                        {/* PASO 2: INFORMACIÃ“N */}
                         {currentStep === 2 && (
-                            <div className="animate-fade-in bg-surface-dark border border-white/5 rounded-2xl p-8">
-                                <h3 className="text-2xl font-bold text-white mb-6">Datos de FacturaciÃ³n</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-sm text-gray-400">Nombre</label>
-                                        <input
-                                            type="text"
-                                            value={formData.firstName}
-                                            readOnly={!!user?.firstName} // Read-only if from DB
-                                            onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                                            className={`w-full bg-black/20 border rounded-lg p-3 text-white 
-                                                ${user?.firstName ? 'border-white/10 text-gray-400 cursor-not-allowed' : 'border-white/10 focus:border-primary'}`}
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm text-gray-400">Apellido</label>
-                                        <input
-                                            type="text"
-                                            value={formData.lastName}
-                                            readOnly={!!user?.lastName}
-                                            onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                                            className={`w-full bg-black/20 border rounded-lg p-3 text-white 
-                                                ${user?.lastName ? 'border-white/10 text-gray-400 cursor-not-allowed' : 'border-white/10 focus:border-primary'}`}
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm text-gray-400">Email</label>
-                                        <input
-                                            type="email"
-                                            value={formData.email}
-                                            readOnly
-                                            className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-gray-400 cursor-not-allowed"
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2 md:col-span-2">
-                                        <label className="text-sm text-gray-400">DNI / Documento (Requerido para el certificado)</label>
-                                        <div className="relative">
-                                            <input
-                                                type="text"
-                                                value={formData.dni}
-                                                onChange={(e) => setFormData({ ...formData, dni: e.target.value })}
-                                                readOnly={!!user?.dni} // Bloqueado si ya existÃ­a en el usuario original
-                                                placeholder="Ingresa tu DNI"
-                                                className={`w-full bg-black/20 border rounded-lg p-3 text-white transition-colors
-                                                    ${user?.dni ? 'border-white/10 text-gray-400 cursor-not-allowed' : 'border-primary/50 focus:border-primary'}`}
-                                            />
-                                            {user?.dni && (
-                                                <span className="absolute right-3 top-3 text-xs text-gray-500 flex items-center gap-1">
-                                                    <span className="material-symbols-outlined text-sm">lock</span>
-                                                    Verificado
-                                                </span>
-                                            )}
-                                        </div>
-                                        {!user?.dni && <p className="text-xs text-primary/80">* Este dato se vincularÃ¡ a tu cuenta y no podrÃ¡ modificarse posteriormente.</p>}
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-sm text-gray-400">DirecciÃ³n</label>
-                                        <input
-                                            type="text"
-                                            value={formData.address}
-                                            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                                            placeholder="Calle y altura"
-                                            className="w-full bg-black/20 border border-white/10 focus:border-primary rounded-lg p-3 text-white"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm text-gray-400">CÃ³digo Postal</label>
-                                        <input
-                                            type="text"
-                                            value={formData.zipCode}
-                                            onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
-                                            placeholder="CP"
-                                            className="w-full bg-black/20 border border-white/10 focus:border-primary rounded-lg p-3 text-white"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
+                            <BillingForm formData={formData} setFormData={setFormData} user={user} />
                         )}
 
-                        {/* PASO 3: PAGO */}
                         {currentStep === 3 && (
-                            <div className="animate-fade-in space-y-6">
-                                <h3 className="text-2xl font-bold text-white mb-4">SeleccionÃ¡ tu mÃ©todo de pago</h3>
-
-                                <div className="grid grid-cols-1 gap-4">
-                                    {/* OpciÃ³n Transferencia */}
-                                    <button
-                                        onClick={() => setPaymentMethod('transferencia')}
-                                        className={`group relative p-6 rounded-2xl border transition-all duration-300 text-left flex items-center gap-6 overflow-hidden
-                                            ${paymentMethod === 'transferencia' ? 'bg-surface-dark border-primary shadow-[0_0_30px_rgba(34,211,238,0.1)]' : 'bg-surface-dark border-white/10 hover:border-white/30'}`}
-                                    >
-                                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors
-                                            ${paymentMethod === 'transferencia' ? 'border-primary' : 'border-gray-500'}`}>
-                                            {paymentMethod === 'transferencia' && <div className="w-3 h-3 rounded-full bg-primary"></div>}
-                                        </div>
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-3 mb-1">
-                                                <h4 className="font-bold text-white text-lg">Transferencia Bancaria</h4>
-                                                <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs font-bold rounded">10% OFF</span>
-                                            </div>
-                                            <p className="text-gray-400 text-sm">TransferÃ­ directamente a nuestra cuenta bancaria.</p>
-                                        </div>
-                                        <span className="material-symbols-outlined text-4xl text-gray-600 group-hover:text-white transition-colors">account_balance</span>
-                                    </button>
-
-                                    {/* OpciÃ³n Mercado Pago */}
-                                    <button
-                                        onClick={() => setPaymentMethod('mercadopago')}
-                                        className={`group relative p-6 rounded-2xl border transition-all duration-300 text-left flex items-center gap-6
-                                            ${paymentMethod === 'mercadopago' ? 'bg-surface-dark border-primary shadow-[0_0_30px_rgba(34,211,238,0.1)]' : 'bg-surface-dark border-white/10 hover:border-white/30'}`}
-                                    >
-                                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors
-                                            ${paymentMethod === 'mercadopago' ? 'border-primary' : 'border-gray-500'}`}>
-                                            {paymentMethod === 'mercadopago' && <div className="w-3 h-3 rounded-full bg-primary"></div>}
-                                        </div>
-                                        <div className="flex-1">
-                                            <h4 className="font-bold text-white text-lg mb-1">Mercado Pago</h4>
-                                            <p className="text-gray-400 text-sm">Dinero en cuenta, tarjetas de débito y crédito.</p>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-blue-400 font-bold text-xl">mercado</span>
-                                            <span className="text-white font-bold text-xl">pago</span>
-                                        </div>
-                                    </button>
-
-                                    {/* Renderizado Condicional del Brick de Mercado Pago */}
-                                    {paymentMethod === 'mercadopago' && (
-                                        <div className="mt-4 animate-fade-in bg-white p-4 rounded-xl">
-                                            {loadingMP && (
-                                                <div className="flex justify-center p-8">
-                                                    <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                                                </div>
-                                            )}
-                                            {/* Container para el brick vanilla */}
-                                            <div id="paymentBrick_container" ref={brickContainerRef}></div>
-                                        </div>
-                                    )}
-
-
-
-                                    {/* Botón de Acción Principal Desktop */}
-                                    <button
-                                        onClick={() => {
-                                            if (currentStep === 3 && paymentMethod === 'mercadopago') {
-                                                processMercadoPagoPayment();
-                                            } else {
-                                                handleNext();
-                                            }
-                                        }}
-                                        className="w-full hidden lg:block py-4 bg-primary hover:bg-primary-dark text-black font-bold rounded-xl transition-all transform hover:scale-[1.02] shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)]"
-                                    >
-                                        {currentStep < 3 ? (
-                                            <span className="flex items-center justify-center gap-2">
-                                                Continuar <span className="material-symbols-outlined">arrow_forward</span>
-                                            </span>
-                                        ) : (
-                                            'Finalizar Pedido'
-                                        )}
-                                    </button>
-
-                                    <div className="mt-4 flex justify-center lg:justify-start">
-                                        <button
-                                            onClick={handleBack}
-                                            className="text-sm text-gray-500 hover:text-white flex items-center gap-1 transition-colors"
-                                        >
-                                            <span className="material-symbols-outlined text-sm">arrow_back</span>
-                                            Volver al paso anterior
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 flex gap-3 text-primary/80 text-xs">
-                                    <span className="material-symbols-outlined text-lg">shield</span>
-                                    <div>
-                                        <p className="font-bold mb-1">Garantía de Satisfacción</p>
-                                        <p>Tenés 7 días para probar el contenido. Si no es lo que esperabas, te devolvemos tu dinero.</p>
-                                    </div>
-                                </div>
-
-                            </div>
+                            <PaymentMethods
+                                paymentMethod={paymentMethod}
+                                setPaymentMethod={setPaymentMethod}
+                                loadingMP={loadingMP}
+                                onMainAction={() => {
+                                    if (paymentMethod === 'mercadopago') {
+                                        processMercadoPagoPayment();
+                                    } else {
+                                        // Handle Transfer logic here or just next
+                                        handleNext();
+                                    }
+                                }}
+                                currentStep={3}
+                                handleBack={handleBack}
+                                ref={brickContainerRef}
+                            />
                         )}
                     </div>
 
                     {/* Columna Lateral - Resumen */}
                     <div className="lg:col-span-1">
-                        <div className="bg-surface-dark border border-white/5 rounded-2xl p-6 sticky top-8">
-                            <h3 className="text-xl font-bold text-white mb-6">Resumen de Compra</h3>
-
-                            <div className="space-y-4 mb-6">
-                                {directCourse ? (
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-400">1 x {directCourse.title}</span>
-                                        <span className="text-white font-bold">${directCourse.price.toLocaleString()}</span>
-                                    </div>
-                                ) : (
-                                    cart.map(item => (
-                                        <div key={item.id} className="flex justify-between items-center text-sm">
-                                            <span className="text-gray-400">1 x {item.title}</span>
-                                            <span className="text-white font-bold">${item.price.toLocaleString()}</span>
-                                        </div>
-                                    ))
-                                )}
-
-                                <div className="border-t border-white/10 my-4"></div>
-
-                                <div className="flex justify-between items-center text-gray-400">
-                                    <span>Subtotal</span>
-                                    <span>${finalTotal.toLocaleString()}</span>
-                                </div>
-
-                                {paymentMethod === 'transferencia' && (
-                                    <div className="flex justify-between items-center text-green-400">
-                                        <span>Descuento Transferencia (10%)</span>
-                                        <span>-${(finalTotal * 0.1).toLocaleString()}</span>
-                                    </div>
-                                )}
-
-                                <div className="flex justify-between items-center text-xl font-bold text-white pt-4 border-t border-white/10">
-                                    <span>Total</span>
-                                    <div className="text-right">
-                                        <span className="text-primary block">
-                                            ${paymentMethod === 'transferencia'
-                                                ? (finalTotal * 0.9).toLocaleString()
-                                                : finalTotal.toLocaleString()}
-                                        </span>
-                                        {paymentMethod === 'transferencia' && (
-                                            <span className="text-xs text-gray-500 font-normal block line-through">
-                                                ${finalTotal.toLocaleString()}
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Cupón */}
-                            {!directCourse && (
-                                <div className="mb-6 space-y-2">
-                                    {activeCoupon ? (
-                                        <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 flex justify-between items-center">
-                                            <span className="text-green-400 text-sm font-bold flex items-center gap-2">
-                                                <span className="material-symbols-outlined text-sm">local_offer</span>
-                                                Cupón activado
-                                            </span>
-                                            <button onClick={removeCoupon} className="text-gray-500 hover:text-white">
-                                                <span className="material-symbols-outlined text-sm">close</span>
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div className="flex gap-2">
-                                            <input
-                                                type="text"
-                                                placeholder="Código de cupón"
-                                                value={couponInput}
-                                                onChange={(e) => setCouponInput(e.target.value)}
-                                                className="bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-primary flex-1"
-                                            />
-                                            <button
-                                                onClick={() => applyCoupon(couponInput)}
-                                                className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white text-sm font-bold transition-all"
-                                            >
-                                                <span className="material-symbols-outlined text-sm">check</span>
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* Botón de Acción Principal Desktop (Movido aquí para que esté en el sidebar) */}
-                            <button
-                                onClick={() => {
-                                    if (currentStep === 3 && paymentMethod === 'mercadopago') {
-                                        processMercadoPagoPayment();
-                                    } else {
-                                        handleNext();
-                                    }
-                                }}
-                                className={`w-full py-4 font-bold rounded-xl transition-all transform hover:scale-[1.02] shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] mb-4
-                                    ${paymentMethod === 'mercadopago' && currentStep === 3
-                                        ? 'bg-blue-500 hover:bg-blue-600 text-white'
-                                        : 'bg-primary hover:bg-primary-dark text-black'}`}
-                            >
-                                {currentStep < 3 ? (
-                                    <span className="flex items-center justify-center gap-2">
-                                        Continuar <span className="material-symbols-outlined">arrow_forward</span>
-                                    </span>
-                                ) : (
-                                    paymentMethod === 'mercadopago' ? 'Pagar con Mercado Pago' : 'Finalizar Pedido'
-                                )}
-                            </button>
-
-                            <p className="text-xs text-gray-500 text-center">
-                                Al completar la compra, aceptas nuestros términos y condiciones.
-                            </p>
-                        </div>
+                        <CartSummary
+                            cart={cart}
+                            directCourse={directCourse}
+                            finalTotal={finalTotal}
+                            paymentMethod={paymentMethod}
+                            activeCoupon={activeCoupon}
+                            onApplyCoupon={applyCoupon}
+                            onRemoveCoupon={removeCoupon}
+                            currentStep={currentStep}
+                            onMainAction={() => {
+                                if (currentStep === 3 && paymentMethod === 'mercadopago') {
+                                    processMercadoPagoPayment();
+                                } else {
+                                    handleNext();
+                                }
+                            }}
+                            loadingMP={loadingMP}
+                        />
                     </div>
 
                     {/* Sticky Bottom Bar Mobile */}
@@ -1095,14 +703,20 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                 </p>
                             </div>
                             <button
-                                onClick={handleNext}
+                                onClick={() => {
+                                    if (currentStep === 3 && paymentMethod === 'mercadopago') {
+                                        processMercadoPagoPayment();
+                                    } else {
+                                        handleNext();
+                                    }
+                                }}
                                 className="px-6 py-3 bg-primary text-black font-bold rounded-xl shadow-[0_0_15px_rgba(34,211,238,0.3)]"
                             >
                                 {currentStep < 3 ? (
                                     <div className="flex items-center gap-2">
                                         Continuar <span className="material-symbols-outlined text-lg">arrow_forward</span>
                                     </div>
-                                ) : paymentMethod === 'mercadopago' ? 'Pagar arriba' : 'Finalizar'}
+                                ) : paymentMethod === 'mercadopago' ? 'Pagar (Arriba)' : 'Finalizar'}
                             </button>
                         </div>
                     </div>
