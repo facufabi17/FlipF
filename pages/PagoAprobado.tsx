@@ -1,9 +1,15 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const PagoAprobado = () => {
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const channel = new BroadcastChannel('payment_status');
+        channel.postMessage({ type: 'PAYMENT_SUCCESS' });
+        channel.close();
+    }, []);
 
     return (
         <div className="min-h-screen bg-black flex items-center justify-center p-4">

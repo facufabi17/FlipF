@@ -193,91 +193,105 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
 
     // Polling optimizado con Visibility API
     const isProcessingRef = useRef(false);
+    const attemptsRef = useRef(0);
+
+    const checkStatus = React.useCallback(async () => {
+        // Control de Seguridad
+        if (!isWaitingPayment || isProcessingRef.current) return;
+        if (!externalPaymentId && !externalReference) return;
+
+        // Límite de intentos (e.g. 20 intentos * 3 seg = 60 seg aprox)
+        if (attemptsRef.current >= 20) {
+            console.warn("Polling timeout alcanzado.");
+            setIsWaitingPayment(false);
+            sessionStorage.removeItem('pendingPaymentId');
+            sessionStorage.removeItem('pendingReference');
+            sessionStorage.removeItem('isPaymentInProgress');
+            sessionStorage.removeItem('paymentTimestamp');
+            onShowToast('Tiempo de espera agotado. Por favor verificá tu pago en Mercado Pago.', 'error');
+            return;
+        }
+
+        attemptsRef.current += 1;
+
+        try {
+            let query = externalPaymentId
+                ? `payment_id=${externalPaymentId}`
+                : `external_reference=${externalReference}`;
+
+            const res = await fetch(`/api/check-payment-status?${query}`);
+            const data = await res.json();
+
+            console.log(`Polling status (${attemptsRef.current}/20):`, data.status);
+
+            if (data.id && !externalPaymentId) {
+                setExternalPaymentId(data.id);
+                sessionStorage.setItem('pendingPaymentId', data.id);
+            }
+
+            if (data.status === 'approved' || data.status === 'accredited') {
+                isProcessingRef.current = true;
+                setIsWaitingPayment(false);
+
+                // Limpiar persistencia
+                sessionStorage.removeItem('pendingPaymentId');
+                sessionStorage.removeItem('pendingReference');
+                sessionStorage.removeItem('isPaymentInProgress');
+                sessionStorage.removeItem('paymentTimestamp');
+
+                // Actualizar DB
+                const itemsToPurchase = directCourse
+                    ? [{ id: directCourse.id, type: 'course' as const }]
+                    : cart.map(item => ({ id: item.id, type: item.type }));
+
+                await purchaseItems(itemsToPurchase);
+
+                if (!directCourse) {
+                    clearCart();
+                    if (activeCoupon) removeCoupon();
+                }
+
+                onShowToast('¡Pago exitoso!', 'success');
+                navigate('/pago_apro', { replace: true });
+
+            } else if (data.status === 'rejected') {
+                isProcessingRef.current = true;
+                setIsWaitingPayment(false);
+
+                sessionStorage.removeItem('pendingPaymentId');
+                sessionStorage.removeItem('pendingReference');
+                sessionStorage.removeItem('isPaymentInProgress');
+                sessionStorage.removeItem('paymentTimestamp');
+
+                onShowToast('El pago fue rechazado. Intenta nuevamente.', 'error');
+                setTimeout(() => { isProcessingRef.current = false; }, 1000);
+            }
+        } catch (error) {
+            console.error("Error polling payment status:", error);
+        }
+    }, [isWaitingPayment, externalPaymentId, externalReference, directCourse, cart, navigate, purchaseItems, clearCart, activeCoupon, onShowToast]);
 
     useEffect(() => {
         let interval: NodeJS.Timeout;
 
-        const checkStatus = async () => {
-            // Control de Seguridad: Si ya no estamos esperando, cortar.
-            if (!isWaitingPayment && !isProcessingRef.current) return;
-            if ((!externalPaymentId && !externalReference) || isProcessingRef.current) return;
-
-            try {
-                let query = externalPaymentId
-                    ? `payment_id=${externalPaymentId}`
-                    : `external_reference=${externalReference}`;
-
-                const res = await fetch(`/api/check-payment-status?${query}`);
-                const data = await res.json();
-
-                console.log("Polling payment status:", data.status);
-
-                if (data.id && !externalPaymentId) {
-                    setExternalPaymentId(data.id);
-                    sessionStorage.setItem('pendingPaymentId', data.id);
-                }
-
-                if (data.status === 'approved' || data.status === 'accredited') {
-                    // 1. Detener intervalo e impedir re-entradas inmediatamente
-                    isProcessingRef.current = true;
-                    clearInterval(interval);
-                    setIsWaitingPayment(false);
-
-                    // 2. Limpiar persistencia inmediatamente
-                    sessionStorage.removeItem('pendingPaymentId');
-                    sessionStorage.removeItem('pendingReference');
-                    sessionStorage.removeItem('isPaymentInProgress');
-                    sessionStorage.removeItem('paymentTimestamp');
-
-                    // 3. Actualizar DB (Profile)
-                    const itemsToPurchase = directCourse
-                        ? [{ id: directCourse.id, type: 'course' as const }]
-                        : cart.map(item => ({ id: item.id, type: item.type }));
-
-                    try {
-                        await purchaseItems(itemsToPurchase);
-
-                        if (!directCourse) {
-                            clearCart();
-                            if (activeCoupon) removeCoupon();
-                        }
-                    } catch (err) {
-                        console.error("Warning: Failed to update profile after successful payment", err);
-                    }
-
-                    // 4. Redirección Forzada
-                    onShowToast('¡Pago exitoso!', 'success');
-                    navigate('/pago_apro', { replace: true });
-
-                } else if (data.status === 'rejected') {
-                    isProcessingRef.current = true;
-                    clearInterval(interval);
-                    setIsWaitingPayment(false);
-
-                    sessionStorage.removeItem('pendingPaymentId');
-                    sessionStorage.removeItem('pendingReference');
-                    sessionStorage.removeItem('isPaymentInProgress');
-                    sessionStorage.removeItem('paymentTimestamp');
-
-                    onShowToast('El pago fue rechazado. Intenta nuevamente.', 'error');
-                    setTimeout(() => { isProcessingRef.current = false; }, 1000);
-                }
-            } catch (error) {
-                console.error("Error polling payment status:", error);
-            }
-        };
-
         if (isWaitingPayment && (externalPaymentId || externalReference)) {
-            checkStatus();
-            interval = setInterval(checkStatus, 3000); // Polling cada 3s para evitar saturación
+            // Reiniciar intentos al comenzar un nuevo ciclo de espera
+            if (attemptsRef.current === 0 || !interval) {
+                // Solo reiniciamos si es un flujo fresco, o podriamos manejarlo al setear isWaitingPayment
+            }
+            // NOTA: Para no reiniciar el contador en cada render/reconexión si es el mismo pago, 
+            // idealmente deberíamos resetearlo solo al iniciar el flujo de pago.
+            // Por simplicidad, asumimos que si se monta el componente y recupera sesión, sigue contando (o empieza de 0 si no persistimos el count).
+
+            checkStatus(); // Check inmediato
+            interval = setInterval(checkStatus, 5000);
 
             const handleVisibilityChange = () => {
                 if (document.visibilityState === 'visible') {
-                    console.log("Tab visible (regreso del usuario), forzando check inmediato...");
+                    console.log("Tab visible, check inmediato...");
                     checkStatus();
                 }
             };
-
             document.addEventListener("visibilitychange", handleVisibilityChange);
 
             return () => {
@@ -285,7 +299,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 document.removeEventListener("visibilitychange", handleVisibilityChange);
             };
         }
-    }, [isWaitingPayment, externalPaymentId, externalReference, directCourse, cart, navigate, purchaseItems, clearCart, activeCoupon, onShowToast]);
+    }, [isWaitingPayment, externalPaymentId, externalReference, checkStatus]);
 
     // Listener para sincronización de Pestañas (Wallet Redirect Success API)
     useEffect(() => {
@@ -310,36 +324,53 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     }, [location.search]);
 
 
-    // Listener para sincronización de Pestañas (Wallet Redirect Success)
+    // Listener para sincronización de Pestañas (BroadcastChannel + Storage)
     useEffect(() => {
+        const handleSuccess = () => {
+            const itemsToPurchase = directCourse
+                ? [{ id: directCourse.id, type: 'course' as const }]
+                : cart.map(item => ({ id: item.id, type: item.type }));
+
+            purchaseItems(itemsToPurchase).then(() => {
+                if (!directCourse) {
+                    clearCart();
+                    if (activeCoupon) removeCoupon();
+                }
+                setIsWaitingPayment(false);
+                sessionStorage.removeItem('pendingPaymentId');
+                sessionStorage.removeItem('pendingReference');
+                sessionStorage.removeItem('isPaymentInProgress');
+                sessionStorage.removeItem('paymentTimestamp');
+
+                navigate('/pago_apro');
+                onShowToast('¡Pago exitoso confirmado!', 'success');
+            });
+        };
+
+        // 1. BroadcastChannel (Para navegadores modernos y mismo origen)
+        const channel = new BroadcastChannel('payment_status');
+        channel.onmessage = (event) => {
+            if (event.data.type === 'PAYMENT_SUCCESS') {
+                console.log("¡Pago exitoso detectado vía BroadcastChannel!");
+                handleSuccess();
+            }
+        };
+
+        // 2. Storage Event (Fallback para compatibilidad)
         const handleStorageChange = (e: StorageEvent) => {
             if (e.key === 'mp_payment_success' && e.newValue) {
-                console.log("¡Pago exitoso detectado en otra pestaña!");
+                console.log("¡Pago exitoso detectado vía Storage!");
                 localStorage.removeItem('mp_payment_success');
-
-                const itemsToPurchase = directCourse
-                    ? [{ id: directCourse.id, type: 'course' as const }]
-                    : cart.map(item => ({ id: item.id, type: item.type }));
-
-                purchaseItems(itemsToPurchase).then(() => {
-                    if (!directCourse) {
-                        clearCart();
-                        if (activeCoupon) removeCoupon();
-                    }
-                    setIsWaitingPayment(false);
-                    sessionStorage.removeItem('pendingPaymentId');
-                    sessionStorage.removeItem('pendingReference');
-                    sessionStorage.removeItem('isPaymentInProgress');
-                    sessionStorage.removeItem('paymentTimestamp');
-
-                    navigate('/pago_apro');
-                    onShowToast('¡Pago exitoso confirmado!', 'success');
-                });
+                handleSuccess();
             }
         };
 
         window.addEventListener('storage', handleStorageChange);
-        return () => window.removeEventListener('storage', handleStorageChange);
+
+        return () => {
+            channel.close();
+            window.removeEventListener('storage', handleStorageChange);
+        };
     }, [directCourse, cart, purchaseItems, clearCart, activeCoupon, navigate, onShowToast]);
 
     // Handlers
@@ -456,6 +487,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                         sessionStorage.setItem('pendingReference', externalReference);
                         sessionStorage.setItem('isPaymentInProgress', 'true');
                         sessionStorage.setItem('paymentTimestamp', Date.now().toString());
+                        attemptsRef.current = 0; // Reset intentos
                     }
                     window.open(initPoint, 'mp_popup', 'width=1000,height=700,scrollbars=yes,resizable=yes');
                     setIsWaitingPayment(true);
@@ -511,6 +543,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 sessionStorage.setItem('pendingPaymentId', paymentIdStr);
                 sessionStorage.setItem('isPaymentInProgress', 'true');
                 sessionStorage.setItem('paymentTimestamp', Date.now().toString());
+                attemptsRef.current = 0; // Reset intentos
 
             } else {
                 onShowToast('Estado del pago: ' + paymentResult.status, 'error');
@@ -799,16 +832,10 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                         </p>
                         <div className="flex flex-col gap-3">
                             <button
-                                onClick={() => {
-                                    setIsWaitingPayment(false);
-                                    sessionStorage.removeItem('pendingPaymentId');
-                                    sessionStorage.removeItem('pendingReference');
-                                    sessionStorage.removeItem('isPaymentInProgress');
-                                    sessionStorage.removeItem('paymentTimestamp');
-                                }}
+                                onClick={() => setIsWaitingPayment(false)}
                                 className="text-sm text-gray-500 hover:text-white underline"
                             >
-                                Cancelar y volver
+                                Cancelar espera
                             </button>
                         </div>
                     </div>
