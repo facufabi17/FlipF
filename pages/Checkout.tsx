@@ -704,7 +704,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                         )}
 
                         {currentStep === 2 && (
-                            <BillingForm formData={formData} setFormData={setFormData} user={user} />
+                            <BillingForm formData={formData} setFormData={setFormData} user={user} onBack={handleBack} />
                         )}
 
                         {currentStep === 3 && (
