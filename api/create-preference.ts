@@ -72,6 +72,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 : {}
             ),
             binary_mode: true,
+            notification_url: process.env.WEBHOOK_URL || `${baseUrl}/api/webhook`
         };
 
         console.error('Preference Body:', JSON.stringify(body, null, 2));

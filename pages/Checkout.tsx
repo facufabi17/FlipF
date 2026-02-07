@@ -165,7 +165,11 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     }, [isAuthenticated, user, navigate, loading]);
 
     // Restaurar estado de persistencia al montar
+    const hasRestoredSession = useRef(false);
+
     useEffect(() => {
+        if (hasRestoredSession.current) return;
+
         const storedPaymentId = sessionStorage.getItem('pendingPaymentId');
         const storedReference = sessionStorage.getItem('pendingReference');
         const storedIsWaiting = sessionStorage.getItem('isPaymentInProgress');
@@ -180,7 +184,8 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 if (storedPaymentId) setExternalPaymentId(storedPaymentId);
                 if (storedReference) setExternalReference(storedReference);
                 setIsWaitingPayment(true);
-                onShowToast('Restaurando sesión de pago...', 'success');
+                hasRestoredSession.current = true;
+                // Evitamos llamar a onShowToast aquí para no causar re-renders infinitos si la función no es estable
             } else {
                 console.log("Sesión de pago expirada o inválida, limpiando...");
                 sessionStorage.removeItem('pendingPaymentId');
@@ -189,7 +194,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 sessionStorage.removeItem('paymentTimestamp');
             }
         }
-    }, [onShowToast]);
+    }, []); // Dependencias vacías para correr solo al montar
 
     // Polling optimizado con Visibility API
     const isProcessingRef = useRef(false);
@@ -321,7 +326,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 navigate('/pago_apro');
             });
         }
-    }, [location.search]);
+    }, [location.search, onShowToast, directCourse, cart, purchaseItems, clearCart, activeCoupon, navigate]);
 
 
     // Listener para sincronización de Pestañas (BroadcastChannel + Storage)
@@ -459,7 +464,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 window.paymentBrickController = null;
             }
         };
-    }, [currentStep, paymentMethod, preferenceId, finalTotal]);
+    }, [currentStep, paymentMethod, preferenceId, finalTotal, formData.firstName, formData.lastName, formData.email, formData.entityType, formData.cuil, formData.dni, onShowToast]);
 
 
     const processMercadoPagoPayment = async () => {
@@ -672,133 +677,129 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
 
     // Main Render
     return (
-        <div className="animate-fade-in min-h-screen pb-24 md:pb-0 relative text-white">
-            <div className="max-w-6xl mx-auto p-6 lg:p-12">
+        <>
+            {/* Overlay de Espera de Pago */}
+            {isWaitingPayment && (
+                <div className="fixed inset-0 bg-black/95 backdrop-blur-md z-[9999] flex flex-col items-center justify-center p-4 animate-fade-in" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh' }}>
+                    <div className="bg-surface-dark border border-white/10 p-8 rounded-2xl max-w-md w-full text-center shadow-[0_0_50px_rgba(34,211,238,0.3)] relative z-[10000]">
+                        <div className="w-20 h-20 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+                        <h3 className="text-2xl font-bold text-white mb-2">Confirmando pago...</h3>
+                        <p className="text-gray-400 mb-6">
+                            Completá el proceso en la ventana de Mercado Pago.<br />
+                            <span className="text-primary text-sm mt-2 block">No cierres esta pestaña.</span>
+                        </p>
 
-                {/* Stepper */}
-                <CheckoutSteps currentStep={currentStep} steps={STEPS} />
+                        <div className="flex items-start gap-3 text-sm text-left bg-blue-500/10 p-4 rounded-xl border border-blue-500/20 text-blue-200">
+                            <span className="material-symbols-outlined text-lg mt-0.5">info</span>
+                            <span>
+                                Una vez aprobado, te redirigiremos automáticamente.
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            )}
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                    {/* Columna Principal */}
-                    <div className="lg:col-span-2 space-y-6">
+            <div className="animate-fade-in min-h-screen pb-24 md:pb-0 relative text-white">
+                <div className="max-w-6xl mx-auto p-6 lg:p-12">
 
-                        {currentStep === 1 && (
-                            <div className="animate-fade-in space-y-8">
-                                {/* Cursos */}
-                                {(directCourse || courses.length > 0) && (
-                                    <div className="bg-surface-dark border border-white/5 rounded-2xl p-6">
-                                        <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                                            <span className="material-symbols-outlined text-primary">school</span>
-                                            Cursos
-                                        </h3>
-                                        <div className="space-y-4">
-                                            {courses.map((item) => (
-                                                <div key={item.id} className="flex gap-4 items-center bg-black/20 p-4 rounded-xl border border-white/5 relative group hover:border-primary/30 transition-colors">
-                                                    <img src={item.image} className="w-20 h-20 rounded-lg object-cover" alt="" />
-                                                    <div className="flex-1">
-                                                        <h4 className="font-bold text-white text-lg">{item.title}</h4>
-                                                        <p className="text-primary font-bold text-lg">${item.price.toLocaleString()}</p>
+                    {/* Stepper */}
+                    <CheckoutSteps currentStep={currentStep} steps={STEPS} />
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                        {/* Columna Principal */}
+                        <div className="lg:col-span-2 space-y-6">
+
+                            {currentStep === 1 && (
+                                <div className="animate-fade-in space-y-8">
+                                    {/* Cursos */}
+                                    {(directCourse || courses.length > 0) && (
+                                        <div className="bg-surface-dark border border-white/5 rounded-2xl p-6">
+                                            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                                                <span className="material-symbols-outlined text-primary">school</span>
+                                                Cursos
+                                            </h3>
+                                            <div className="space-y-4">
+                                                {courses.map((item) => (
+                                                    <div key={item.id} className="flex gap-4 items-center bg-black/20 p-4 rounded-xl border border-white/5 relative group hover:border-primary/30 transition-colors">
+                                                        <img src={item.image} className="w-20 h-20 rounded-lg object-cover" alt="" />
+                                                        <div className="flex-1">
+                                                            <h4 className="font-bold text-white text-lg">{item.title}</h4>
+                                                            <p className="text-primary font-bold text-lg">${item.price.toLocaleString()}</p>
+                                                        </div>
+                                                        {!directCourse && (
+                                                            <button onClick={() => removeFromCart(item.id)} className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-500 transition-all">
+                                                                <span className="material-symbols-outlined text-lg">close</span>
+                                                            </button>
+                                                        )}
                                                     </div>
-                                                    {!directCourse && (
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Recursos */}
+                                    {!directCourse && resources.length > 0 && (
+                                        <div className="bg-surface-dark border border-white/5 rounded-2xl p-6">
+                                            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                                                <span className="material-symbols-outlined text-purple-400">folder_open</span>
+                                                Recursos
+                                            </h3>
+                                            <div className="space-y-4">
+                                                {resources.map((item) => (
+                                                    <div key={item.id} className="flex gap-4 items-center bg-black/20 p-4 rounded-xl border border-white/5 relative group hover:border-purple-500/30 transition-colors">
+                                                        <img src={item.image} className="w-20 h-20 rounded-lg object-cover" alt="" />
+                                                        <div className="flex-1">
+                                                            <h4 className="font-bold text-white text-lg">{item.title}</h4>
+                                                            <p className="text-primary font-bold text-lg">${item.price.toLocaleString()}</p>
+                                                        </div>
                                                         <button onClick={() => removeFromCart(item.id)} className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-500 transition-all">
                                                             <span className="material-symbols-outlined text-lg">close</span>
                                                         </button>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Recursos */}
-                                {!directCourse && resources.length > 0 && (
-                                    <div className="bg-surface-dark border border-white/5 rounded-2xl p-6">
-                                        <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                                            <span className="material-symbols-outlined text-purple-400">folder_open</span>
-                                            Recursos
-                                        </h3>
-                                        <div className="space-y-4">
-                                            {resources.map((item) => (
-                                                <div key={item.id} className="flex gap-4 items-center bg-black/20 p-4 rounded-xl border border-white/5 relative group hover:border-purple-500/30 transition-colors">
-                                                    <img src={item.image} className="w-20 h-20 rounded-lg object-cover" alt="" />
-                                                    <div className="flex-1">
-                                                        <h4 className="font-bold text-white text-lg">{item.title}</h4>
-                                                        <p className="text-primary font-bold text-lg">${item.price.toLocaleString()}</p>
                                                     </div>
-                                                    <button onClick={() => removeFromCart(item.id)} className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-500 transition-all">
-                                                        <span className="material-symbols-outlined text-lg">close</span>
-                                                    </button>
-                                                </div>
-                                            ))}
+                                                ))}
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
+                                    )}
+                                </div>
+                            )}
 
-                        {currentStep === 2 && (
-                            <BillingForm formData={formData} setFormData={setFormData} user={user} onBack={handleBack} />
-                        )}
+                            {currentStep === 2 && (
+                                <BillingForm formData={formData} setFormData={setFormData} user={user} onBack={handleBack} />
+                            )}
 
-                        {currentStep === 3 && (
-                            <PaymentMethods
+                            {currentStep === 3 && (
+                                <PaymentMethods
+                                    paymentMethod={paymentMethod}
+                                    setPaymentMethod={setPaymentMethod}
+                                    loadingMP={loadingMP}
+                                    onMainAction={() => {
+                                        if (paymentMethod === 'mercadopago') {
+                                            processMercadoPagoPayment();
+                                        } else if (paymentMethod === 'transferencia') {
+                                            handleTransferOrder();
+                                        } else {
+                                            handleNext();
+                                        }
+                                    }}
+                                    currentStep={3}
+                                    handleBack={handleBack}
+                                    ref={brickContainerRef}
+                                />
+                            )}
+                        </div>
+
+                        {/* Columna Lateral - Resumen */}
+                        <div className="lg:col-span-1">
+                            <CartSummary
+                                cart={cart}
+                                directCourse={directCourse}
+                                finalTotal={finalTotal}
                                 paymentMethod={paymentMethod}
-                                setPaymentMethod={setPaymentMethod}
-                                loadingMP={loadingMP}
+                                activeCoupon={activeCoupon}
+                                onApplyCoupon={applyCoupon}
+                                onRemoveCoupon={removeCoupon}
+                                currentStep={currentStep}
                                 onMainAction={() => {
-                                    if (paymentMethod === 'mercadopago') {
-                                        processMercadoPagoPayment();
-                                    } else if (paymentMethod === 'transferencia') {
-                                        handleTransferOrder();
-                                    } else {
-                                        // Handle other logic here or just next
-                                        handleNext();
-                                    }
-                                }}
-                                currentStep={3}
-                                handleBack={handleBack}
-                                ref={brickContainerRef}
-                            />
-                        )}
-                    </div>
-
-                    {/* Columna Lateral - Resumen */}
-                    <div className="lg:col-span-1">
-                        <CartSummary
-                            cart={cart}
-                            directCourse={directCourse}
-                            finalTotal={finalTotal}
-                            paymentMethod={paymentMethod}
-                            activeCoupon={activeCoupon}
-                            onApplyCoupon={applyCoupon}
-                            onRemoveCoupon={removeCoupon}
-                            currentStep={currentStep}
-                            onMainAction={() => {
-                                if (currentStep === 3) {
-                                    if (paymentMethod === 'mercadopago') processMercadoPagoPayment();
-                                    else if (paymentMethod === 'transferencia') handleTransferOrder();
-                                    else handleNext();
-                                } else {
-                                    handleNext();
-                                }
-                            }}
-                            loadingMP={loadingMP}
-                        />
-                    </div>
-
-                    {/* Sticky Bottom Bar Mobile */}
-                    <div className="fixed bottom-0 left-0 w-full bg-surface-dark border-t border-white/10 p-4 lg:hidden z-50">
-                        <div className="flex items-center gap-4">
-                            <div className="flex-1">
-                                <p className="text-gray-400 text-xs uppercase">Total a pagar</p>
-                                <p className="text-xl font-bold text-primary">
-                                    ${paymentMethod === 'transferencia'
-                                        ? (finalTotal * 0.9).toLocaleString()
-                                        : finalTotal.toLocaleString()}
-                                </p>
-                            </div>
-                            <button
-                                onClick={() => {
                                     if (currentStep === 3) {
                                         if (paymentMethod === 'mercadopago') processMercadoPagoPayment();
                                         else if (paymentMethod === 'transferencia') handleTransferOrder();
@@ -807,41 +808,45 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                         handleNext();
                                     }
                                 }}
-                                className="px-6 py-3 bg-primary text-black font-bold rounded-xl shadow-[0_0_15px_rgba(34,211,238,0.3)]"
-                            >
-                                {currentStep < 3 ? (
-                                    <div className="flex items-center gap-2">
-                                        Continuar <span className="material-symbols-outlined text-lg">arrow_forward</span>
-                                    </div>
-                                ) : paymentMethod === 'mercadopago' ? 'Pagar (Arriba)' : 'Finalizar'}
-                            </button>
+                                loadingMP={loadingMP}
+                            />
+                        </div>
+
+                        {/* Sticky Bottom Bar Mobile */}
+                        <div className="fixed bottom-0 left-0 w-full bg-surface-dark border-t border-white/10 p-4 lg:hidden z-50">
+                            <div className="flex items-center gap-4">
+                                <div className="flex-1">
+                                    <p className="text-gray-400 text-xs uppercase">Total a pagar</p>
+                                    <p className="text-xl font-bold text-primary">
+                                        ${paymentMethod === 'transferencia'
+                                            ? (finalTotal * 0.9).toLocaleString()
+                                            : finalTotal.toLocaleString()}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        if (currentStep === 3) {
+                                            if (paymentMethod === 'mercadopago') processMercadoPagoPayment();
+                                            else if (paymentMethod === 'transferencia') handleTransferOrder();
+                                            else handleNext();
+                                        } else {
+                                            handleNext();
+                                        }
+                                    }}
+                                    className="px-6 py-3 bg-primary text-black font-bold rounded-xl shadow-[0_0_15px_rgba(34,211,238,0.3)]"
+                                >
+                                    {currentStep < 3 ? (
+                                        <div className="flex items-center gap-2">
+                                            Continuar <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                                        </div>
+                                    ) : paymentMethod === 'mercadopago' ? 'Pagar (Arriba)' : 'Finalizar'}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            {/* Overlay de Espera de Pago Externo */}
-            {isWaitingPayment && (
-                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center p-4">
-                    <div className="bg-surface-dark border border-primary/30 p-8 rounded-2xl max-w-md w-full text-center shadow-[0_0_50px_rgba(34,211,238,0.2)] animate-fade-in">
-                        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-                        <h3 className="text-2xl font-bold text-white mb-2">Esperando confirmación...</h3>
-                        <p className="text-gray-400 mb-6">
-                            Por favor completá el pago en la ventana emergente.
-                            Detectaremos automáticamente cuando finalices.
-                        </p>
-                        <div className="flex flex-col gap-3">
-                            <button
-                                onClick={() => setIsWaitingPayment(false)}
-                                className="text-sm text-gray-500 hover:text-white underline"
-                            >
-                                Cancelar espera
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
+        </>
     );
 };
 

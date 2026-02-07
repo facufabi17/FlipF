@@ -16,21 +16,25 @@ const startServer = async () => {
     const { default: createPreferenceHandler } = await import('./create-preference');
     const { default: processPaymentHandler } = await import('./process-payment');
     const { default: checkPaymentStatusHandler } = await import('./check-payment-status');
+    const { default: webhookHandler } = await import('./webhook');
 
     // Mount handlers
     app.all('/api/create-preference', (req, res) => createPreferenceHandler(req as any, res as any));
     app.all('/api/process-payment', (req, res) => processPaymentHandler(req as any, res as any));
     app.all('/api/check-payment-status', (req, res) => checkPaymentStatusHandler(req as any, res as any));
+    app.post('/api/webhook', (req, res) => webhookHandler(req as any, res as any));
 
     // Fallback for direct root access testing
     app.post('/create-preference', (req, res) => createPreferenceHandler(req as any, res as any));
     app.post('/process_payment', (req, res) => processPaymentHandler(req as any, res as any));
+    app.post('/webhook', (req, res) => webhookHandler(req as any, res as any));
 
     app.listen(port, () => {
         console.log(`> Local API Server running at http://localhost:${port}`);
         console.log(`  - /api/create-preference`);
         console.log(`  - /api/process-payment`);
         console.log(`  - /api/check-payment-status`);
+        console.log(`  - /api/webhook`);
     });
 };
 
