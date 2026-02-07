@@ -29,6 +29,8 @@ interface AuthContextType {
     purchaseItems: (items: { id: string, type: 'course' | 'resource' }[]) => Promise<void>;
     isAuthenticated: boolean;
     loading: boolean;
+    createOrder: (items: any[], total: number, paymentMethod: string, status?: 'pending' | 'approved', billingData?: any) => Promise<any>;
+    getOrders: () => Promise<any[]>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -395,7 +397,40 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return (
         <AuthContext.Provider value={{
             user, login, register, logout, enrollInCourse, addResourceToUser,
-            markModuleCompleted, updateProfile, purchaseItems, issueCertificate, isAuthenticated: !!user, loading
+            markModuleCompleted, updateProfile, purchaseItems, issueCertificate, isAuthenticated: !!user, loading,
+            createOrder: async (items: any[], total: number, paymentMethod: string, status: 'pending' | 'approved' = 'pending', billingData?: any) => {
+                if (!user) return null;
+                const { data, error } = await supabase
+                    .from('orders')
+                    .insert({
+                        user_id: user.id,
+                        items,
+                        total,
+                        payment_method: paymentMethod,
+                        status,
+                        ...(billingData || {})
+                    })
+                    .select()
+                    .single();
+                if (error) {
+                    console.error("Error creating order:", error);
+                    return null;
+                }
+                return data;
+            },
+            getOrders: async () => {
+                if (!user) return [];
+                const { data, error } = await supabase
+                    .from('orders')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .order('created_at', { ascending: false });
+                if (error) {
+                    console.error("Error fetching orders:", error);
+                    return [];
+                }
+                return data;
+            }
         }}>
             {children}
         </AuthContext.Provider>

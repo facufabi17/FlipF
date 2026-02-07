@@ -29,7 +29,7 @@ const STEPS = [
 const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { isAuthenticated, user, updateProfile, purchaseItems, loading } = useAuth();
+    const { isAuthenticated, user, updateProfile, purchaseItems, loading, createOrder } = useAuth();
     const { cart, total, removeFromCart, clearCart, activeCoupon, applyCoupon, removeCoupon, discount, totalAfterDiscount } = useCart();
 
     // Estado del Stepper
@@ -42,7 +42,13 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
         email: '',
         dni: '',
         address: '',
-        zipCode: ''
+        zipCode: '',
+        entityType: 'individual' as 'individual' | 'association',
+        country: '',
+        province: '',
+        city: '',
+        cuil: '',
+        businessName: ''
     });
 
     // Cargar datos persistidos (Step y Form) al montar
@@ -57,7 +63,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
             // Restaurar Form
             const savedForm = sessionStorage.getItem('checkout_form');
             if (savedForm) {
-                setFormData(JSON.parse(savedForm));
+                setFormData(prev => ({ ...prev, ...JSON.parse(savedForm) }));
             }
         } catch (e) {
             console.error("Error restoring session data", e);
@@ -75,9 +81,10 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     }, [formData]);
 
     // Estado de Pago
-    const [paymentMethod, setPaymentMethod] = useState<'transferencia' | 'mercadopago' | 'mobbex' | 'prueba' | null>(null);
+    const [paymentMethod, setPaymentMethod] = useState<'transferencia' | 'mercadopago' | null>(null);
     const [preferenceId, setPreferenceId] = useState<string | null>(null);
     const [loadingMP, setLoadingMP] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
 
     // Estados para Pago Externo (Polling)
     const [isWaitingPayment, setIsWaitingPayment] = useState(false);
@@ -364,12 +371,16 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                             firstName: formData.firstName,
                             lastName: formData.lastName,
                             email: formData.email,
+                            entityType: formData.entityType,
+                            identification: {
+                                type: formData.entityType === 'association' ? 'CUIT' : 'DNI',
+                                number: formData.entityType === 'association' ? formData.cuil : formData.dni
+                            }
                         },
                     },
                     customization: {
                         paymentMethods: {
                             ticket: "all",
-                            bankTransfer: "all",
                             creditCard: "all",
                             debitCard: "all",
                             mercadoPago: "all", // Wallet
@@ -511,6 +522,49 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
         }
     };
 
+    // --- Lógica de Transferencia ---
+    const handleTransferOrder = async () => {
+        if (!user) return;
+        setIsProcessing(true);
+
+        const itemsToPurchase = directCourse
+            ? [{ id: directCourse.id, title: directCourse.title, type: 'course' as const, price: directCourse.price }]
+            : cart.map(item => ({ id: item.id, title: item.title, type: item.type, price: item.price }));
+
+        // 1. Crear Orden "Pending" con datos extra
+        const order = await createOrder(
+            itemsToPurchase,
+            finalTotal,
+            'transferencia',
+            'pending',
+            {
+                entity_type: formData.entityType,
+                country: formData.country,
+                province: formData.province,
+                city: formData.city,
+                cuil: formData.cuil,
+                business_name: formData.businessName
+            }
+        );
+
+        if (order) {
+            // 2. Limpiar carrito si corresponde
+            if (!directCourse) {
+                clearCart();
+                if (activeCoupon) removeCoupon();
+            }
+
+            // 3. Notificar y Redirigir
+            onShowToast('Pedido registrado. Por favor envía tu comprobante.', 'success');
+            setTimeout(() => {
+                navigate('/historial-compras');
+            }, 1000);
+        } else {
+            onShowToast('Error al registrar el pedido.', 'error');
+            setIsProcessing(false);
+        }
+    };
+
     const handleNext = async () => {
         if (currentStep === 1) {
             if (isEmpty) {
@@ -519,8 +573,12 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
             }
             setCurrentStep(2);
         } else if (currentStep === 2) {
-            if (!formData.firstName || !formData.lastName || !formData.email || !formData.dni || !formData.address || !formData.zipCode) {
+            if (!formData.firstName || !formData.lastName || !formData.email || !formData.dni || !formData.address || !formData.zipCode || !formData.country || !formData.province || !formData.city) {
                 onShowToast('Por favor completa todos los campos obligatorios', 'error');
+                return;
+            }
+            if (formData.entityType === 'association' && !formData.cuil) {
+                onShowToast('El CUIL es obligatorio para Personas Jurídicas', 'error');
                 return;
             }
             if (user && !user.dni && formData.dni) {
@@ -657,8 +715,10 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                 onMainAction={() => {
                                     if (paymentMethod === 'mercadopago') {
                                         processMercadoPagoPayment();
+                                    } else if (paymentMethod === 'transferencia') {
+                                        handleTransferOrder();
                                     } else {
-                                        // Handle Transfer logic here or just next
+                                        // Handle other logic here or just next
                                         handleNext();
                                     }
                                 }}
@@ -681,8 +741,10 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                             onRemoveCoupon={removeCoupon}
                             currentStep={currentStep}
                             onMainAction={() => {
-                                if (currentStep === 3 && paymentMethod === 'mercadopago') {
-                                    processMercadoPagoPayment();
+                                if (currentStep === 3) {
+                                    if (paymentMethod === 'mercadopago') processMercadoPagoPayment();
+                                    else if (paymentMethod === 'transferencia') handleTransferOrder();
+                                    else handleNext();
                                 } else {
                                     handleNext();
                                 }
@@ -704,8 +766,10 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                             </div>
                             <button
                                 onClick={() => {
-                                    if (currentStep === 3 && paymentMethod === 'mercadopago') {
-                                        processMercadoPagoPayment();
+                                    if (currentStep === 3) {
+                                        if (paymentMethod === 'mercadopago') processMercadoPagoPayment();
+                                        else if (paymentMethod === 'transferencia') handleTransferOrder();
+                                        else handleNext();
                                     } else {
                                         handleNext();
                                     }

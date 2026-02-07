@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import emailjs from '@emailjs/browser';
-import NeuralNetworkHero from "../components/Fondos/AnimacionVioleta";
+import NeuralNetworkHero from "../components/background/AnimacionVioleta";
 import { CONTACT_INFO } from '../info';
 
 interface ConsultingProps {

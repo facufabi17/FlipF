@@ -21,18 +21,19 @@ const PaidResources = lazy(() => import('./pages/PaidResources'));
 const Academy = lazy(() => import('./pages/Academy'));
 const CourseDetails = lazy(() => import('./pages/CourseDetails'));
 const Checkout = lazy(() => import('./pages/Checkout'));
-const MyCourses = lazy(() => import('./pages/Usuario/MyCourses'));
-const MyCertificates = lazy(() => import('./pages/Usuario/MyCertificates'));
+const MyCourses = lazy(() => import('./pages/user/MyCourses'));
+const MyCertificates = lazy(() => import('./pages/user/MyCertificates'));
 const VerifyCertificate = lazy(() => import('./pages/VerifyCertificate'));
-const MyResources = lazy(() => import('./pages/Usuario/MyResources'));
+const PurchaseHistory = lazy(() => import('./pages/user/PurchaseHistory'));
+const MyResources = lazy(() => import('./pages/user/MyResources'));
 const CoursePlayer = lazy(() => import('./pages/CoursePlayer'));
 const Consulting = lazy(() => import('./pages/Consulting'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
-const UserProfile = lazy(() => import('./pages/Usuario/UserProfile'));
+const UserProfile = lazy(() => import('./pages/user/UserProfile'));
 const Help = lazy(() => import('./pages/Help'));
-const Privacy = lazy(() => import('./pages/Term&Priv/Privacy'));
-const Terms = lazy(() => import('./pages/Term&Priv/Terms'));
+const Privacy = lazy(() => import('./pages/terms&privacy/Privacy'));
+const Terms = lazy(() => import('./pages/terms&privacy/Terms'));
 const UpdatePassword = lazy(() => import('./pages/UpdatePassword'));
 const PagoAprobado = lazy(() => import('./pages/PagoAprobado'));
 const PaymentSuccess = lazy(() => import('./pages/PaymentSuccess'));
@@ -72,6 +73,7 @@ const App: React.FC = () => {
                                     <Route path="/checkout" element={<Checkout onShowToast={showToast} />} />
                                     <Route path="/checkout/:id" element={<Checkout onShowToast={showToast} />} />
                                     <Route path="/pago_apro" element={<PagoAprobado />} />
+                                    <Route path="/historial-compras" element={<PurchaseHistory />} />
 
                                     <Route path="/mis-cursos" element={<MyCourses />} />
                                     <Route path="/mis-certificados" element={<MyCertificates />} />

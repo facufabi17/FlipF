@@ -8,6 +8,12 @@ interface BillingFormProps {
         dni: string;
         address: string;
         zipCode: string;
+        entityType: 'individual' | 'association';
+        country?: string;
+        province?: string;
+        city?: string;
+        cuil?: string;
+        businessName?: string;
     };
     setFormData: React.Dispatch<React.SetStateAction<any>>;
     user: any;
@@ -17,9 +23,64 @@ const BillingForm: React.FC<BillingFormProps> = ({ formData, setFormData, user }
     return (
         <div className="animate-fade-in bg-surface-dark border border-white/5 rounded-2xl p-8">
             <h3 className="text-2xl font-bold text-white mb-6">Datos de Facturación</h3>
+            <div className="md:col-span-2 space-y-2">
+                <label className="text-sm text-gray-400">Tipo de Persona (Facturación)</label>
+                <div className="flex gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                            type="radio"
+                            name="entityType"
+                            value="individual"
+                            checked={formData.entityType === 'individual'}
+                            onChange={(e) => setFormData({ ...formData, entityType: 'individual' })}
+                            className="text-primary focus:ring-primary bg-black/20 border-white/10"
+                        />
+                        <span className="text-white">Persona</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                            type="radio"
+                            name="entityType"
+                            value="association"
+                            checked={formData.entityType === 'association'}
+                            onChange={(e) => setFormData({ ...formData, entityType: 'association' })}
+                            className="text-primary focus:ring-primary bg-black/20 border-white/10"
+                        />
+                        <span className="text-white">Empresa</span>
+                    </label>
+                </div>
+            </div>
+
+            {/* Campos de Empresa */}
+            {formData.entityType === 'association' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in mb-4 p-4 bg-white/5 rounded-xl border border-primary/20">
+                    <div className="space-y-2">
+                        <label className="text-sm text-primary font-bold">Razón Social</label>
+                        <input
+                            type="text"
+                            value={formData.businessName || ''}
+                            onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
+                            placeholder="Nombre de la Empresa S.A."
+                            className="w-full bg-black/40 border border-primary/50 focus:border-primary rounded-lg p-3 text-white"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-sm text-primary font-bold">CUIT / TV</label>
+                        <input
+                            type="text"
+                            value={formData.cuil || ''}
+                            onChange={(e) => setFormData({ ...formData, cuil: e.target.value })}
+                            placeholder="20-xxxxxxxx-x"
+                            className="w-full bg-black/40 border border-primary/50 focus:border-primary rounded-lg p-3 text-white"
+                        />
+                    </div>
+                </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Datos Personales / Representante */}
                 <div className="space-y-2">
-                    <label className="text-sm text-gray-400">Nombre</label>
+                    <label className="text-sm text-gray-400">Nombre {formData.entityType === 'association' ? '(Representante)' : ''}</label>
                     <input
                         type="text"
                         value={formData.firstName}
@@ -30,7 +91,7 @@ const BillingForm: React.FC<BillingFormProps> = ({ formData, setFormData, user }
                     />
                 </div>
                 <div className="space-y-2">
-                    <label className="text-sm text-gray-400">Apellido</label>
+                    <label className="text-sm text-gray-400">Apellido {formData.entityType === 'association' ? '(Representante)' : ''}</label>
                     <input
                         type="text"
                         value={formData.lastName}
@@ -40,6 +101,7 @@ const BillingForm: React.FC<BillingFormProps> = ({ formData, setFormData, user }
                             ${user?.lastName ? 'border-white/10 text-gray-400 cursor-not-allowed' : 'border-white/10 focus:border-primary'}`}
                     />
                 </div>
+
                 <div className="space-y-2">
                     <label className="text-sm text-gray-400">Email</label>
                     <input
@@ -50,8 +112,8 @@ const BillingForm: React.FC<BillingFormProps> = ({ formData, setFormData, user }
                     />
                 </div>
 
-                <div className="space-y-2 md:col-span-2">
-                    <label className="text-sm text-gray-400">DNI / Documento (Requerido para el certificado)</label>
+                <div className="space-y-2">
+                    <label className="text-sm text-gray-400">DNI / Documento {formData.entityType === 'association' ? '(Representante)' : ''}</label>
                     <div className="relative">
                         <input
                             type="text"
@@ -69,16 +131,48 @@ const BillingForm: React.FC<BillingFormProps> = ({ formData, setFormData, user }
                             </span>
                         )}
                     </div>
-                    {!user?.dni && <p className="text-xs text-primary/80">* Este dato se vinculará a tu cuenta y no podrá modificarse posteriormente.</p>}
                 </div>
 
-                <div className="space-y-2">
+                {/* Dirección - Fila Completa o Grid */}
+                <div className="space-y-2 md:col-span-2">
                     <label className="text-sm text-gray-400">Dirección</label>
                     <input
                         type="text"
                         value={formData.address}
                         onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                         placeholder="Calle y altura"
+                        className="w-full bg-black/20 border border-white/10 focus:border-primary rounded-lg p-3 text-white"
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <label className="text-sm text-gray-400">País</label>
+                    <input
+                        type="text"
+                        value={formData.country || ''}
+                        onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                        placeholder="Argentina"
+                        className="w-full bg-black/20 border border-white/10 focus:border-primary rounded-lg p-3 text-white"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-sm text-gray-400">Provincia / Estado</label>
+                    <input
+                        type="text"
+                        value={formData.province || ''}
+                        onChange={(e) => setFormData({ ...formData, province: e.target.value })}
+                        placeholder="Buenos Aires"
+                        className="w-full bg-black/20 border border-white/10 focus:border-primary rounded-lg p-3 text-white"
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <label className="text-sm text-gray-400">Ciudad</label>
+                    <input
+                        type="text"
+                        value={formData.city || ''}
+                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                        placeholder="CABA"
                         className="w-full bg-black/20 border border-white/10 focus:border-primary rounded-lg p-3 text-white"
                     />
                 </div>

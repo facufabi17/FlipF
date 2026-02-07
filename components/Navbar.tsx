@@ -130,6 +130,10 @@ const Navbar: React.FC = () => {
 
                                     <div className="border-t border-white/5 my-1"></div>
 
+                                    <Link to="/historial-compras" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors" onClick={() => setUserMenuOpen(false)}>
+                                        <span className="material-symbols-outlined text-[20px] text-gray-400">receipt_long</span>
+                                        Historial de Compras
+                                    </Link>
                                     <Link to="/perfil" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors" onClick={() => setUserMenuOpen(false)}>
                                         <span className="material-symbols-outlined text-[20px] text-gray-400">person</span>
                                         Información de usuario
@@ -179,6 +183,7 @@ const Navbar: React.FC = () => {
                             <Link to="/mis-cursos" onClick={() => setMobileMenuOpen(false)} className="text-primary font-bold">Mis Cursos</Link>
                             <Link to="/mis-certificados" onClick={() => setMobileMenuOpen(false)} className="text-yellow-500 font-bold">Mis Certificados</Link>
                             <Link to="/mis-recursos" onClick={() => setMobileMenuOpen(false)} className="text-accent font-bold">Mis Recursos</Link>
+                            <Link to="/historial-compras" onClick={() => setMobileMenuOpen(false)} className="text-gray-300">Historial</Link>
                             <Link to="/perfil" onClick={() => setMobileMenuOpen(false)} className="text-gray-300">Información de usuario</Link>
                             <Link to="/ayuda" onClick={() => setMobileMenuOpen(false)} className="text-gray-300">Ayuda</Link>
                         </>

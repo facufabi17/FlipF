@@ -1,8 +1,9 @@
 import React, { forwardRef } from 'react';
+import { BANK_INFO } from '../../info';
 
 interface PaymentMethodsProps {
-    paymentMethod: 'transferencia' | 'mercadopago' | 'mobbex' | 'prueba' | null;
-    setPaymentMethod: (method: 'transferencia' | 'mercadopago' | 'mobbex' | 'prueba') => void;
+    paymentMethod: 'transferencia' | 'mercadopago' | null;
+    setPaymentMethod: (method: 'transferencia' | 'mercadopago') => void;
     loadingMP: boolean;
     onMainAction: () => void;
     currentStep: number;
@@ -43,6 +44,69 @@ const PaymentMethods = forwardRef<HTMLDivElement, PaymentMethodsProps>(({
                     <span className="material-symbols-outlined text-4xl text-gray-600 group-hover:text-white transition-colors">account_balance</span>
                 </button>
 
+                {paymentMethod === 'transferencia' && (
+                    <div className="animate-fade-in space-y-4">
+                        <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl flex gap-3 text-left">
+                            <span className="material-symbols-outlined text-yellow-500 shrink-0">warning</span>
+                            <p className="text-sm text-yellow-200">
+                                <span className="font-bold">IMPORTANTE:</span> Para aprobar tu acceso, es <span className="font-bold underline">OBLIGATORIO</span> enviar el comprobante de pago por WhatsApp al finalizar el pedido.
+                            </p>
+                        </div>
+
+                        <div className="bg-surface-dark border border-white/10 rounded-xl p-6 relative overflow-hidden">
+                            {BANK_INFO.bankLogo && (
+                                <div className="absolute top-4 right-4 opacity-80 bg-white/5 p-2 rounded-lg">
+                                    <img src={BANK_INFO.bankLogo} alt={BANK_INFO.bankName} className="h-6 object-contain" />
+                                </div>
+                            )}
+                            <h4 className="font-bold text-white mb-4 flex items-center gap-2">
+                                <span className="material-symbols-outlined text-primary">account_balance_wallet</span>
+                                Datos Bancarios
+                            </h4>
+                            <div className="space-y-3 text-sm">
+                                <div className="flex justify-between border-b border-white/5 pb-2">
+                                    <span className="text-gray-400">Banco:</span>
+                                    <span className="text-white font-medium text-right">{BANK_INFO.bankName}</span>
+                                </div>
+                                <div className="flex justify-between border-b border-white/5 pb-2">
+                                    <span className="text-gray-400">Titular:</span>
+                                    <span className="text-white font-medium text-right">{BANK_INFO.nameOfTheHolder}</span>
+                                </div>
+                                <div className="flex justify-between border-b border-white/5 pb-2">
+                                    <span className="text-gray-400">CBU:</span>
+                                    <div className="text-right">
+                                        <span className="text-white font-medium block">{BANK_INFO.cbu}</span>
+                                        <button
+                                            onClick={() => navigator.clipboard.writeText(BANK_INFO.cbu)}
+                                            className="text-primary text-xs hover:underline mt-1 flex items-center gap-1 justify-end ml-auto"
+                                        >
+                                            <span className="material-symbols-outlined text-[10px]">content_copy</span>
+                                            Copiar CBU
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between border-b border-white/5 pb-2">
+                                    <span className="text-gray-400">Alias:</span>
+                                    <div className="text-right">
+                                        <span className="text-primary font-bold text-lg block">{BANK_INFO.alias}</span>
+                                        <button
+                                            onClick={() => navigator.clipboard.writeText(BANK_INFO.alias)}
+                                            className="text-gray-400 text-xs hover:text-white hover:underline mt-1 flex items-center gap-1 justify-end ml-auto"
+                                        >
+                                            <span className="material-symbols-outlined text-[10px]">content_copy</span>
+                                            Copiar Alias
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-400">CUIT/DNI:</span>
+                                    <span className="text-white font-medium text-right">{BANK_INFO.dni}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Opción Mercado Pago */}
                 <button
                     onClick={() => setPaymentMethod('mercadopago')}
@@ -58,8 +122,8 @@ const PaymentMethods = forwardRef<HTMLDivElement, PaymentMethodsProps>(({
                         <p className="text-gray-400 text-sm">Dinero en cuenta, tarjetas de débito y crédito.</p>
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className="text-blue-400 font-bold text-xl">mercado</span>
-                        <span className="text-white font-bold text-xl">pago</span>
+                        <img src="/mercado-pago.png" alt="Mercado Pago" className="h-8 object-contain" />
+
                     </div>
                 </button>
 
@@ -75,21 +139,6 @@ const PaymentMethods = forwardRef<HTMLDivElement, PaymentMethodsProps>(({
                         <div id="paymentBrick_container" ref={brickContainerRef}></div>
                     </div>
                 )}
-
-                {/* 
-                  Mobbex Integration (Inactive/Future)
-                  // TODO: Implement Mobbex logic when credentials/sdk are available.
-                  // Current implementation is a placeholder based on future requirements.
-                  /*
-                  <button
-                      onClick={() => setPaymentMethod('mobbex')}
-                      className="..."
-                  >
-                      Mobbex Placeholder
-                  </button>
-                  */
-                }
-
 
                 {/* Botón de Acción Principal Desktop */}
 

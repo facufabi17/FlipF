@@ -101,3 +101,26 @@ export interface User {
     certificates?: Record<string, string>; // courseId -> certificateId
     dni?: string;
 }
+
+export interface OrderItem {
+    id: string;
+    title: string;
+    type: 'course' | 'resource';
+    price: number;
+}
+
+export interface Order {
+    id: string;
+    user_id: string;
+    items: OrderItem[];
+    total: number;
+    status: 'approved' | 'pending' | 'rejected';
+    payment_method: string;
+    created_at: string;
+    entity_type?: 'individual' | 'association';
+    country?: string;
+    province?: string;
+    city?: string;
+    cuil?: string;
+    business_name?: string;
+}

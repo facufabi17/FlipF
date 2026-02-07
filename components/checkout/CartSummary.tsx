@@ -91,17 +91,17 @@ const CartSummary: React.FC<CartSummaryProps> = ({
                             </button>
                         </div>
                     ) : (
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 w-full">
                             <input
                                 type="text"
                                 placeholder="Código de cupón"
                                 value={couponInput}
                                 onChange={(e) => setCouponInput(e.target.value)}
-                                className="bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-primary flex-1"
+                                className="min-w-0 bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-primary flex-1"
                             />
                             <button
                                 onClick={() => onApplyCoupon(couponInput)}
-                                className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white text-sm font-bold transition-all"
+                                className="shrink-0 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white text-sm font-bold transition-all"
                             >
                                 <span className="material-symbols-outlined text-sm">check</span>
                             </button>

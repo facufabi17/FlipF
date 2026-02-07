@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { COURSES } from '../data/courses';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import AnimacionCian from '../components/Fondos/AnimacionCian';
+import AnimacionCian from '../components/background/AnimacionCian';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 

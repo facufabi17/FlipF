@@ -12,3 +12,13 @@ export const CONTACT_INFO = {
     telegram: "",
 
 };
+
+export const BANK_INFO = {
+    dni: "00000000",
+    nameOfTheHolder: "Nombre Apellido",
+    cbu: "0000000000000000000000",
+    alias: "ALIAS.BANCO",
+    bankCode: "0000",
+    bankName: "Banco de la Nacion",
+    bankLogo: "",
+};
