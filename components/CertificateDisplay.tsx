@@ -25,6 +25,22 @@ const CertificateDisplay: React.FC<CertificateDisplayProps> = ({
     const certificateRef = useRef<HTMLDivElement>(null);
     const [isGenerating, setIsGenerating] = useState(false);
     const [signatureSvg, setSignatureSvg] = useState<string | null>(null);
+    const [scale, setScale] = useState(1);
+    const BASE_WIDTH = 800;
+
+    React.useEffect(() => {
+        const handleResize = () => {
+            // 48 px de margen total (24px a cada lado aprox)
+            const newScale = Math.min(1, (window.innerWidth - 48) / BASE_WIDTH);
+            setScale(newScale);
+        };
+
+        // Calcular escala inicial
+        handleResize();
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // Fetch and process SVG signature for PDF compatibility
     React.useEffect(() => {
@@ -58,7 +74,7 @@ const CertificateDisplay: React.FC<CertificateDisplayProps> = ({
         try {
             // 1. Capturar en alta resolución
             const canvas = await html2canvas(certificateRef.current, {
-                scale: 2, // Higher scale for better quality
+                scale: 4, // Higher scale for better quality (3200px width approx)
                 useCORS: true,
                 backgroundColor: '#1a1a1a',
                 logging: false,
@@ -120,12 +136,28 @@ const CertificateDisplay: React.FC<CertificateDisplayProps> = ({
                     <p className="text-xs text-gray-600 mt-2">Si esto persiste, contacta a soporte.</p>
                 </div>
             ) : (
-                /* --- CERTIFICATE CANVAS --- */
-                <div className="relative w-full overflow-hidden shadow-2xl rounded-lg">
+                /* --- CERTIFICATE WRAPPER FOR SCALING --- */
+                <div
+                    style={{
+                        width: '100%',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        overflow: 'hidden',
+                        height: `${BASE_WIDTH * 0.707 * scale}px`, // Mantener relación de aspecto 1:1.414
+                        transition: 'height 0.3s ease'
+                    }}
+                >
                     <div
                         ref={certificateRef}
-                        className="relative bg-gradient-to-br from-[#0f0f13] to-[#1a1a2e] text-white p-12 md:p-20 w-full aspect-[1.414/1] flex flex-col items-center justify-between border-[12px] border-double border-primary/30"
-                        style={{ minWidth: '800px' }} // Ensure consistent width for PDF generation even on mobile
+                        className="relative bg-gradient-to-br from-[#0f0f13] to-[#1a1a2e] text-white p-8 md:p-12 flex flex-col items-center justify-between border-[12px] border-double border-primary/30 shadow-2xl rounded-lg origin-top"
+                        style={{
+                            transform: `scale(${scale})`,
+                            transformOrigin: 'top center',
+                            minWidth: `${BASE_WIDTH}px`,
+                            width: `${BASE_WIDTH}px`,
+                            aspectRatio: '1.414/1', // A4 Landscape ratio
+                            height: `${BASE_WIDTH * 0.707}px`
+                        }}
                     >
                         {/* Decorative Elements */}
                         <div className="absolute top-0 left-0 w-64 h-64 bg-primary/5 rounded-br-full blur-3xl pointer-events-none"></div>
@@ -136,43 +168,43 @@ const CertificateDisplay: React.FC<CertificateDisplayProps> = ({
                         <div className="absolute bottom-4 right-4 w-24 h-24 border-b-2 border-r-2 border-primary/20 rounded-br-3xl"></div>
 
                         {/* Header */}
-                        <div className="text-center z-10 w-full mb-8">
+                        <div className="text-center z-10 w-full mb-2">
                             {/* Logo Placeholder - Text based if image fails or missing */}
-                            <div className="flex items-center justify-center gap-3 mb-6 opacity-90">
-                                <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-primary text-2xl">school</span>
+                            <div className="flex items-center justify-center gap-3 mb-2 opacity-90">
+                                <div className="w-6 h-6 bg-primary/20 rounded-lg flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-primary text-base">school</span>
                                 </div>
-                                <span className="text-2xl font-bold tracking-widest uppercase font-display">Flip Manager</span>
+                                <span className="text-lg font-bold tracking-widest uppercase font-display">Flip Manager</span>
                             </div>
 
-                            <h1 className="text-5xl md:text-6xl font-display font-bold uppercase tracking-widest text-white mb-2 shadow-sm drop-shadow-lg">
+                            <h1 className="text-3xl md:text-4xl font-display font-bold uppercase tracking-widest text-white mb-1 shadow-sm drop-shadow-lg">
                                 Certificado
                             </h1>
-                            <p className="text-xl md:text-2xl text-gray-400 uppercase tracking-[0.5em] font-light">de Finalización</p>
+                            <p className="text-base md:text-lg text-gray-400 uppercase tracking-[0.5em] font-light">de Finalización</p>
                         </div>
 
                         {/* Body */}
                         <div className="text-center z-10 flex-1 flex flex-col justify-center w-full max-w-3xl">
-                            <p className="text-lg text-gray-400 mb-4 font-light">Se otorga el presente reconocimiento a</p>
+                            <p className="text-sm text-gray-400 mb-2 font-light">Se otorga el presente reconocimiento a</p>
 
-                            <h2 className="text-4xl md:text-5xl font-bold text-white mb-2 font-serif italic tracking-wide pb-4 border-b border-white/10 mx-auto inline-block min-w-[60%]">
+                            <h2 className="text-2xl md:text-3xl font-bold text-white mb-1 font-serif italic tracking-wide pb-2 border-b border-white/10 mx-auto inline-block min-w-[60%]">
                                 {studentName}
                             </h2>
-                            <p className="text-sm text-gray-500 mb-8 font-mono">DNI: {studentDni}</p>
+                            <p className="text-[10px] text-gray-500 mb-4 font-mono">DNI: {studentDni}</p>
 
-                            <p className="text-lg text-gray-400 mb-4 font-light">Por haber completado exitosamente el curso profesional</p>
+                            <p className="text-sm text-gray-400 mb-2 font-light">Por haber completado exitosamente el curso profesional</p>
 
-                            <h3 className="text-3xl md:text-4xl font-bold text-primary mb-6 uppercase tracking-wide drop-shadow-md">
+                            <h3 className="text-xl md:text-2xl font-bold text-primary mb-2 uppercase tracking-wide drop-shadow-md">
                                 {courseName}
                             </h3>
 
-                            <p className="text-gray-400 max-w-2xl mx-auto leading-relaxed text-sm md:text-base">
+                            <p className="text-gray-400 max-w-xl mx-auto leading-relaxed text-[10px] md:text-xs">
                                 Demostrando su dominio en las habilidades y conocimientos impartidos, cumpliendo con todos los requisitos académicos y prácticos exigidos por Flip Manager.
                             </p>
                         </div>
 
                         {/* Footer */}
-                        <div className="flex justify-between items-end w-full mt-12 z-10 px-8">
+                        <div className="flex justify-between items-end w-full mt-2 z-10 px-4">
                             <div className="text-center">
                                 <div className="mb-2 relative h-8 w-24 flex items-end justify-center mx-auto">
                                     {/* Digital Signature - Inline SVG for PDF Compatibility */}
@@ -201,7 +233,7 @@ const CertificateDisplay: React.FC<CertificateDisplayProps> = ({
                                 {/* Real QR Code */}
                                 <div className="bg-white p-2 rounded-lg shadow-lg">
                                     <QRCodeSVG
-                                        value={`https://flipmanager.com/#/verify/${certId}`}
+                                        value={`https://flip-f.vercel.app/#/verify/${certId}`}
                                         size={80}
                                         level="M"
                                         fgColor="#000000"
@@ -219,9 +251,7 @@ const CertificateDisplay: React.FC<CertificateDisplayProps> = ({
                         </div>
                     </div>
                 </div>
-
-            )
-            }
+            )}
 
             {/* --- ACTION BUTTONS --- */}
 
@@ -258,7 +288,7 @@ const CertificateDisplay: React.FC<CertificateDisplayProps> = ({
             <p className="text-gray-500 text-sm text-center max-w-2xl">
                 Nota: Para descargar el certificado en alta calidad, asegúrate de estar en un dispositivo con pantalla grande o usa la versión de escritorio.
             </p>
-        </div >
+        </div>
     );
 };
 
