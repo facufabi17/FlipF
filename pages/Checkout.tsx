@@ -830,16 +830,3 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
 };
 
 export default Checkout;
-
-https://flip-f.vercel.app/#/pago_apro?
-collection_id = 1344542197
-collection_status = approved
-payment_id = 1344542197
-status = approved
-external_reference = 3df8106e - 20e5 - 4ec3 - a3e0 - e7d0b9c1d99b
-payment_type = credit_card
-merchant_order_id = 37974462165
-preference_id = 72452717 - d37e1a84 - 37d1 - 4d02 - 8b9a - 410c8a449acb
-site_id = MLA
-processing_mode = aggregator
-merchant_account_id = null
