@@ -287,7 +287,15 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 sessionStorage.removeItem('pendingPaymentId');
                 sessionStorage.removeItem('pendingReference');
                 sessionStorage.removeItem('isPaymentInProgress');
+                sessionStorage.removeItem('pendingPaymentId');
+                sessionStorage.removeItem('pendingReference');
+                sessionStorage.removeItem('isPaymentInProgress');
                 sessionStorage.removeItem('paymentTimestamp');
+
+                // Limpiar estado del checkout
+                sessionStorage.removeItem('checkout_step');
+                sessionStorage.removeItem('checkout_form');
+                setCurrentStep(1);
 
                 // Actualizar DB
                 const itemsToPurchase = directCourse
@@ -371,7 +379,14 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 sessionStorage.removeItem('pendingPaymentId');
                 sessionStorage.removeItem('pendingReference');
                 sessionStorage.removeItem('isPaymentInProgress');
+                sessionStorage.removeItem('pendingReference');
+                sessionStorage.removeItem('isPaymentInProgress');
                 sessionStorage.removeItem('paymentTimestamp');
+
+                // Limpiar estado del checkout
+                sessionStorage.removeItem('checkout_step');
+                sessionStorage.removeItem('checkout_form');
+                setCurrentStep(1);
 
                 // Construir URL de éxito con datos
                 let successUrl = '/pago_apro';
@@ -556,7 +571,14 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
 
                 sessionStorage.removeItem('pendingPaymentId');
                 sessionStorage.removeItem('isPaymentInProgress');
+                sessionStorage.removeItem('pendingPaymentId');
+                sessionStorage.removeItem('isPaymentInProgress');
                 sessionStorage.removeItem('paymentTimestamp');
+
+                // Limpiar estado del checkout
+                sessionStorage.removeItem('checkout_step');
+                sessionStorage.removeItem('checkout_form');
+                setCurrentStep(1);
 
                 navigate('/pago_apro');
                 onShowToast('¡Pago exitoso!', 'success');
@@ -618,6 +640,14 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
 
             // 3. Notificar y Redirigir
             onShowToast('Pedido registrado. Por favor envía tu comprobante.', 'success');
+            // 3. Notificar y Redirigir
+            onShowToast('Pedido registrado. Por favor envía tu comprobante.', 'success');
+
+            // Limpiar estado del checkout
+            sessionStorage.removeItem('checkout_step');
+            sessionStorage.removeItem('checkout_form');
+            setCurrentStep(1);
+
             setTimeout(() => {
                 navigate('/historial-compras');
             }, 1000);
