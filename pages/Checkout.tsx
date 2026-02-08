@@ -134,11 +134,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                 province: formData.province,
                                 city: formData.city,
                                 cuil: formData.cuil,
-                                business_name: formData.businessName,
-                                first_name: formData.firstName,
-                                last_name: formData.lastName,
-                                email: formData.email,
-                                dni: formData.dni
+                                business_name: formData.businessName
                             }
                         );
 
@@ -158,7 +154,16 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                         body: JSON.stringify({
                             items: itemsToPurchase,
                             baseUrl: window.location.origin,
-                            external_reference: currentOrderId // Usamos el ID de la orden
+                            external_reference: currentOrderId, // Usamos el ID de la orden
+                            payer: {
+                                name: formData.firstName,
+                                surname: formData.lastName,
+                                email: formData.email,
+                                identification: {
+                                    type: formData.entityType === 'association' ? 'CUIT' : 'DNI',
+                                    number: formData.entityType === 'association' ? formData.cuil : formData.dni
+                                }
+                            }
                         })
                     });
 

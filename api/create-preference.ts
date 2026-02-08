@@ -60,6 +60,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 unit_price: Number(item.price),
                 currency_id: 'ARS',
             })),
+            payer: req.body.payer, // Agregar payer
             external_reference: externalReference,
             back_urls: {
                 success: `${appOrigin}/#/mp-callback`,
