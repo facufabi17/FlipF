@@ -109,7 +109,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                         payment_id: paymentId, // Guardar el ID de MP si no lo teníamos
                         updated_at: new Date().toISOString()
                     })
-                    .eq('external_reference', externalReference); // O .eq('id', externalReference) si usaste el ID de la orden como ref
+                    .eq('id', externalReference); // O .eq('id', externalReference) si usaste el ID de la orden como ref
 
                 if (dbError) {
                     console.error('Supabase Error updating order:', dbError);
