@@ -44,11 +44,15 @@ const Footer: React.FC = () => {
                     </div>
                 </div>
             </div>
-            <div className="max-w-7xl mx-auto px-6 mt-12 pt-8 border-t border-white/5 text-center md:text-left">
-                <p className="text-gray-600 text-xs">© 2026 Flip Authority Hub. Todos los derechos reservados.</p>
+            <div className="max-w-7xl mx-auto px-6 mt-12 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p className="text-gray-600 text-xs text-center md:text-left">© 2026 Flip Authority Hub. Todos los derechos reservados.</p>
+                <a href="http://qr.afip.gob.ar/?qr=cg9jumScDfyeCPzWUkM9Hw,," target="_F960AFIPInfo" className="opacity-80 hover:opacity-100 transition-opacity">
+                    <img src="http://www.afip.gob.ar/images/f960/DATAWEB.jpg" alt="Data Fiscal" className="w-12 h-auto" />
+                </a>
             </div>
         </footer>
     );
 };
 
 export default Footer;
+
