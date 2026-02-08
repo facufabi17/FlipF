@@ -114,7 +114,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({
             <button
                 onClick={onMainAction}
                 disabled={loadingMP && currentStep === 3 && paymentMethod === 'mercadopago'}
-                className={`w-full py-4 font-bold rounded-xl transition-all transform hover:scale-[1.02] shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] mb-4
+                className={`w-full py-4 font-bold rounded-xl transition-all transform hover:scale-[1.02] shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:shadow-[0_0_30px_rgba(139,92,246,0.5)] mb-4 hidden lg:block
                     ${paymentMethod === 'mercadopago' && currentStep === 3
                         ? 'bg-blue-500 hover:bg-blue-600 text-white'
                         : 'bg-primary hover:bg-primary-dark text-black'}

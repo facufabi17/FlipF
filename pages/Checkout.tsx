@@ -105,6 +105,10 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     // Estado para orden pendiente (Database-First)
     const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
 
+    // Estado para Mobile Footer
+    const [isMobileDetailsOpen, setIsMobileDetailsOpen] = useState(false);
+    const [mobileCouponInput, setMobileCouponInput] = useState('');
+
     useEffect(() => {
         // Obtenemos preferencia si no tenemos ID O si somos MP y no tenemos Init Point (para Wallet)
         // Y si NO estamos cargando ya (evitar doble llamada)
@@ -871,10 +875,98 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                             />
                         </div>
 
-                        {/* Sticky Bottom Bar Mobile */}
-                        <div className="fixed bottom-0 left-0 w-full bg-surface-dark border-t border-white/10 p-4 lg:hidden z-50">
-                            <div className="flex items-center gap-4">
-                                <div className="flex-1">
+                        {/* Smart Sticky Footer Mobile */}
+                        {isMobileDetailsOpen && (
+                            <div
+                                className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm"
+                                onClick={() => setIsMobileDetailsOpen(false)}
+                            />
+                        )}
+
+                        <div className={`fixed bottom-0 left-0 w-full bg-surface-dark border-t border-white/10 transition-transform duration-300 z-50 lg:hidden rounded-t-2xl shadow-[0_-5px_20px_rgba(0,0,0,0.5)]`}>
+
+                            {/* Contenido Expandido */}
+                            {isMobileDetailsOpen && (
+                                <div className="p-4 space-y-4 animate-fade-in max-h-[60vh] overflow-y-auto">
+                                    <div className="flex justify-center mb-2" onClick={() => setIsMobileDetailsOpen(false)}>
+                                        <div className="w-12 h-1 bg-white/20 rounded-full"></div>
+                                    </div>
+                                    <h4 className="text-white font-bold mb-2">Detalle del Pedido</h4>
+
+                                    {/* Lista de Ítems */}
+                                    <div className="space-y-3">
+                                        {itemsToShow.map(item => (
+                                            <div key={item.id} className="flex justify-between items-center text-sm">
+                                                <span className="text-gray-300 truncate max-w-[200px]">{item.title}</span>
+                                                <span className="text-white font-medium">${item.price.toLocaleString()}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="border-t border-white/10 my-2"></div>
+
+                                    {/* Cupón Mobile */}
+                                    {!directCourse && (
+                                        <div className="py-2">
+                                            {activeCoupon ? (
+                                                <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 flex justify-between items-center">
+                                                    <span className="text-green-400 text-sm font-bold flex items-center gap-2">
+                                                        <span className="material-symbols-outlined text-sm">local_offer</span>
+                                                        Cupón aplicado
+                                                    </span>
+                                                    <button onClick={removeCoupon} className="text-gray-500 hover:text-white">
+                                                        <span className="material-symbols-outlined text-sm">close</span>
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex gap-2 w-full">
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Código de cupón"
+                                                        value={mobileCouponInput}
+                                                        onChange={(e) => setMobileCouponInput(e.target.value)}
+                                                        className="min-w-0 bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:border-primary flex-1"
+                                                    />
+                                                    <button
+                                                        onClick={() => {
+                                                            applyCoupon(mobileCouponInput);
+                                                            setMobileCouponInput('');
+                                                        }}
+                                                        className="shrink-0 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white text-sm font-bold transition-all"
+                                                    >
+                                                        Aplicar
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    <div className="border-t border-white/10 my-2"></div>
+
+                                    <div className="flex justify-between items-center text-gray-400 text-sm">
+                                        <span>Subtotal</span>
+                                        <span>${finalTotal.toLocaleString()}</span>
+                                    </div>
+
+                                    {paymentMethod === 'transferencia' && (
+                                        <div className="flex justify-between items-center text-green-400 text-sm">
+                                            <span>Descuento Transferencia (10%)</span>
+                                            <span>-${(finalTotal * 0.1).toLocaleString()}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Barra Fija (Always Visible) */}
+                            <div className="p-4 flex items-center gap-4 bg-surface-dark border-t border-white/5">
+                                <button
+                                    onClick={() => setIsMobileDetailsOpen(!isMobileDetailsOpen)}
+                                    className="p-2 text-gray-400 hover:text-white transition-colors"
+                                >
+                                    <span className={`material-symbols-outlined transform transition-transform duration-300 ${isMobileDetailsOpen ? 'rotate-180' : ''}`}>keyboard_arrow_up</span>
+                                </button>
+
+                                <div className="flex-1" onClick={() => setIsMobileDetailsOpen(!isMobileDetailsOpen)}>
                                     <p className="text-gray-400 text-xs uppercase">Total a pagar</p>
                                     <p className="text-xl font-bold text-primary">
                                         ${paymentMethod === 'transferencia'
@@ -892,13 +984,15 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                             handleNext();
                                         }
                                     }}
-                                    className="px-6 py-3 bg-primary text-black font-bold rounded-xl shadow-[0_0_15px_rgba(34,211,238,0.3)]"
+                                    disabled={loadingMP && currentStep === 3 && paymentMethod === 'mercadopago'}
+                                    className={`px-6 py-3 bg-primary text-black font-bold rounded-xl shadow-[0_0_15px_rgba(139,92,246,0.3)] whitespace-nowrap ${loadingMP ? 'opacity-70 cursor-not-allowed' : ''}`}
                                 >
                                     {currentStep < 3 ? (
                                         <div className="flex items-center gap-2">
                                             Continuar <span className="material-symbols-outlined text-lg">arrow_forward</span>
                                         </div>
-                                    ) : paymentMethod === 'mercadopago' ? 'Pagar (Arriba)' : 'Finalizar'}
+                                    ) : loadingMP && paymentMethod === 'mercadopago' ? 'Cargando...' :
+                                        paymentMethod === 'mercadopago' ? 'Pagar' : 'Finalizar'}
                                 </button>
                             </div>
                         </div>
