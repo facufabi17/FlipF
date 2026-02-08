@@ -1,9 +1,14 @@
 
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const PagoAprobado = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+
+    const paymentId = searchParams.get('payment_id');
+    const externalReference = searchParams.get('external_reference');
+    const status = searchParams.get('status');
 
     useEffect(() => {
         const channel = new BroadcastChannel('payment_status');
@@ -19,9 +24,36 @@ const PagoAprobado = () => {
                 </div>
 
                 <h1 className="text-3xl font-bold text-white mb-2">¡Pago Aprobado!</h1>
-                <p className="text-gray-400 mb-8">
-                    Tu compra se ha procesado correctamente. Ya tenés acceso a todo el contenido.
+                <p className="text-gray-400 mb-6">
+                    Tu compra se ha procesado correctamente.
                 </p>
+
+                {/* Detalles de la Transacción */}
+                {(paymentId || externalReference) && (
+                    <div className="bg-black/30 rounded-xl p-4 mb-8 text-sm text-left border border-white/5 space-y-2">
+                        {paymentId && (
+                            <div className="flex justify-between">
+                                <span className="text-gray-500">Operación:</span>
+                                <span className="text-white font-mono">{paymentId}</span>
+                            </div>
+                        )}
+                        {externalReference && (
+                            <div className="flex justify-between">
+                                <span className="text-gray-500">Referencia:</span>
+                                <span className="text-white font-mono truncate max-w-[150px]" title={externalReference}>
+                                    {externalReference.split('-')[0]}...
+                                </span>
+                            </div>
+                        )}
+                        {status && (
+                            <div className="flex justify-between">
+                                <span className="text-gray-500">Estado:</span>
+                                <span className="text-green-400 capitalize">{status}</span>
+                            </div>
+                        )}
+                    </div>
+                )}
+
 
                 <div className="space-y-4">
                     <button
@@ -32,7 +64,7 @@ const PagoAprobado = () => {
                     </button>
 
                     <button
-                        onClick={() => navigate('/recursos')}
+                        onClick={() => navigate('/recursos-pago')} // Corregido link recursos pago
                         className="w-full py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-xl transition-all"
                     >
                         Ver Recursos

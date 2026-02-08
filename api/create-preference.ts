@@ -1,9 +1,8 @@
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { fileURLToPath } from 'url';
+import { createServer } from 'http';
 
-
-
-// Helper para UUID seguro sin dependencias de Node
 // Helper para UUID seguro sin dependencias de Node
 function generateUUID() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -100,9 +99,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 }
 
 // Local Server Runner (if executed directly)
-import { fileURLToPath } from 'url';
-import { createServer } from 'http';
-
 // Check if running directly in Node
 // @ts-ignore
 if (import.meta.url === `file://${process.argv[1]}`) {
