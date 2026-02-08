@@ -40,7 +40,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         const client = new MercadoPagoConfig({ accessToken });
 
-        const { items, baseUrl } = req.body;
+        const { items, baseUrl, external_reference } = req.body;
         const appOrigin = (baseUrl || 'https://flip-f.vercel.app').replace(/\/$/, '').replace(/#$/, '');
 
         console.error('--- Debug Create Preference (STDERR) ---');
@@ -50,7 +50,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             return res.status(400).json({ error: 'Items are required' });
         }
 
-        const externalReference = generateUUID();
+        const externalReference = external_reference || generateUUID();
 
         const body = {
             items: items.map((item: any) => ({

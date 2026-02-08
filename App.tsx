@@ -37,7 +37,7 @@ const Terms = lazy(() => import('./pages/terms&privacy/Terms'));
 const UpdatePassword = lazy(() => import('./pages/UpdatePassword'));
 const PagoAprobado = lazy(() => import('./pages/PagoAprobado'));
 const PaymentSuccess = lazy(() => import('./pages/PaymentSuccess'));
-const MPCallback = lazy(() => import('./pages/MPCallback'));
+const MPCallback = lazy(() => import('./components/MPCallback'));
 
 //const { data: todos } = await supabase.from('todos').select()
 

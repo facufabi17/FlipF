@@ -102,43 +102,88 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     const resources = itemsToShow.filter(i => i.type === 'resource');
     const isEmpty = !directCourse && cart.length === 0;
 
+    // Estado para orden pendiente (Database-First)
+    const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
+
     useEffect(() => {
         // Obtenemos preferencia si no tenemos ID O si somos MP y no tenemos Init Point (para Wallet)
-        if (paymentMethod === 'mercadopago' && (!preferenceId || !initPoint)) {
-            setLoadingMP(true);
+        // Y si NO estamos cargando ya (evitar doble llamada)
+        if (paymentMethod === 'mercadopago' && (!preferenceId || !initPoint) && !loadingMP) {
 
-            const itemsToPurchase = directCourse
-                ? [{ id: directCourse.id, title: directCourse.title, price: directCourse.price, quantity: 1 }]
-                : cart.map(item => ({ id: item.id, title: item.title, price: item.price, quantity: 1 }));
+            const initializePayment = async () => {
+                setLoadingMP(true);
 
-            fetch('/api/create-preference', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    items: itemsToPurchase,
-                    baseUrl: window.location.origin
-                })
-            })
-                .then(async res => {
+                const itemsToPurchase = directCourse
+                    ? [{ id: directCourse.id, title: directCourse.title, price: directCourse.price, quantity: 1, type: 'course' }]
+                    : cart.map(item => ({ id: item.id, title: item.title, price: item.price, quantity: 1, type: item.type }));
+
+                try {
+                    // 1. Database-First: Crear orden pendiente SI no existe
+                    let currentOrderId = pendingOrderId;
+
+                    if (!currentOrderId) {
+                        // Importante: createOrder espera items, total, method, status, billingData
+                        const orderData = await createOrder(
+                            itemsToPurchase,
+                            finalTotal,
+                            'mercadopago',
+                            'pending',
+                            {
+                                entity_type: formData.entityType,
+                                country: formData.country,
+                                province: formData.province,
+                                city: formData.city,
+                                cuil: formData.cuil,
+                                business_name: formData.businessName,
+                                first_name: formData.firstName,
+                                last_name: formData.lastName,
+                                email: formData.email,
+                                dni: formData.dni
+                            }
+                        );
+
+                        if (orderData && orderData.id) {
+                            currentOrderId = orderData.id;
+                            setPendingOrderId(currentOrderId);
+                            console.log("Orden pendiente creada en DB:", currentOrderId);
+                        } else {
+                            throw new Error("No se pudo crear la orden en la base de datos.");
+                        }
+                    }
+
+                    // 2. Crear Preferencia en MP usando el ID de la orden como referencia externa
+                    const res = await fetch('/api/create-preference', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            items: itemsToPurchase,
+                            baseUrl: window.location.origin,
+                            external_reference: currentOrderId // Usamos el ID de la orden
+                        })
+                    });
+
                     const data = await res.json();
                     if (!res.ok) {
                         console.error('SERVER ERROR DETAILS:', data);
                         throw new Error(data.details || data.error || 'Error creating preference');
                     }
-                    return data;
-                })
-                .then(data => {
+
                     if (data.id) setPreferenceId(data.id);
                     if (data.init_point) setInitPoint(data.init_point);
+                    // Ahora la referencia externa debería ser el mismo orderID
                     if (data.external_reference) setExternalReference(data.external_reference);
-                })
-                .catch(err => {
-                    console.error("Error creating preference", err);
-                    onShowToast("Error al inicializar pago", "error");
-                })
-                .finally(() => setLoadingMP(false));
+
+                } catch (err) {
+                    console.error("Error creating preference/order", err);
+                    onShowToast("Error al inicializar pago. Intenta nuevamente.", "error");
+                } finally {
+                    setLoadingMP(false);
+                }
+            };
+
+            initializePayment();
         }
-    }, [paymentMethod, preferenceId, directCourse, cart, onShowToast]);
+    }, [paymentMethod, preferenceId, directCourse, cart, onShowToast, createOrder, finalTotal, formData, pendingOrderId, loadingMP, initPoint]);
 
     // Scroll top al cambiar de paso
     useEffect(() => {
@@ -205,8 +250,8 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
         if (!isWaitingPayment || isProcessingRef.current) return;
         if (!externalPaymentId && !externalReference) return;
 
-        // Límite de intentos (e.g. 20 intentos * 3 seg = 60 seg aprox)
-        if (attemptsRef.current >= 20) {
+        // Límite de intentos (e.g. 40 intentos * 3 seg = 60 seg aprox)
+        if (attemptsRef.current >= 40) {
             console.warn("Polling timeout alcanzado.");
             setIsWaitingPayment(false);
             sessionStorage.removeItem('pendingPaymentId');
@@ -227,7 +272,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
             const res = await fetch(`/api/check-payment-status?${query}`);
             const data = await res.json();
 
-            console.log(`Polling status (${attemptsRef.current}/20):`, data.status);
+            console.log(`Polling status (${attemptsRef.current}/40):`, data.status);
 
             if (data.id && !externalPaymentId) {
                 setExternalPaymentId(data.id);

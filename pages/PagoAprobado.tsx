@@ -64,7 +64,7 @@ const PagoAprobado = () => {
                     </button>
 
                     <button
-                        onClick={() => navigate('/recursos-pago')} // Corregido link recursos pago
+                        onClick={() => navigate('/mis-recursos')} // Corregido link recursos pago
                         className="w-full py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-xl transition-all"
                     >
                         Ver Recursos
