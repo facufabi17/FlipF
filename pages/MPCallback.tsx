@@ -30,7 +30,8 @@ const MPCallback: React.FC = () => {
                 // Dar tiempo al mensaje para ser enviado
                 setTimeout(() => {
                     channel.close();
-                    // 2. Intentar cerrar la ventana
+                    // 2. Intentar devolver foco y cerrar
+                    if (window.opener) window.opener.focus();
                     window.close();
                 }, 1000);
             } else if (status === 'pending' || status === 'in_process') {

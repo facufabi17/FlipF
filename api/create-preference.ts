@@ -62,9 +62,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             })),
             external_reference: externalReference,
             back_urls: {
-                success: `${appOrigin}/#/pago_apro`,
-                failure: `${appOrigin}/#/checkout`,
-                pending: `${appOrigin}/#/checkout`,
+                success: `${appOrigin}/#/mp-callback`,
+                failure: `${appOrigin}/#/mp-callback`,
+                pending: `${appOrigin}/#/mp-callback`,
             },
             ...(!appOrigin.includes('localhost') && !appOrigin.includes('127.0.0.1')
                 ? { auto_return: 'approved' }
