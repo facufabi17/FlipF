@@ -7,7 +7,7 @@ const Navbar: React.FC = () => {
     const navigate = useNavigate();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
-    const { user, logout, isAuthenticated } = useAuth();
+    const { user, logout, isAuthenticated, loading } = useAuth();
     const { itemCount, total } = useCart();
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -92,7 +92,11 @@ const Navbar: React.FC = () => {
                         )}
                     </Link>
 
-                    {isAuthenticated ? (
+                    {loading ? (
+                        <div className="flex items-center justify-center w-20">
+                            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                    ) : isAuthenticated ? (
                         <div className="relative" ref={dropdownRef}>
                             <button
                                 onClick={() => setUserMenuOpen(!userMenuOpen)}

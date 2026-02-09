@@ -17,7 +17,7 @@ initMercadoPago(import.meta.env.VITE_MP_PUBLIC_KEY, {
 });
 
 interface CheckoutProps {
-    onShowToast: (text: string, type?: 'success' | 'error') => void;
+    onShowToast: (text: string, type?: 'success' | 'error' | 'info') => void;
 }
 
 const STEPS = [
@@ -433,13 +433,19 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     useEffect(() => {
         if (currentStep === 3 && paymentMethod === 'mercadopago' && preferenceId && brickContainerRef.current) {
 
+            // Limpieza preventiva
             if (window.paymentBrickController) {
-                window.paymentBrickController.unmount();
+                try {
+                    window.paymentBrickController.unmount();
+                } catch (e) {
+                    console.warn("Error unmounting previous brick:", e);
+                }
                 window.paymentBrickController = null;
             }
 
             setLoadingMP(true);
 
+            // Importante: Asegurar que el objeto MP se crea con la Key correcta
             const mp = new window.MercadoPago(import.meta.env.VITE_MP_PUBLIC_KEY, {
                 locale: 'es-AR'
             });
@@ -451,11 +457,13 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                     initialization: {
                         amount: Math.round(finalTotal),
                         preferenceId: preferenceId,
+                        // Mapeo Crítico para evitar secure_fetch_card_token_failed
                         payer: {
+                            email: formData.email, // Campo OBLIGATORIO para tokenización
                             firstName: formData.firstName,
                             lastName: formData.lastName,
-                            email: formData.email,
-                            entityType: formData.entityType,
+                            // Reintegrado y asegurado para evitar warning/error "entityType only receives..."
+                            entityType: (formData.entityType === 'association') ? 'association' : 'individual',
                             identification: {
                                 type: formData.entityType === 'association' ? 'CUIT' : 'DNI',
                                 number: formData.entityType === 'association' ? formData.cuil : formData.dni
@@ -473,7 +481,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                             style: {
                                 theme: 'default',
                             },
-                            hidePaymentButton: true,
+                            hidePaymentButton: true, // OCULTAR BOTÓN NATIVO para usar el externo
                         }
                     },
                     callbacks: {
@@ -481,16 +489,29 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                             setLoadingMP(false);
                             console.log("Brick ready");
                         },
-                        onSubmit: async () => {
-                            console.warn("NATIVE BRICK SUBMIT DETECTED - Recapturing flow...");
-                            if (window.paymentBrickController) {
-                                processMercadoPagoPayment();
+                        onSubmit: async (paymentFormData: any, additionalData: any) => {
+                            console.log("Brick onSubmit Triggered");
+                            console.log("FormData COMPLETO recibido del Brick:", JSON.stringify(paymentFormData, null, 2));
+                            console.log("AdditionalData recibido del Brick:", JSON.stringify(additionalData, null, 2));
+
+                            // Validación crítica de Token para pagos con tarjeta
+                            if (paymentFormData.paymentType === 'credit_card' || paymentFormData.paymentType === 'debit_card') {
+                                const token = paymentFormData.token || paymentFormData.formData?.token;
+                                if (!token) {
+                                    console.error("❌ ERROR CRÍTICO: El Brick no devolvió un token de tarjeta. Datos recibidos:", paymentFormData);
+                                    onShowToast("Error: No se pudo validar la tarjeta. Por favor revise los datos e intente nuevamente.", "error");
+                                    return; // IMPORTANTE: Detener ejecución aquí
+                                }
                             }
+
+                            // Llamamos a nuestra función de procesamiento pasando los datos DIRECTOS del brick
+                            await processMercadoPagoPayment(paymentFormData);
                         },
                         onError: (error: any) => {
-                            console.error("Brick Error:", error);
+                            console.error("Brick Error Callback:", error);
                             setLoadingMP(false);
-                            onShowToast("Error al cargar el formulario de pago", "error");
+                            const errorMsg = error.message || "Error desconocido en el componente de pago";
+                            onShowToast(`Error en el formulario de pago: ${errorMsg}`, "error");
                         },
                     },
                 };
@@ -499,70 +520,125 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                     const controller = await bricksBuilder.create('payment', 'paymentBrick_container', settings);
                     window.paymentBrickController = controller;
                 } catch (e) {
-                    console.error("Error creating brick", e);
+                    console.error("Error creating brick instance", e);
+                    onShowToast("No se pudo cargar el formulario de pago. Refrescá la página.", "error");
                 }
             };
 
             renderBrick();
         }
 
+        // Cleanup al desmontar o cambiar dependencias
         return () => {
-            if ((currentStep !== 3 || paymentMethod !== 'mercadopago') && window.paymentBrickController) {
-                window.paymentBrickController.unmount();
-                window.paymentBrickController = null;
+            if (window.paymentBrickController) {
+                try {
+                    window.paymentBrickController.unmount();
+                    window.paymentBrickController = null;
+                } catch (e) {
+                    console.warn("Cleanup error:", e);
+                }
             }
         };
-    }, [currentStep, paymentMethod, preferenceId, finalTotal, formData.firstName, formData.lastName, formData.email, formData.entityType, formData.cuil, formData.dni, onShowToast]);
+    }, [currentStep, paymentMethod, preferenceId, finalTotal, formData, onShowToast]); // Dependencias simplificadas a formData objeto completo
 
 
-    const processMercadoPagoPayment = async () => {
-        console.log(">>> INICIANDO PROCESO DE PAGO con Brick Controller <<<");
 
-        if (!window.paymentBrickController) {
-            console.error("Brick Controller not found");
-            onShowToast("Error interno del componente de pago. Recarga la página.", "error");
-            return;
-        }
-
+    const processMercadoPagoPayment = async (brickFormData?: any) => {
         try {
-            onShowToast('Procesando pago...', 'success');
-            const result = await window.paymentBrickController.getFormData().catch((e: any) => null);
+            setLoadingMP(true);
+            console.log(">>> INICIANDO PROCESO DE PAGO <<<");
 
-            if ((!result || !result.formData) && result?.paymentType !== 'wallet_purchase') {
-                onShowToast('Por favor revisá los datos del formulario.', 'error');
+            // Si no nos pasan datos (desde onSubmit), intentamos obtenerlos del controller (fallback)
+            // Pero idealmente deberían venir desde onSubmit
+            let paymentData = brickFormData;
+
+            if (!paymentData && window.paymentBrickController) {
+                // Recuperamos datos desde el controller al usar el botón externo
+                try {
+                    const result = await window.paymentBrickController.getFormData();
+                    if (result) {
+                        paymentData = result.formData || result;
+                    }
+                } catch (e) {
+                    console.error("Fallo obteniendo datos del controller:", e);
+                }
+            }
+
+            if (!paymentData) {
+                console.error("❌ No hay datos de pago disponibles.");
+                onShowToast("Por favor completá los datos de la tarjeta y usá el botón 'Pagar' del formulario.", "error");
+                setLoadingMP(false);
                 return;
             }
 
-            // CASO WALLET / REDIRECT
-            if (result?.paymentType === 'wallet_purchase') {
+            // Validación final antes de enviar al backend
+            if ((paymentData.paymentType === 'credit_card' || paymentData.paymentType === 'debit_card') && !paymentData.token && !paymentData.formData?.token) {
+                console.error("❌ ERROR: Intento de envío al backend sin token.", paymentData);
+                onShowToast("Error de validación: Falta el token de la tarjeta.", "error");
+                setLoadingMP(false);
+                return;
+            }
+
+            // CASO WALLET / REDIRECT (detectado por payment_method_id o tipo)
+            if (paymentData.payment_method_id === 'account_money' || paymentData.paymentType === 'wallet_purchase') {
                 if (initPoint) {
                     if (externalReference) {
                         sessionStorage.setItem('pendingReference', externalReference);
                         sessionStorage.setItem('isPaymentInProgress', 'true');
                         sessionStorage.setItem('paymentTimestamp', Date.now().toString());
-                        attemptsRef.current = 0; // Reset intentos
+                        attemptsRef.current = 0;
                     }
-                    window.open(initPoint, 'mp_popup', 'width=1000,height=700,scrollbars=yes,resizable=yes');
+                    console.log("Redirigiendo a Wallet:", initPoint);
+                    // window.open(initPoint, 'mp_popup', 'width=1000,height=700,scrollbars=yes,resizable=yes'); // Comentado para evitar duplicidad
                     setIsWaitingPayment(true);
-                    onShowToast('Continuá el pago en la ventana emergente', 'success');
-                    return;
+                    onShowToast('Continuá el pago en la nueva pestaña', 'success');
+                    setLoadingMP(false);
+                    return; // IMPORTANTE: Retornar para no seguir al backend
                 } else {
-                    onShowToast("Error al iniciar la redirección de pago.", "error");
-                    return;
+                    console.warn("Se solicitó Wallet pero no hay initPoint definido.");
                 }
             }
 
             // CASO CORE (Tarjetas)
+            // Enriquecer datos del pago con info de contexto
+            // IMPORTANTE: El Brick devuelve los datos dentro de 'formData', hay que aplanarlos para el backend de MP
+            const sourceData = paymentData.formData || paymentData;
+
+            const paymentPayload = {
+                ...sourceData, // Esto trae token, transaction_amount, installments, payment_method_id, etc. al primer nivel
+                description: directCourse ? `Curso: ${directCourse.title}` : `Compra en Flip - ${cart.length} items`,
+                external_reference: pendingOrderId,
+                payer: {
+                    ...sourceData.payer, // Priorizar datos del brick (email, identification)
+                    email: formData.email, // Fallback/Overwrite con datos del formulario de facturación
+                    first_name: formData.firstName,
+                    last_name: formData.lastName,
+                    identification: {
+                        type: formData.entityType === 'association' ? 'CUIT' : 'DNI',
+                        number: formData.entityType === 'association' ? formData.cuil : formData.dni
+                    }
+                },
+                notification_url: import.meta.env.VITE_WEBHOOK_URL || undefined,
+                binary_mode: true
+            };
+
+            console.log("Enviando pago al backend:", paymentPayload);
+
             const response = await fetch("/api/process-payment", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(result.formData),
+                body: JSON.stringify(paymentPayload),
             });
 
             const paymentResult = await response.json();
 
             if (paymentResult.error) {
-                onShowToast('Error al procesar el pago: ' + (paymentResult.details?.message || paymentResult.error), 'error');
+                console.error("Error Backend:", paymentResult);
+                // Si el error es checkout_create_error, intentamos mostrar detalles
+                const details = paymentResult.details || {};
+                const msg = details.message || paymentResult.error || "Error desconocido";
+                onShowToast(`Error al procesar el pago: ${msg}`, 'error');
+                setLoadingMP(false); // Asegurar que quitamos loading
                 return;
             }
 
@@ -580,9 +656,8 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
 
                 sessionStorage.removeItem('pendingPaymentId');
                 sessionStorage.removeItem('isPaymentInProgress');
-                sessionStorage.removeItem('pendingPaymentId');
-                sessionStorage.removeItem('isPaymentInProgress');
-                sessionStorage.removeItem('paymentTimestamp');
+                sessionStorage.removeItem('pendingReference');
+                sessionStorage.removeItem('paymentTimestamp'); // Corregido: limpieza redundante
 
                 // Limpiar estado del checkout
                 sessionStorage.removeItem('checkout_step');
@@ -592,7 +667,8 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 navigate('/pago_apro');
                 onShowToast('¡Pago exitoso!', 'success');
 
-            } else if (['in_process', 'pending', 'created'].includes(paymentResult.status)) {
+            } else if (['in_process', 'pending', 'created', 'authorized'].includes(paymentResult.status)) {
+                // ... lógica existente pendiente ...
                 if (paymentResult.point_of_interaction?.type === 'redirect' && paymentResult.point_of_interaction.transaction_data?.ticket_url) {
                     window.open(paymentResult.point_of_interaction.transaction_data.ticket_url, '_blank');
                 }
@@ -603,14 +679,14 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 sessionStorage.setItem('pendingPaymentId', paymentIdStr);
                 sessionStorage.setItem('isPaymentInProgress', 'true');
                 sessionStorage.setItem('paymentTimestamp', Date.now().toString());
-                attemptsRef.current = 0; // Reset intentos
+                attemptsRef.current = 0;
 
             } else {
                 onShowToast('Estado del pago: ' + paymentResult.status, 'error');
             }
 
         } catch (error) {
-            console.error("Network Error:", error);
+            console.error("Network/System Error:", error);
             onShowToast('Error de conexión al procesar el pago', 'error');
         }
     };
@@ -664,6 +740,15 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
             onShowToast('Error al registrar el pedido.', 'error');
             setIsProcessing(false);
         }
+    };
+
+    const handleCancelPayment = () => {
+        setIsWaitingPayment(false);
+        sessionStorage.removeItem('pendingPaymentId');
+        sessionStorage.removeItem('pendingReference');
+        sessionStorage.removeItem('isPaymentInProgress');
+        sessionStorage.removeItem('paymentTimestamp');
+        onShowToast('Pago cancelado.', 'info');
     };
 
     const handleNext = async () => {
@@ -758,6 +843,13 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                 Una vez aprobado, te redirigiremos automáticamente.
                             </span>
                         </div>
+
+                        <button
+                            onClick={handleCancelPayment}
+                            className="mt-6 text-sm text-gray-500 hover:text-red-400 transition-colors underline decoration-dotted underline-offset-4"
+                        >
+                            Cancelar y volver
+                        </button>
                     </div>
                 </div>
             )}
@@ -974,6 +1066,8 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                             : finalTotal.toLocaleString()}
                                     </p>
                                 </div>
+
+                                {/* Botón de Acción Mobile - RESTAURADO */}
                                 <button
                                     onClick={() => {
                                         if (currentStep === 3) {

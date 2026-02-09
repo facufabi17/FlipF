@@ -14,7 +14,7 @@ import ScrollToTop from './components/ScrollToTop';
 import LoadingSpinner from './components/LoadingSpinner';
 
 // Lazy Load Pages
-const Home = lazy(() => import('./pages/Home'));
+import Home from './pages/Home';
 const About = lazy(() => import('./pages/About'));
 const FreeResources = lazy(() => import('./pages/FreeResources'));
 const PaidResources = lazy(() => import('./pages/PaidResources'));

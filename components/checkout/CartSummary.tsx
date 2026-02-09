@@ -11,6 +11,7 @@ interface CartSummaryProps {
     currentStep: number;
     onMainAction: () => void;
     loadingMP?: boolean;
+    hideButton?: boolean;
 }
 
 const CartSummary: React.FC<CartSummaryProps> = ({
@@ -23,7 +24,8 @@ const CartSummary: React.FC<CartSummaryProps> = ({
     onRemoveCoupon,
     currentStep,
     onMainAction,
-    loadingMP
+    loadingMP,
+    hideButton = false
 }) => {
     const [couponInput, setCouponInput] = useState('');
 
@@ -111,24 +113,26 @@ const CartSummary: React.FC<CartSummaryProps> = ({
             )}
 
             {/* Botón de Acción Principal Desktop */}
-            <button
-                onClick={onMainAction}
-                disabled={loadingMP && currentStep === 3 && paymentMethod === 'mercadopago'}
-                className={`w-full py-4 font-bold rounded-xl transition-all transform hover:scale-[1.02] shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:shadow-[0_0_30px_rgba(139,92,246,0.5)] mb-4 hidden lg:block
-                    ${paymentMethod === 'mercadopago' && currentStep === 3
-                        ? 'bg-blue-500 hover:bg-blue-600 text-white'
-                        : 'bg-primary hover:bg-primary-dark text-black'}
-                    ${(loadingMP && currentStep === 3 && paymentMethod === 'mercadopago') ? 'opacity-70 cursor-not-allowed' : ''}`}
-            >
-                {currentStep < 3 ? (
-                    <span className="flex items-center justify-center gap-2">
-                        Continuar <span className="material-symbols-outlined">arrow_forward</span>
-                    </span>
-                ) : (
-                    loadingMP && paymentMethod === 'mercadopago' ? 'Cargando...' :
-                        paymentMethod === 'mercadopago' ? 'Pagar con Mercado Pago' : 'Finalizar Pedido'
-                )}
-            </button>
+            {!hideButton && (
+                <button
+                    onClick={onMainAction}
+                    disabled={loadingMP && currentStep === 3 && paymentMethod === 'mercadopago'}
+                    className={`w-full py-4 font-bold rounded-xl transition-all transform hover:scale-[1.02] shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:shadow-[0_0_30px_rgba(139,92,246,0.5)] mb-4 hidden lg:block
+                        ${paymentMethod === 'mercadopago' && currentStep === 3
+                            ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                            : 'bg-primary hover:bg-primary-dark text-black'}
+                        ${(loadingMP && currentStep === 3 && paymentMethod === 'mercadopago') ? 'opacity-70 cursor-not-allowed' : ''}`}
+                >
+                    {currentStep < 3 ? (
+                        <span className="flex items-center justify-center gap-2">
+                            Continuar <span className="material-symbols-outlined">arrow_forward</span>
+                        </span>
+                    ) : (
+                        loadingMP && paymentMethod === 'mercadopago' ? 'Cargando...' :
+                            paymentMethod === 'mercadopago' ? 'Pagar con Mercado Pago' : 'Finalizar Pedido'
+                    )}
+                </button>
+            )}
 
             <p className="text-xs text-gray-500 text-center">
                 Al completar la compra, aceptas nuestros términos y condiciones.

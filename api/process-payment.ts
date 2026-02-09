@@ -29,15 +29,41 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
         const body = req.body;
 
-        // Using the logic from snippet.js but wrapping in response handling
-        const result = await payment.create({ body });
+        console.log('--- Processing Payment Request ---');
+        console.log('Payment Data received:', JSON.stringify(body, null, 2));
+
+        // Validar campos mínimos necesarios
+        if (!body.transaction_amount || !body.token || !body.payment_method_id || !body.payer || !body.payer.email) {
+            console.warn('Missing required payment fields');
+            // No retornamos error aquí para dejar que MP valide, pero logueamos warning
+        }
+
+        // Asegurar que haya una descripción y referencia externa si no vienen
+        // Nota: Es mejor que el frontend los mande, pero aquí podemos poner fallbacks
+        if (!body.description) body.description = 'Compra en Flip';
+        if (!body.external_reference) console.warn('Warning: No external_reference provided for this payment.');
+
+        // Configuración adicional del request
+        const paymentData = {
+            ...body,
+            notification_url: body.notification_url || process.env.WEBHOOK_URL
+        };
+
+        const result = await payment.create({ body: paymentData });
+
+        console.log('Payment created successfully:', result.id);
 
         return res.status(200).json(result);
     } catch (error: any) {
         console.error('Error processing payment:', error);
+
+        // Mejor manejo de errores de Mercado Pago
+        const errorDetails = error.cause || error.message || error;
+        console.error('MP Error Details:', JSON.stringify(errorDetails, null, 2));
+
         return res.status(500).json({
             error: 'Error processing payment',
-            details: error.message || error
+            details: errorDetails
         });
     }
 }
