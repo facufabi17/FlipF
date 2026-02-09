@@ -6,6 +6,7 @@ import { useCart } from '../context/CartContext';
 import AnimacionCian from '../components/background/AnimacionCian';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
+import { CourseTimeline } from '../components/ui/course-timeline';
 
 // --- Types & Data for Career Paths ---
 interface CareerStage {
@@ -27,8 +28,8 @@ interface CareerPath {
 const CAREER_PATHS: CareerPath[] = [
     {
         id: 'path-marketing',
-        title: 'Analista de Marketing Digital y Estrategia',
-        description: 'Programa integral desde fundamentos hasta growth marketing y gestión de presupuestos. Conviértete en un líder del mercado.',
+        title: 'Certificado',
+        description: 'Analista de Marketing Digital y Estrategia',
         icon: 'campaign', // material icon name
         incentive: 'Certificación de Especialista en Marketing Digital',
         incentiveDescription: 'Al completar esta ruta, recibirás una certificación oficial de Flip Manager que valida tus habilidades en estrategia, análisis y ejecución de campañas. Reconocido por líderes de la industria.',
@@ -67,10 +68,10 @@ const CAREER_PATHS: CareerPath[] = [
     },
     {
         id: 'path-data',
-        title: 'Analista de Datos e IA',
-        description: 'Domina la interpretación de datos, crea modelos predictivos y automatiza decisiones estratégicas.',
+        title: 'Certificado',
+        description: 'Analista en Ciencias de Datos e IA',
         icon: 'psychology',
-        incentive: 'Diploma de Data Scientist Junior',
+        incentive: 'Certificado de Especialista en Ciencia de Datos',
         incentiveDescription: 'Obtén un diploma que avala tu dominio en Python, SQL y Machine Learning. Ideal para roles de Analista de Datos, BI Developer o Data Scientist Junior.',
         stages: [
             {
@@ -124,6 +125,7 @@ const Academy: React.FC = () => {
     const [selectedCareerId, setSelectedCareerId] = useState<string | null>(null);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [activeIncentive, setActiveIncentive] = useState<string | null>(null);
+
 
     // --- Derived Data ---
     const categories = useMemo(() => {
@@ -252,8 +254,11 @@ const Academy: React.FC = () => {
 
             <div className="relative z-10 max-w-7xl mx-auto px-6 py-12 space-y-24">
 
+
+
+
                 {/* --- SECCIÓN 2: RUTAS DE CARRERA (MISSION MAPS) --- */}
-                <section id="rutas" ref={pathsRef}>
+                <section className='block md:hidden' id="rutas" ref={pathsRef}>
                     <div className="flex flex-col items-center text-center gap-4 mb-16">
                         <div className="flex items-center gap-4 animate-fade-in-up">
                             <span className="material-symbols-outlined text-[#00F5F1] text-4xl shadow-cyan-glow rounded-full">map</span>
@@ -361,6 +366,65 @@ const Academy: React.FC = () => {
                                 </div>
                             )
                         })}
+                    </div>
+                </section>
+
+
+
+
+                {/* --- SECCIÓN 2: RUTAS DE CARRERA (MISSION MAPS) --- */}
+                <section className='hidden md:block' id="rutas" ref={pathsRef}>
+                    <div className="flex flex-col items-center text-center gap-4 mb-16">
+                        <div className="flex items-center gap-4 animate-fade-in-up">
+                            <span className="material-symbols-outlined text-[#00F5F1] text-4xl shadow-cyan-glow rounded-full">map</span>
+                            <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight">
+                                Mapas de <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00F5F1] to-white">Rutas de Carrera</span>
+                            </h2>
+                        </div>
+                        <p className="text-gray-400 max-w-xl text-sm md:text-base border border-white/5 bg-white/5 px-6 py-2 rounded-full backdrop-blur-md">
+                            Completa cursos tácticos para desbloquear tu <span className="text-[#00F5F1] font-bold">Certificado de Analista e Insignia de Carrera</span>.
+                        </p>
+                    </div>
+
+                    <div className="flex flex-col gap-8 relative z-10 w-full max-w-7xl mx-auto">
+                        {CAREER_PATHS.map((path) => (
+                            <div key={path.id} className="relative">
+                                {/* Career Path Container */}
+                                <div className="bg-black/40 border border-white/10 rounded-3xl p-8 backdrop-blur-sm relative overflow-hidden group">
+                                    {/* Background Decor */}
+                                    <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-l from-[#00F5F1]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+
+                                    {/* Header */}
+                                    <div className="flex flex-col md:flex-row items-center gap-6 mb-8 relative z-10">
+                                        <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#00F5F1] shadow-[0_0_20px_rgba(0,245,241,0.1)]">
+                                            <span className="material-symbols-outlined text-4xl">{path.icon}</span>
+                                        </div>
+                                        <div className="text-center md:text-left">
+                                            <h3 className="text-3xl font-bold text-white mb-2">{path.title}</h3>
+                                            <p className="text-gray-400 max-w-2xl">{path.description}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Timeline Component */}
+                                    <CourseTimeline
+                                        stages={path.stages.map(stage => ({
+                                            name: stage.name.split(':')[0], // "Etapa 1"
+                                            description: stage.name.split(':')[1] || stage.description, // Description
+                                            courses: stage.courses.map(courseName => {
+                                                const found = COURSES.find(c => c.title === courseName);
+                                                return found ? { title: found.title, id: found.id } : { title: courseName, id: '#' };
+                                            })
+                                        }))}
+                                        incentive={path.incentive}
+                                        careerTitle="Mapa de Misiones"
+                                    />
+
+                                    {/* Footer Actions */}
+                                    <div className="flex justify-end border-t border-white/5">
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </section>
 

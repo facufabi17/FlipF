@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import FlowGradient from "../components/background/AnimacionEntrada";
 import { COURSES } from '../data/courses';
-import { StickyScroll } from '../components/ui/sticky-scroll-reveal';
 import { CardCarousel } from '../components/ui/card-carousel';
 
 const Home: React.FC = () => {
