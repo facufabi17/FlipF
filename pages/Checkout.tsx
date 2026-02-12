@@ -10,6 +10,7 @@ import CheckoutSteps from '../components/checkout/CheckoutSteps';
 import CartSummary from '../components/checkout/CartSummary';
 import BillingForm from '../components/checkout/BillingForm';
 import PaymentMethods from '../components/checkout/PaymentMethods';
+import ScheduleSelector from '../components/ui/Horarios de Cursos';
 
 // Inicializar Mercado Pago
 initMercadoPago(import.meta.env.VITE_MP_PUBLIC_KEY, {
@@ -30,7 +31,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { isAuthenticated, user, updateProfile, purchaseItems, loading, createOrder } = useAuth();
-    const { cart, total, removeFromCart, clearCart, activeCoupon, applyCoupon, removeCoupon, discount, totalAfterDiscount } = useCart();
+    const { cart, total, removeFromCart, clearCart, activeCoupon, applyCoupon, removeCoupon, discount, totalAfterDiscount, updateCartItemSchedule } = useCart();
 
     // Estado del Stepper
     const [currentStep, setCurrentStep] = useState(1);
@@ -95,7 +96,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     const directCourse = id ? COURSES.find(c => c.id === id) : null;
     const finalTotal = directCourse ? directCourse.price : totalAfterDiscount;
     const itemsToShow = directCourse
-        ? [{ ...directCourse, type: 'course', quantity: 1 }]
+        ? [{ ...directCourse, type: 'course', quantity: 1, selectedSchedule: undefined as any }]
         : cart;
 
     const courses = itemsToShow.filter(i => i.type === 'course');
@@ -118,14 +119,24 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 setLoadingMP(true);
 
                 const itemsToPurchase = directCourse
-                    ? [{ id: directCourse.id, title: directCourse.title, price: directCourse.price, quantity: 1, type: 'course' }]
-                    : cart.map(item => ({ id: item.id, title: item.title, price: item.price, quantity: 1, type: item.type }));
+                    ? [{ id: directCourse.id, title: directCourse.title, price: directCourse.price, quantity: 1, type: 'course', selectedSchedule: undefined }]
+                    : cart.map(item => ({
+                        id: item.id,
+                        title: item.title,
+                        price: item.price,
+                        quantity: 1,
+                        type: item.type,
+                        selectedSchedule: item.selectedSchedule
+                    }));
 
                 try {
                     // 1. Database-First: Crear orden pendiente SI no existe
                     let currentOrderId = pendingOrderId;
 
                     if (!currentOrderId) {
+                        // Extraer schedule_id del primer item que lo tenga (para columna dedicada)
+                        const scheduleId = itemsToPurchase.find((i: any) => i.selectedSchedule)?.selectedSchedule?.id;
+
                         // Importante: createOrder espera items, total, method, status, billingData
                         const orderData = await createOrder(
                             itemsToPurchase,
@@ -138,7 +149,8 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                 province: formData.province,
                                 city: formData.city,
                                 cuil: formData.cuil,
-                                business_name: formData.businessName
+                                business_name: formData.businessName,
+                                schedule_id: scheduleId // Guardamos el ID en la columna dedicada
                             }
                         );
 
@@ -697,8 +709,17 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
         setIsProcessing(true);
 
         const itemsToPurchase = directCourse
-            ? [{ id: directCourse.id, title: directCourse.title, type: 'course' as const, price: directCourse.price }]
-            : cart.map(item => ({ id: item.id, title: item.title, type: item.type, price: item.price }));
+            ? [{ id: directCourse.id, title: directCourse.title, type: 'course' as const, price: directCourse.price, selectedSchedule: undefined }]
+            : cart.map(item => ({
+                id: item.id,
+                title: item.title,
+                type: item.type,
+                price: item.price,
+                selectedSchedule: item.selectedSchedule
+            }));
+
+        // Extraer schedule_id
+        const scheduleId = itemsToPurchase.find((i: any) => i.selectedSchedule)?.selectedSchedule?.id;
 
         // 1. Crear Orden "Pending" con datos extra
         const order = await createOrder(
@@ -712,7 +733,8 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 province: formData.province,
                 city: formData.city,
                 cuil: formData.cuil,
-                business_name: formData.businessName
+                business_name: formData.businessName,
+                schedule_id: scheduleId
             }
         );
 
@@ -875,11 +897,21 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                             </h3>
                                             <div className="space-y-4">
                                                 {courses.map((item) => (
-                                                    <div key={item.id} className="flex gap-4 items-center bg-black/20 p-4 rounded-xl border border-white/5 relative group hover:border-primary/30 transition-colors">
+                                                    <div key={item.id} className="flex gap-4 items-start bg-black/20 p-4 rounded-xl border border-white/5 relative group hover:border-primary/30 transition-colors">
                                                         <img src={item.image} className="w-20 h-20 rounded-lg object-cover" alt="" />
                                                         <div className="flex-1">
                                                             <h4 className="font-bold text-white text-lg">{item.title}</h4>
                                                             <p className="text-primary font-bold text-lg">${item.price.toLocaleString()}</p>
+
+                                                            {/* Selector de Horario en Checkout */}
+                                                            <div className="mt-3">
+                                                                <ScheduleSelector
+                                                                    courseId={item.id}
+                                                                    mode="dropdown"
+                                                                    selectedScheduleId={item.selectedSchedule?.id}
+                                                                    onSelect={(schedule) => updateCartItemSchedule(item.id, schedule)}
+                                                                />
+                                                            </div>
                                                         </div>
                                                         {!directCourse && (
                                                             <button onClick={() => removeFromCart(item.id)} className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-500 transition-all">

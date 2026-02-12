@@ -11,7 +11,7 @@ import "swiper/css/navigation"
 import { SparklesIcon } from "lucide-react"
 import { Autoplay, EffectCoverflow, Navigation, Pagination, } from "swiper/modules"
 
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/ui/Etiquetitas"
 
 interface CardItem {
     src: string;

@@ -41,9 +41,11 @@ const CartSummary: React.FC<CartSummaryProps> = ({
                     </div>
                 ) : (
                     cart.map(item => (
-                        <div key={item.id} className="flex justify-between items-center text-sm">
-                            <span className="text-gray-400">1 x {item.title}</span>
-                            <span className="text-white font-bold">${item.price.toLocaleString()}</span>
+                        <div key={item.id} className="flex flex-col gap-1 border-b border-white/5 pb-2 mb-2 last:border-0 last:pb-0 last:mb-0">
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-gray-400">1 x {item.title}</span>
+                                <span className="text-white font-bold">${item.price.toLocaleString()}</span>
+                            </div>
                         </div>
                     ))
                 )}

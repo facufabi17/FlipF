@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import FlowGradient from "../components/background/AnimacionEntrada";
 import { COURSES } from '../data/courses';
-import { CardCarousel } from '../components/ui/card-carousel';
+import { CardCarousel } from '../components/ui/Tarjetas de Cursos HOME';
 
 const Home: React.FC = () => {
     const featuredCourses = [

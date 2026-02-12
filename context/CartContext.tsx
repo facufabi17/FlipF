@@ -23,6 +23,7 @@ interface CartContextType {
     applyCoupon: (code: string) => boolean;
     removeCoupon: () => void;
     getCheckoutItems: () => CheckoutItem[];
+    updateCartItemSchedule: (itemId: string, schedule: any) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -32,7 +33,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const savedCart = localStorage.getItem('flip_cart');
         return savedCart ? JSON.parse(savedCart) : [];
     });
-    
+
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [activeCoupon, setActiveCoupon] = useState<Coupon | null>(null);
 
@@ -42,10 +43,33 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const addToCart = (item: CartItem) => {
         setCart(prev => {
-            if (prev.some(i => i.id === item.id)) return prev; // Evitar duplicados
+            // Verificar si el item ya existe
+            // Si es un curso con horario, verificamos id + schedule.id
+            const exists = prev.some(i => {
+                if (i.id !== item.id) return false;
+                // Si ambos tienen schedule, deben coincidir
+                if (i.selectedSchedule && item.selectedSchedule) {
+                    return i.selectedSchedule.id === item.selectedSchedule.id;
+                }
+                // Si ninguno tiene schedule, es el mismo item
+                if (!i.selectedSchedule && !item.selectedSchedule) return true;
+
+                return false;
+            });
+
+            if (exists) return prev; // Evitar duplicados exactos
             return [...prev, item];
         });
         setIsCartOpen(true); // Abrir carrito al agregar
+    };
+
+    const updateCartItemSchedule = (itemId: string, schedule: any) => {
+        setCart(prev => prev.map(item => {
+            if (item.id === itemId) {
+                return { ...item, selectedSchedule: schedule };
+            }
+            return item;
+        }));
     };
 
     const removeFromCart = (id: string) => {
@@ -163,7 +187,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             activeCoupon,
             applyCoupon,
             removeCoupon,
-            getCheckoutItems
+            getCheckoutItems,
+            updateCartItemSchedule
         }}>
             {children}
         </CartContext.Provider>

@@ -6,7 +6,7 @@ import { useCart } from '../context/CartContext';
 import AnimacionCian from '../components/background/AnimacionCian';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
-import { CourseTimeline } from '../components/ui/course-timeline';
+import { CourseTimeline } from '../components/ui/Linea de Cursos ACADEMIA';
 
 // --- Types & Data for Career Paths ---
 interface CareerStage {

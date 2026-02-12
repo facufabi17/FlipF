@@ -14,11 +14,13 @@ interface DbProfile {
     completed_modules: Record<string, string[]>;
     certificates: Record<string, string>;
     dni: string;
+    avatar_url?: string;
 }
 
 interface AuthContextType {
     user: User | null;
     login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
+    loginWithGoogle: () => Promise<{ success: boolean; message?: string }>;
     register: (firstName: string, lastName: string, email: string, password: string, dni?: string) => Promise<{ success: boolean; message: string }>;
     logout: () => Promise<void>;
     enrollInCourse: (courseId: string) => Promise<void>;
@@ -69,7 +71,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 ownedResources: profileData?.owned_resources || [],
                 progress: profileData?.completed_modules || {},
                 certificates: profileData?.certificates || {},
-                dni: profileData?.dni
+                dni: profileData?.dni,
+                avatar_url: profileData?.avatar_url || supabaseUser.user_metadata?.avatar_url || supabaseUser.user_metadata?.picture
             });
             return true;
         } catch (err) {
@@ -175,6 +178,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } catch (error: any) {
             console.error("Login error:", error);
             return { success: false, message: error.message || "Error al iniciar sesión" };
+        }
+    };
+
+    const loginWithGoogle = async () => {
+        try {
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.origin,
+                    queryParams: {
+                        access_type: 'offline',
+                        prompt: 'consent',
+                    },
+                },
+            });
+
+            if (error) throw error;
+            return { success: true };
+        } catch (error: any) {
+            console.error("Google Login error:", error);
+            return { success: false, message: error.message || "Error al iniciar sesión con Google" };
         }
     };
 
@@ -396,7 +420,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     return (
         <AuthContext.Provider value={{
-            user, login, register, logout, enrollInCourse, addResourceToUser,
+            user, login, loginWithGoogle, register, logout, enrollInCourse, addResourceToUser,
             markModuleCompleted, updateProfile, purchaseItems, issueCertificate, isAuthenticated: !!user, loading,
             createOrder: async (items: any[], total: number, paymentMethod: string, status: 'pending' | 'approved' = 'pending', billingData?: any) => {
                 if (!user) return null;

@@ -67,6 +67,15 @@ export interface Course {
     modules: CourseModule[];
 }
 
+export interface CourseSchedule {
+    id: string;
+    course_id: string;
+    day_of_week: string;
+    start_time: string;
+    end_time: string;
+    capacity: number;
+}
+
 // --- NUEVO: Recursos de Pago ---
 export interface PaidResource {
     id: string;
@@ -86,6 +95,7 @@ export interface CartItem {
     price: number;
     image: string;
     type: 'course' | 'resource';
+    selectedSchedule?: CourseSchedule | null;
 }
 
 export interface User {
@@ -100,6 +110,7 @@ export interface User {
     progress?: Record<string, string[]>;
     certificates?: Record<string, string>; // courseId -> certificateId
     dni?: string;
+    avatar_url?: string;
 }
 
 export interface OrderItem {
@@ -107,6 +118,8 @@ export interface OrderItem {
     title: string;
     type: 'course' | 'resource';
     price: number;
+    schedule_id?: string;
+    schedule_details?: string; // Para mostrar en historial sin join
 }
 
 export interface Order {

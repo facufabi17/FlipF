@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { COURSES } from '../data/courses';
+import ScheduleSelector from '../components/ui/Horarios de Cursos';
 
 interface CourseDetailsProps {
     onShowToast: (text: string, type?: 'success' | 'error') => void;
@@ -26,6 +27,10 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ onShowToast }) => {
     // Calcular total de lecciones para mostrar
     const totalLessons = selectedCourse.modules.reduce((acc, mod) => acc + mod.lessons.length, 0);
 
+    // Estado para horario seleccionado
+    const [selectedSchedule, setSelectedSchedule] = React.useState<any | null>(null);
+    const [requiresSchedule, setRequiresSchedule] = React.useState(false);
+
     const handleAddToCartClick = () => {
         // Obligar inicio de sesión
         if (!isAuthenticated) {
@@ -39,12 +44,19 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ onShowToast }) => {
             return;
         }
 
+        // Validar selección de horario si es requerido
+        if (requiresSchedule && !selectedSchedule) {
+            onShowToast('Por favor selecciona un horario para cursar', 'error');
+            return;
+        }
+
         addToCart({
             id: selectedCourse.id,
             title: selectedCourse.title,
             price: selectedCourse.price,
             image: selectedCourse.image,
-            type: 'course'
+            type: 'course',
+            selectedSchedule: selectedSchedule // Pasamos el horario seleccionado
         });
 
         onShowToast('Curso agregado al carrito', 'success');
@@ -149,6 +161,16 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ onShowToast }) => {
                                         </div>
                                     </div>
 
+                                    {/* Selector de Horarios (Importación dinámica o directa) */}
+                                    <React.Suspense fallback={<div className="h-20 bg-white/5 animate-pulse rounded-xl mb-6"></div>}>
+                                        <ScheduleSelector
+                                            courseId={selectedCourse.id}
+                                            onSelect={setSelectedSchedule}
+                                            selectedScheduleId={selectedSchedule?.id}
+                                            onSchedulesFound={setRequiresSchedule}
+                                        />
+                                    </React.Suspense>
+
                                     <ul className="space-y-4 mb-6">
                                         <li className="flex items-start gap-3 text-gray-300 text-sm">
                                             <span className="material-symbols-outlined text-[#00F5F1] text-lg mt-0.5">check_circle</span>
@@ -188,10 +210,15 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ onShowToast }) => {
                                         ) : (
                                             <button
                                                 onClick={handleAddToCartClick}
-                                                className="w-full py-4 rounded-xl bg-[#00F5F1]/10 text-[#00F5F1] font-bold text-lg border border-[#00F5F1]/50 hover:bg-[#00F5F1] hover:text-black transition-all flex items-center justify-center gap-2 group"
+                                                disabled={requiresSchedule && !selectedSchedule}
+                                                className={`w-full py-4 rounded-xl font-bold text-lg border transition-all flex items-center justify-center gap-2 group
+                                                    ${requiresSchedule && !selectedSchedule
+                                                        ? 'bg-gray-800 text-gray-500 border-gray-700 cursor-not-allowed opacity-50'
+                                                        : 'bg-[#00F5F1]/10 text-[#00F5F1] border-[#00F5F1]/50 hover:bg-[#00F5F1] hover:text-black'
+                                                    }`}
                                             >
                                                 <span className="material-symbols-outlined group-hover:scale-110 transition-transform">add_shopping_cart</span>
-                                                Agregar al Carrito
+                                                {requiresSchedule && !selectedSchedule ? 'Elige un horario' : 'Agregar al Carrito'}
                                             </button>
                                         )}
 
