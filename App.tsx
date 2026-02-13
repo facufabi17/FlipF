@@ -12,6 +12,8 @@ import { CartProvider } from './context/CartContext';
 import AuthHandler from './context/AuthHandler';
 import ScrollToTop from './components/ScrollToTop';
 import LoadingSpinner from './components/LoadingSpinner';
+import GoogleAnalytics from './components/GoogleAnalytics';
+
 
 // Lazy Load Pages
 import Home from './pages/Home';
@@ -54,7 +56,9 @@ const App: React.FC = () => {
         <AuthProvider>
             <CartProvider>
                 <HashRouter>
+                    <GoogleAnalytics />
                     <ScrollToTop />
+
                     <AuthHandler />
                     <div className="flex flex-col min-h-screen">
                         <Navbar />
