@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://flip-f.vercel.app/sitemap.xml
