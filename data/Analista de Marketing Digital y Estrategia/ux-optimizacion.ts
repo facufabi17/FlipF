@@ -7,6 +7,6 @@ export const UX_OPTIMIZACION: Course = {
     price: 55000,
     category: 'Marketing',
     level: 'Intermedio',
-    image: 'https://images.unsplash.com/photo-1586717791821-3f44a5638d0f?auto=format&fit=crop&q=80&w=800',
+    image: '/img-cources/mkt-ux.webp',
     modules: []
 };

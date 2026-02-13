@@ -7,6 +7,6 @@ export const GESTION_REDES: Course = {
     price: 55000,
     category: 'Marketing',
     level: 'Intermedio',
-    image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&q=80&w=800',
+    image: '/img-cources/mkt-ads.webp',
     modules: []
 };

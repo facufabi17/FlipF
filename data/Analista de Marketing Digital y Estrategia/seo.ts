@@ -7,6 +7,6 @@ export const SEO: Course = {
     price: 65000,
     category: 'Marketing',
     level: 'Avanzado',
-    image: 'https://images.unsplash.com/photo-1571786256017-aee7a0c009b6?auto=format&fit=crop&q=80&w=800',
+    image: '/img-cources/mkt-seo.webp',
     modules: []
 };

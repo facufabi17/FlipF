@@ -7,6 +7,6 @@ export const INVESTIGACION_AUDIENCIAS: Course = {
     price: 45000,
     category: 'Marketing',
     level: 'Principiante',
-    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800',
+    image: '/img-cources/mkt-research.webp',
     modules: []
 };

@@ -7,6 +7,6 @@ export const STORYTELLING_DATOS: Course = {
     price: 75000,
     category: 'Negocios',
     level: 'Avanzado',
-    image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&q=80&w=800',
+    image: '/img-cources/data-story.webp',
     modules: []
 };

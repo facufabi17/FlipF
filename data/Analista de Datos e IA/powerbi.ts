@@ -7,6 +7,6 @@ export const POWERBI: Course = {
     price: 60000,
     category: 'Datos',
     level: 'Intermedio',
-    image: 'https://images.unsplash.com/photo-1543286386-713df548e9cc?auto=format&fit=crop&q=80&w=800',
+    image: '/img-cources/data-powerbi.webp',
     modules: []
 };

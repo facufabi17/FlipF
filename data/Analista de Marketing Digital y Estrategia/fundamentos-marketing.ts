@@ -7,7 +7,7 @@ export const FUNDAMENTOS_MARKETING: Course = {
     price: 45000,
     category: 'Marketing',
     level: 'Principiante',
-    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800',
+    image: '/img-cources/mkt-fundamentals.webp',
     modules: [
         {
             id: 'mod1',

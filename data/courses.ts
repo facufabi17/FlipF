@@ -60,6 +60,6 @@ export const COURSES: Course[] = [
     NOSQL_DATABASES,
     INGENIERIA_DATOS,
 
-    // Standalone
-    COURSE_OPERATIONS
+    // Otros
+    //COURSE_OPERATIONS
 ];

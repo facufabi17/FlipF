@@ -7,6 +7,6 @@ export const DESARROLLO_WEB_ESTRATEGICO: Course = {
     price: 55000,
     category: 'Desarrollo',
     level: 'Intermedio',
-    image: 'https://images.unsplash.com/photo-1547658719-da2b51169166?auto=format&fit=crop&q=80&w=800',
+    image: '/img-cources/mkt-web.webp',
     modules: []
 };

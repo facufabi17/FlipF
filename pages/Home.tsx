@@ -17,7 +17,6 @@ const Home: React.FC = () => {
         COURSES[14], // AI Operativa
         COURSES[17], // PowerBI
         COURSES[23],
-        COURSES[24],
     ];
 
     const featuredCoursesContent = featuredCourses.map(course => ({

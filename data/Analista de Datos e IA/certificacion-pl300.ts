@@ -7,6 +7,6 @@ export const CERTIFICACION_PL300: Course = {
     price: 60000,
     category: 'Datos',
     level: 'Intermedio',
-    image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=800',
+    image: '/img-cources/data-pl300.webp',
     modules: []
 };

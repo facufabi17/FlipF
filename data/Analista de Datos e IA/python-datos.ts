@@ -7,6 +7,6 @@ export const PYTHON_DATOS: Course = {
     price: 50000,
     category: 'Datos',
     level: 'Principiante',
-    image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&q=80&w=800',
+    image: '/img-cources/data-python.webp',
     modules: []
 };

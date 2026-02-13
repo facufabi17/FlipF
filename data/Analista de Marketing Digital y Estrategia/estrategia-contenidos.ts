@@ -7,6 +7,6 @@ export const ESTRATEGIA_CONTENIDOS: Course = {
     price: 45000,
     category: 'Marketing',
     level: 'Principiante',
-    image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=800',
+    image: '/img-cources/mkt-content.webp',
     modules: []
 };

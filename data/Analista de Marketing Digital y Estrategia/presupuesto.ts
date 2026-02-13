@@ -7,6 +7,6 @@ export const PRESUPUESTO: Course = {
     price: 65000,
     category: 'Negocios',
     level: 'Avanzado',
-    image: 'https://images.unsplash.com/photo-1554224155-984bb41e1d08?auto=format&fit=crop&q=80&w=800',
+    image: '/img-cources/mkt-budget.webp',
     modules: []
 };

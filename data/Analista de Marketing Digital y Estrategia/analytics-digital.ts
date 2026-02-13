@@ -7,6 +7,6 @@ export const ANALYTICS_DIGITAL: Course = {
     price: 65000,
     category: 'Datos',
     level: 'Avanzado',
-    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800',
+    image: '/img-cources/mkt-analytics.webp',
     modules: []
 };

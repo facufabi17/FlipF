@@ -7,6 +7,6 @@ export const GROWTH_STRATEGIES: Course = {
     price: 65000,
     category: 'Growth',
     level: 'Avanzado',
-    image: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&q=80&w=800',
+    image: '/img-cources/mkt-growth.webp',
     modules: []
 };

@@ -7,6 +7,6 @@ export const AUTOMATIZACION_MAIL: Course = {
     price: 55000,
     category: 'Marketing',
     level: 'Intermedio',
-    image: 'https://images.unsplash.com/photo-1563986768494-4dee46a385bd?auto=format&fit=crop&q=80&w=800',
+    image: '/img-cources/mkt-automation.webp',
     modules: []
 };

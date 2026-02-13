@@ -7,6 +7,6 @@ export const SERVIDORES_AVANZADOS: Course = {
     price: 60000,
     category: 'Desarrollo',
     level: 'Intermedio',
-    image: 'https://images.unsplash.com/photo-1558494949-efc025793ad7?auto=format&fit=crop&q=80&w=800',
+    image: '/img-cources/data-server.webp',
     modules: []
 };

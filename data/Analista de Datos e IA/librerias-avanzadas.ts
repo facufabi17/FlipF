@@ -7,6 +7,6 @@ export const LIBRERIAS_AVANZADAS: Course = {
     price: 60000,
     category: 'Datos',
     level: 'Intermedio',
-    image: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&q=80&w=800',
+    image: '/img-cources/data-libs.webp',
     modules: []
 };

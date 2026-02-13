@@ -7,6 +7,6 @@ export const AI_OPERATIVA: Course = {
     price: 50000,
     category: 'IA',
     level: 'Principiante',
-    image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=800',
+    image: '/img-cources/data-ai.webp',
     modules: []
 };

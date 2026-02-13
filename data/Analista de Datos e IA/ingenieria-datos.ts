@@ -7,6 +7,6 @@ export const INGENIERIA_DATOS: Course = {
     price: 75000,
     category: 'Desarrollo',
     level: 'Avanzado',
-    image: 'https://images.unsplash.com/photo-1558494949-efc025793ad7?auto=format&fit=crop&q=80&w=800',
+    image: '/img-cources/data-eng.webp',
     modules: []
 };
