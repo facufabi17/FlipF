@@ -40,7 +40,7 @@ const Navbar: React.FC = () => {
         <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-background-dark/80 backdrop-blur-md">
             <div className="flex h-16 items-center justify-between px-6 lg:px-12 max-w-7xl mx-auto">
                 {/* Logo */}
-                <div className="flex items-center gap-2 cursor-pointer group" onClick={() => handleNavigate('/')}>
+                <div id="nav-logo" className="flex items-center gap-2 cursor-pointer group" onClick={() => handleNavigate('/')}>
                     <div className="flex items-center justify-center size-8 rounded-lg bg-primary/20 border border-white/5">
                         <svg className="w-8 h-8 logo-header transition-transform group-hover:rotate-[180deg] duration-500" viewBox="0 0 1080 1080">
                             <defs>
@@ -54,32 +54,32 @@ const Navbar: React.FC = () => {
 
                 {/* Desktop Nav */}
                 <nav className="hidden md:flex items-center gap-8">
-                    <Link to="/" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Inicio</Link>
-                    <Link to="/academia" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Academia</Link>
-                    <Link to="/consultas" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Consultas</Link>
+                    <Link id="nav-home" to="/" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Inicio</Link>
+                    <Link id="nav-academy" to="/academia" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Academia</Link>
+                    <Link id="nav-consulting" to="/consultas" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Consultas</Link>
                     {/*Academia-text-[#00F5F1]*/}
                     {/*Consultas-text-[#842DB4]*/}
                     {/* Recursos Dropdown */}
                     <div className="relative group h-full flex items-center">
-                        <button className="text-sm font-medium text-gray-300 hover:text-white transition-colors flex items-center gap-1 py-4">
+                        <button id="nav-resources-dropdown" className="text-sm font-medium text-gray-300 hover:text-white transition-colors flex items-center gap-1 py-4">
                             Recursos
                             <svg className="w-3 h-3 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
                         <div className="absolute top-full left-0 hidden group-hover:block w-44 bg-[#1b131f] border border-white/5 rounded-xl shadow-2xl py-2 z-[100]">
-                            <Link to="/recursos-gratis" className="w-full text-left block px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors">Recursos Gratis</Link>
-                            <Link to="/recursos-pago" className="w-full text-left block px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors">Recursos de Pago</Link>
+                            <Link id="nav-resources-free" to="/recursos-gratis" className="w-full text-left block px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors">Recursos Gratis</Link>
+                            <Link id="nav-resources-paid" to="/recursos-pago" className="w-full text-left block px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors">Recursos de Pago</Link>
                         </div>
                     </div>
-                    <Link to="/nosotros" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Nosotros</Link>
+                    <Link id="nav-about" to="/nosotros" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Nosotros</Link>
 
                 </nav>
 
                 {/* Acciones */}
                 <div className="flex items-center gap-4">
                     {/* Carrito */}
-                    <Link to="/checkout" className="relative p-2 text-gray-300 hover:text-white transition-colors group">
+                    <Link id="nav-cart" to="/checkout" className="relative p-2 text-gray-300 hover:text-white transition-colors group">
                         <span className="material-symbols-outlined">shopping_cart</span>
                         {itemCount > 0 && (
                             <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-white shadow-sm ring-2 ring-[#1b131f]">
@@ -101,6 +101,7 @@ const Navbar: React.FC = () => {
                     ) : isAuthenticated ? (
                         <div className="relative" ref={dropdownRef}>
                             <button
+                                id="nav-user-menu"
                                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                                 className="flex items-center gap-2 md:gap-3 focus:outline-none group p-1 md:pr-2 rounded-full hover:bg-white/5 transition-colors"
                             >
@@ -160,8 +161,8 @@ const Navbar: React.FC = () => {
                         </div>
                     ) : (
                         <>
-                            <Link to="/login" className="hidden md:block text-sm font-medium text-white hover:text-gray-300 transition-colors">Iniciar Sesión</Link>
-                            <Link to="/register" className="bg-primary/20 hover:bg-primary/40 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all border border-white/5">
+                            <Link id="nav-login-btn" to="/login" className="hidden md:block text-sm font-medium text-white hover:text-gray-300 transition-colors">Iniciar Sesión</Link>
+                            <Link id="nav-register-btn" to="/register" className="bg-primary/20 hover:bg-primary/40 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all border border-white/5">
                                 Empezar
                             </Link>
                         </>

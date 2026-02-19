@@ -49,6 +49,10 @@ const Consulting: React.FC<ConsultingProps> = ({ onShowToast }) => {
 
       .then((result) => {
         onShowToast('Solicitud enviada correctamente');
+        window.dataLayer?.push({
+          event: 'form_submission',
+          form_name: 'Consulting Application'
+        });
         form.current?.reset();
 
       }, (error) => {

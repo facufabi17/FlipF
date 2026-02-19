@@ -23,24 +23,24 @@ const Footer: React.FC = () => {
                 <div className="flex gap-12 flex-wrap">
                     <div className="flex flex-col gap-3">
                         <h4 className="text-white font-bold text-sm">Plataforma</h4>
-                        <Link to="/" className="text-gray-400 text-sm hover:text-primary transition-colors">Inicio</Link>
-                        <Link to="/recursos-gratis" className="text-gray-400 text-sm hover:text-primary transition-colors">Recursos Gratis</Link>
-                        <Link to="/recursos-pago" className="text-gray-400 text-sm hover:text-primary transition-colors">Recursos de Pago</Link>
-                        <Link to="/academia" className="text-gray-400 text-sm hover:text-primary transition-colors">Cursos</Link>
-                        <Link to="/consultas" className="text-gray-400 text-sm hover:text-primary transition-colors">Consultas</Link>
-                        <Link to="/login" className="text-primary font-medium text-sm hover:text-accent transition-colors">Login Alumnos</Link>
+                        <Link id="footer-home" to="/" className="text-gray-400 text-sm hover:text-primary transition-colors">Inicio</Link>
+                        <Link id="footer-resources-free" to="/recursos-gratis" className="text-gray-400 text-sm hover:text-primary transition-colors">Recursos Gratis</Link>
+                        <Link id="footer-resources-paid" to="/recursos-pago" className="text-gray-400 text-sm hover:text-primary transition-colors">Recursos de Pago</Link>
+                        <Link id="footer-academy" to="/academia" className="text-gray-400 text-sm hover:text-primary transition-colors">Cursos</Link>
+                        <Link id="footer-consulting" to="/consultas" className="text-gray-400 text-sm hover:text-primary transition-colors">Consultas</Link>
+                        <Link id="footer-login" to="/login" className="text-primary font-medium text-sm hover:text-accent transition-colors">Login Alumnos</Link>
                     </div>
                     <div className="flex flex-col gap-3">
                         <h4 className="text-white font-bold text-sm">Compañía</h4>
-                        <Link to="/nosotros" className="text-gray-400 text-sm hover:text-primary transition-colors">Nosotros</Link>
-                        <a className="text-gray-400 text-sm hover:text-primary transition-colors" href="#">Carreras?</a>
-                        <a className="text-gray-400 text-sm hover:text-primary transition-colors" href="#">Trabaja Con Nosotros?</a>
-                        <a className="text-gray-400 text-sm hover:text-primary transition-colors" href={`mailto:${CONTACT_INFO.email}`}>Email Corporativo</a>
+                        <Link id="footer-about" to="/nosotros" className="text-gray-400 text-sm hover:text-primary transition-colors">Nosotros</Link>
+                        <a id="footer-careers" className="text-gray-400 text-sm hover:text-primary transition-colors" href="#">Carreras?</a>
+                        <a id="footer-jobs" className="text-gray-400 text-sm hover:text-primary transition-colors" href="#">Trabaja Con Nosotros?</a>
+                        <a id="footer-email" className="text-gray-400 text-sm hover:text-primary transition-colors" href={`mailto:${CONTACT_INFO.email}`}>Email Corporativo</a>
                     </div>
                     <div className="flex flex-col gap-3">
                         <h4 className="text-white font-bold text-sm">Legal</h4>
-                        <Link to="/privacidad" className="text-gray-400 text-sm hover:text-primary transition-colors" >Privacidad</Link>
-                        <Link to="/terminos" className="text-gray-400 text-sm hover:text-primary transition-colors" >Términos</Link>
+                        <Link id="footer-privacy" to="/privacidad" className="text-gray-400 text-sm hover:text-primary transition-colors" >Privacidad</Link>
+                        <Link id="footer-terms" to="/terminos" className="text-gray-400 text-sm hover:text-primary transition-colors" >Términos</Link>
                     </div>
                 </div>
             </div>

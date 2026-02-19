@@ -3,6 +3,7 @@
 interface Window {
     MercadoPago: any;
     paymentBrickController: any;
+    dataLayer: any[];
 }
 
 interface ImportMetaEnv {

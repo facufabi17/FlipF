@@ -100,7 +100,7 @@ const Login: React.FC<LoginProps> = ({ onShowToast }) => {
                                 <h2 className="text-3xl font-bold text-center text-white mb-2">Recuperar Contraseña</h2>
                                 <p className="text-center text-text-muted mb-8">Ingresa tu email y te enviaremos un enlace.</p>
 
-                                <form onSubmit={handleSubmit} className="space-y-4">
+                                <form id="form-recovery" onSubmit={handleSubmit} className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-300 mb-1">Correo Electrónico</label>
                                         <input
@@ -112,6 +112,7 @@ const Login: React.FC<LoginProps> = ({ onShowToast }) => {
                                         />
                                     </div>
                                     <button
+                                        id="btn-recovery-submit"
                                         type="submit"
                                         disabled={isSubmitting}
                                         className="w-full bg-primary hover:bg-purple-600 text-white font-bold py-3.5 rounded-lg transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
@@ -135,6 +136,7 @@ const Login: React.FC<LoginProps> = ({ onShowToast }) => {
 
                                 {/* Botón de Google */}
                                 <button
+                                    id="btn-login-google"
                                     onClick={handleGoogleLogin}
                                     type="button"
                                     className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-100 text-gray-900 font-bold py-3.5 rounded-lg transition-all mb-6 group border border-transparent hover:shadow-lg hover:border-gray-300"
@@ -166,7 +168,7 @@ const Login: React.FC<LoginProps> = ({ onShowToast }) => {
                                     <div className="h-px bg-white/10 flex-1"></div>
                                 </div>
 
-                                <form onSubmit={handleSubmit} className="space-y-4">
+                                <form id="form-login" onSubmit={handleSubmit} className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-300 mb-1">Correo Electrónico</label>
                                         <input
@@ -201,6 +203,7 @@ const Login: React.FC<LoginProps> = ({ onShowToast }) => {
                                         </button>
                                     </div>
                                     <button
+                                        id="btn-login-submit"
                                         type="submit"
                                         disabled={isSubmitting}
                                         className="w-full bg-primary hover:bg-purple-600 text-white font-bold py-3.5 rounded-lg transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
@@ -209,7 +212,7 @@ const Login: React.FC<LoginProps> = ({ onShowToast }) => {
                                     </button>
                                 </form>
                                 <p className="mt-6 text-center text-sm text-gray-400">
-                                    ¿No tienes cuenta? <Link to="/register" className="text-white font-bold hover:underline">Regístrate</Link>
+                                    ¿No tienes cuenta? <Link id="link-to-register" to="/register" className="text-white font-bold hover:underline">Regístrate</Link>
                                 </p>
                             </div>
                         )}

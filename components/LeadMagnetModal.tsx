@@ -59,6 +59,12 @@ const LeadMagnetModal: React.FC<LeadMagnetModalProps> = ({ resource, isOpen, onC
             }
 
             // 3. Éxito
+            window.dataLayer?.push({
+                event: 'form_submission',
+                form_name: 'Lead Magnet',
+                resource_name: resource.title
+            });
+
             setIsSubmitting(false);
             setIsSuccess(true);
             setTimeout(() => {

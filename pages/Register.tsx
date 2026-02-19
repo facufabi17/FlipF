@@ -70,6 +70,7 @@ const Register: React.FC<RegisterProps> = ({ onShowToast }) => {
 
                         {/* Botón de Google */}
                         <button
+                            id="btn-register-google"
                             onClick={handleGoogleLogin}
                             type="button"
                             className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-100 text-gray-900 font-bold py-3.5 rounded-lg transition-all mb-6 group border border-transparent hover:shadow-lg hover:border-gray-300"
@@ -101,7 +102,7 @@ const Register: React.FC<RegisterProps> = ({ onShowToast }) => {
                             <div className="h-px bg-white/10 flex-1"></div>
                         </div>
 
-                        <form onSubmit={handleSubmit}>
+                        <form id="form-register" onSubmit={handleSubmit}>
                             <div className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
@@ -163,13 +164,13 @@ const Register: React.FC<RegisterProps> = ({ onShowToast }) => {
                                         ⚠️ Esta información no se podrá modificar una vez guardada.
                                     </p>
                                 </div>
-                                <button type="submit" disabled={loading} className="w-full bg-primary hover:bg-purple-600 text-white font-bold py-3.5 rounded-lg transition-all shadow-lg shadow-primary/20 disabled:opacity-50">
+                                <button id="btn-register-submit" type="submit" disabled={loading} className="w-full bg-primary hover:bg-purple-600 text-white font-bold py-3.5 rounded-lg transition-all shadow-lg shadow-primary/20 disabled:opacity-50">
                                     {loading ? 'Creando cuenta...' : 'Registrarse'}
                                 </button>
                             </div>
                         </form>
                         <p className="mt-6 text-center text-sm text-gray-400">
-                            ¿Ya tienes cuenta? <Link to="/login" className="text-white font-bold hover:underline">Inicia Sesión</Link>
+                            ¿Ya tienes cuenta? <Link id="link-to-login" to="/login" className="text-white font-bold hover:underline">Inicia Sesión</Link>
                         </p>
                     </div>
                 </div>

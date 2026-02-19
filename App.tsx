@@ -12,6 +12,7 @@ import { CartProvider } from './context/CartContext';
 import AuthHandler from './context/AuthHandler';
 import ScrollToTop from './components/ScrollToTop';
 import LoadingSpinner from './components/LoadingSpinner';
+import RouteTracker from './components/RouteTracker';
 
 // Lazy Load Pages
 import Home from './pages/Home';
@@ -55,6 +56,7 @@ const App: React.FC = () => {
             <CartProvider>
                 <HashRouter>
                     <ScrollToTop />
+                    <RouteTracker />
                     <AuthHandler />
                     <div className="flex flex-col min-h-screen">
                         <Navbar />
