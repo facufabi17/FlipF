@@ -331,6 +331,15 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 }
 
                 onShowToast('¡Pago exitoso!', 'success');
+
+                const purchaseData = {
+                    value: finalTotal,
+                    items: directCourse
+                        ? [{ item_id: directCourse.id, item_name: directCourse.title, price: directCourse.price, quantity: 1 }]
+                        : cart.map(item => ({ item_id: item.id, item_name: item.title, price: item.price, quantity: 1 }))
+                };
+                sessionStorage.setItem('lastPurchaseData', JSON.stringify(purchaseData));
+
                 // Navegar con datos
                 navigate(`/pago_apro?payment_id=${data.id}&status=${data.status}&external_reference=${query.split('=')[1] || ''}`, { replace: true });
 
@@ -408,6 +417,14 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 sessionStorage.removeItem('checkout_step');
                 sessionStorage.removeItem('checkout_form');
                 setCurrentStep(1);
+
+                const purchaseData = {
+                    value: finalTotal,
+                    items: directCourse
+                        ? [{ item_id: directCourse.id, item_name: directCourse.title, price: directCourse.price, quantity: 1 }]
+                        : cart.map(item => ({ item_id: item.id, item_name: item.title, price: item.price, quantity: 1 }))
+                };
+                sessionStorage.setItem('lastPurchaseData', JSON.stringify(purchaseData));
 
                 // Construir URL de éxito con datos
                 let successUrl = '/pago_apro';
@@ -675,6 +692,14 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 sessionStorage.removeItem('checkout_step');
                 sessionStorage.removeItem('checkout_form');
                 setCurrentStep(1);
+
+                const purchaseData = {
+                    value: finalTotal,
+                    items: directCourse
+                        ? [{ item_id: directCourse.id, item_name: directCourse.title, price: directCourse.price, quantity: 1 }]
+                        : cart.map(item => ({ item_id: item.id, item_name: item.title, price: item.price, quantity: 1 }))
+                };
+                sessionStorage.setItem('lastPurchaseData', JSON.stringify(purchaseData));
 
                 navigate('/pago_apro');
                 onShowToast('¡Pago exitoso!', 'success');

@@ -1,34 +1,24 @@
 
 import React, { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const PaymentSuccess: React.FC = () => {
     const navigate = useNavigate();
-    const location = useLocation();
 
     useEffect(() => {
-        const searchParams = new URLSearchParams(location.search);
-        const transactionId = searchParams.get('payment_id') || searchParams.get('external_reference') || '';
-
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({
-            event: 'purchase',
-            ecommerce: {
-                transaction_id: transactionId,
-                value: 0, // Placeholder a conectar con valores reales
-                currency: 'ARS',
-                items: [] // Placeholder a conectar con items reales
-            }
-        });
-
         // 1. Notificar a la pestaña principal (Checkout)
         localStorage.setItem('mp_payment_success', Date.now().toString());
 
-        // 2. Si es un popup, intentar cerrarlo
+        // También podemos usar BroadcastChannel como alternativa más robusta
+        const channel = new BroadcastChannel('payment_status_channel');
+        channel.postMessage('SUCCESS');
+        channel.close();
+
+        // 2. Cerrar si es un popup
         if (window.opener) {
             window.close();
         } else {
-            // 3. O redirigir a mis cursos directamente si no es popup
+            // Si no es popup, redirigir
             navigate('/mis-cursos');
         }
     }, [navigate]);

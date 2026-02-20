@@ -14,7 +14,31 @@ const PagoAprobado = () => {
         const channel = new BroadcastChannel('payment_status');
         channel.postMessage({ type: 'PAYMENT_SUCCESS' });
         channel.close();
-    }, []);
+
+        // Recuperar datos reales de la compra
+        const savedPurchase = sessionStorage.getItem('lastPurchaseData');
+        if (savedPurchase) {
+            try {
+                const purchaseData = JSON.parse(savedPurchase);
+
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({
+                    event: 'purchase',
+                    ecommerce: {
+                        transaction_id: paymentId || externalReference || `TR-${Date.now()}`,
+                        value: purchaseData.value,
+                        currency: 'ARS',
+                        items: purchaseData.items
+                    }
+                });
+
+                // Limpiar para que no se duplique si el usuario recarga la página
+                sessionStorage.removeItem('lastPurchaseData');
+            } catch (e) {
+                console.error("Error parsing purchase data", e);
+            }
+        }
+    }, [paymentId, externalReference]);
 
     return (
         <div className="min-h-screen bg-black flex items-center justify-center p-4">
