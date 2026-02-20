@@ -7,6 +7,9 @@ import AnimacionCian from '../components/background/AnimacionCian';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { CourseTimeline } from '../components/ui/Linea de Cursos ACADEMIA';
+import { supabase } from '../lib/supabase';
+import ScheduleSelector from '../components/ui/Horarios de Cursos';
+import { CourseSchedule } from '../types';
 
 // --- Types & Data for Career Paths ---
 interface CareerStage {
@@ -126,6 +129,12 @@ const Academy: React.FC = () => {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [activeIncentive, setActiveIncentive] = useState<string | null>(null);
 
+    // --- Schedule Modal State ---
+    const [selectedCourseForSchedule, setSelectedCourseForSchedule] = useState<typeof COURSES[0] | null>(null);
+    const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+    const [selectedSchedule, setSelectedSchedule] = useState<CourseSchedule | null>(null);
+    const [isCheckingSchedules, setIsCheckingSchedules] = useState<string | null>(null);
+
 
     // --- Derived Data ---
     const categories = useMemo(() => {
@@ -185,19 +194,46 @@ const Academy: React.FC = () => {
         // using simple from animations for now
     }, { scope: containerRef });
 
-    const handleAddToCart = (e: React.MouseEvent, course: typeof COURSES[0]) => {
+    const handleAddToCart = async (e: React.MouseEvent, course: typeof COURSES[0]) => {
         e.stopPropagation();
         if (!isAuthenticated) {
             navigate('/login');
             return;
         }
-        addToCart({
-            id: course.id,
-            title: course.title,
-            price: course.price,
-            image: course.image,
-            type: 'course'
-        });
+
+        try {
+            setIsCheckingSchedules(course.id);
+            // Verificar si el curso tiene horarios configurados en BD
+            const { data, error } = await supabase
+                .from('course_schedules')
+                .select('*')
+                .eq('course_id', course.id)
+                .gt('capacity', 0);
+
+            setIsCheckingSchedules(null);
+
+            if (data && data.length > 0) {
+                // El curso tiene horarios disponibles, abrimos el modal
+                setSelectedCourseForSchedule(course);
+                setSelectedSchedule(null); // Limpiar selección previa
+                setIsScheduleModalOpen(true);
+            } else {
+                if (error) {
+                    console.error("Error al consultar horarios", error);
+                }
+                // No tiene horarios o hay error, agregamos directo al carrito
+                addToCart({
+                    id: course.id,
+                    title: course.title,
+                    price: course.price,
+                    image: course.image,
+                    type: 'course'
+                });
+            }
+        } catch (err) {
+            setIsCheckingSchedules(null);
+            console.error("Excepción en handleAddToCart:", err);
+        }
     };
 
     return (
@@ -575,10 +611,18 @@ const Academy: React.FC = () => {
                                                     ) : (
                                                         <button
                                                             onClick={(e) => handleAddToCart(e, course)}
-                                                            className="px-4 py-2 rounded-lg bg-[#00F5F1] text-black font-bold text-sm hover:bg-white transition-colors shadow-[0_0_15px_rgba(0,245,241,0.3)] flex items-center gap-2"
+                                                            disabled={isCheckingSchedules === course.id}
+                                                            className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors flex items-center gap-2 shadow-[0_0_15px_rgba(0,245,241,0.3)] ${isCheckingSchedules === course.id
+                                                                ? 'bg-gray-600 text-gray-300 cursor-wait shadow-none'
+                                                                : 'bg-[#00F5F1] text-black hover:bg-white'
+                                                                }`}
                                                         >
-                                                            <span className="material-symbols-outlined text-sm">add</span>
-                                                            Comprar
+                                                            {isCheckingSchedules === course.id ? (
+                                                                <span className="material-symbols-outlined text-sm animate-spin">hourglass_top</span>
+                                                            ) : (
+                                                                <span className="material-symbols-outlined text-sm">add</span>
+                                                            )}
+                                                            {isCheckingSchedules === course.id ? 'Un momento...' : 'Comprar'}
                                                         </button>
                                                     )}
                                                 </div>
@@ -624,6 +668,68 @@ const Academy: React.FC = () => {
                 </section>
 
             </div>
+
+            {/* Modal de Selección de Horarios */}
+            {isScheduleModalOpen && selectedCourseForSchedule && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
+                    <div className="bg-[#111111] border border-white/10 rounded-2xl p-6 max-w-lg w-full shadow-2xl relative overflow-hidden">
+                        {/* Gradient decorativo */}
+                        <div className="absolute -top-32 -left-32 w-64 h-64 bg-[#00F5F1]/10 rounded-full blur-[80px]"></div>
+
+                        <div className="relative z-10 flex flex-col gap-6">
+                            <h2 className="text-xl font-bold flex items-center gap-2">
+                                <span className="material-symbols-outlined text-[#00F5F1]">event_available</span>
+                                Horarios Disponibles
+                            </h2>
+                            <p className="text-sm text-gray-400 -mt-2">
+                                Seleccioná el horario al que deseás asistir para el curso <span className="text-white font-semibold">"{selectedCourseForSchedule.title}"</span>.
+                            </p>
+
+                            <ScheduleSelector
+                                courseId={selectedCourseForSchedule.id}
+                                onSelect={setSelectedSchedule}
+                                selectedScheduleId={selectedSchedule?.id}
+                                mode="pills"
+                            />
+
+                            <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
+                                <button
+                                    onClick={() => {
+                                        setIsScheduleModalOpen(false);
+                                        setSelectedCourseForSchedule(null);
+                                    }}
+                                    className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition-colors border border-white/10"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        if (!selectedSchedule) return;
+                                        addToCart({
+                                            id: selectedCourseForSchedule.id,
+                                            title: selectedCourseForSchedule.title,
+                                            price: selectedCourseForSchedule.price,
+                                            image: selectedCourseForSchedule.image,
+                                            type: 'course',
+                                            selectedSchedule: selectedSchedule
+                                        });
+                                        setIsScheduleModalOpen(false);
+                                        setSelectedCourseForSchedule(null);
+                                    }}
+                                    disabled={!selectedSchedule}
+                                    className={`px-6 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${selectedSchedule
+                                        ? 'bg-[#00F5F1] text-black hover:bg-white shadow-[0_0_15px_rgba(0,245,241,0.3)]'
+                                        : 'bg-[#00F5F1]/10 text-[#00F5F1]/50 cursor-not-allowed border border-[#00F5F1]/20'
+                                        }`}
+                                >
+                                    <span className="material-symbols-outlined text-sm">add_shopping_cart</span>
+                                    Confirmar y Agregar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

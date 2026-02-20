@@ -42,6 +42,21 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, [cart]);
 
     const addToCart = (item: CartItem) => {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+            event: 'add_to_cart',
+            ecommerce: {
+                currency: 'ARS',
+                value: item.price,
+                items: [{
+                    item_id: item.id,
+                    item_name: item.title,
+                    price: item.price,
+                    quantity: 1
+                }]
+            }
+        });
+
         setCart(prev => {
             // Verificar si el item ya existe
             // Si es un curso con horario, verificamos id + schedule.id

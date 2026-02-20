@@ -6,10 +6,16 @@ const RouteTracker = () => {
 
     useEffect(() => {
         window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({
-            event: 'virtual_pageview',
-            page_path: location.pathname + location.search
-        });
+
+        const timeoutId = setTimeout(() => {
+            window.dataLayer.push({
+                event: 'virtual_pageview',
+                page_path: location.pathname + location.search,
+                page_title: document.title
+            });
+        }, 100);
+
+        return () => clearTimeout(timeoutId);
     }, [location]);
 
     return null;

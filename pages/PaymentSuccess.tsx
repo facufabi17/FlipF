@@ -1,11 +1,26 @@
 
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const PaymentSuccess: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
+        const searchParams = new URLSearchParams(location.search);
+        const transactionId = searchParams.get('payment_id') || searchParams.get('external_reference') || '';
+
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+            event: 'purchase',
+            ecommerce: {
+                transaction_id: transactionId,
+                value: 0, // Placeholder a conectar con valores reales
+                currency: 'ARS',
+                items: [] // Placeholder a conectar con items reales
+            }
+        });
+
         // 1. Notificar a la pestaña principal (Checkout)
         localStorage.setItem('mp_payment_success', Date.now().toString());
 

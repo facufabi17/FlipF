@@ -15,6 +15,7 @@ interface DbProfile {
     certificates: Record<string, string>;
     dni: string;
     avatar_url?: string;
+    deletion_scheduled_at?: string | null;
 }
 
 interface AuthContextType {
@@ -33,6 +34,7 @@ interface AuthContextType {
     loading: boolean;
     createOrder: (items: any[], total: number, paymentMethod: string, status?: 'pending' | 'approved', billingData?: any) => Promise<any>;
     getOrders: () => Promise<any[]>;
+    deleteAccount: () => Promise<{ success: boolean; message?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -61,12 +63,34 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             // Mapeo seguro de tipos usando la estructura implícita de la interfaz DbProfile
             const profileData = data as DbProfile;
 
+            // Si la cuenta estaba programada para eliminarse, la RECUPERAMOS automáticamente
+            if (profileData.deletion_scheduled_at) {
+                console.log("Account was scheduled for deletion. Restoring account automatically...");
+
+                // Actualizar en base de datos para quitar el soft-delete inmediatamente
+                const { error: restoreError } = await supabase
+                    .from('profiles')
+                    .update({ deletion_scheduled_at: null })
+                    .eq('id', supabaseUser.id);
+
+                if (restoreError) {
+                    console.error("Error restoring account:", restoreError);
+                } else {
+                    // Notificar al usuario (usamos alert por simplicidad global en el contexto auth)
+                    window.setTimeout(() => {
+                        window.alert('¡Bienvenido de vuelta! La eliminación de tu cuenta ha sido cancelada.');
+                    }, 500);
+                }
+            }
+
             setUser({
                 id: supabaseUser.id,
                 email: supabaseUser.email || '',
                 name: profileData?.full_name || supabaseUser.user_metadata?.full_name || 'Usuario', // Fallback
-                firstName: profileData?.first_name || supabaseUser.user_metadata?.first_name,
-                lastName: profileData?.last_name || supabaseUser.user_metadata?.last_name,
+                // firstName y lastName con soporte dual para registro por correo (first_name) y Google (given_name)
+                firstName: profileData?.first_name || supabaseUser.user_metadata?.first_name || supabaseUser.user_metadata?.given_name,
+                lastName: profileData?.last_name || supabaseUser.user_metadata?.last_name || supabaseUser.user_metadata?.family_name,
+
                 enrolledCourses: profileData?.enrolled_courses || [],
                 ownedResources: profileData?.owned_resources || [],
                 progress: profileData?.completed_modules || {},
@@ -209,6 +233,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             await supabase.auth.signOut();
         } catch (error) {
             console.error("Error signing out:", error);
+        }
+    };
+
+    const deleteAccount = async () => {
+        try {
+            const { error } = await supabase.rpc('schedule_account_deletion');
+            if (error) throw error;
+
+            // Si la llamada fue exitosa cierro la sesión del usuario para "desactivarlo"
+            await logout();
+            return { success: true, message: "Cuenta programada para eliminación exitosamente." };
+        } catch (error: any) {
+            console.error("Error scheduling account deletion:", error);
+            return { success: false, message: error.message || "No se pudo solicitar la eliminación de la cuenta." };
         }
     };
 
@@ -421,7 +459,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return (
         <AuthContext.Provider value={{
             user, login, loginWithGoogle, register, logout, enrollInCourse, addResourceToUser,
-            markModuleCompleted, updateProfile, purchaseItems, issueCertificate, isAuthenticated: !!user, loading,
+            markModuleCompleted, updateProfile, purchaseItems, issueCertificate, deleteAccount, isAuthenticated: !!user, loading,
             createOrder: async (items: any[], total: number, paymentMethod: string, status: 'pending' | 'approved' = 'pending', billingData?: any) => {
                 if (!user) return null;
                 const { data, error } = await supabase

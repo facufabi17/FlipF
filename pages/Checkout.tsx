@@ -779,6 +779,22 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 onShowToast('El carrito está vacío', 'error');
                 return;
             }
+
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({
+                event: 'begin_checkout',
+                ecommerce: {
+                    currency: 'ARS',
+                    value: finalTotal,
+                    items: cart.map(item => ({
+                        item_id: item.id,
+                        item_name: item.title,
+                        price: item.price,
+                        quantity: 1
+                    }))
+                }
+            });
+
             setCurrentStep(2);
         } else if (currentStep === 2) {
             if (!formData.firstName || !formData.lastName || !formData.email || !formData.dni || !formData.address || !formData.zipCode || !formData.country || !formData.province || !formData.city) {

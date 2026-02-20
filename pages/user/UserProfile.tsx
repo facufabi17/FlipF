@@ -9,7 +9,7 @@ interface UserProfileProps {
 }
 
 const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
-    const { user, updateProfile, isAuthenticated, loading } = useAuth();
+    const { user, updateProfile, isAuthenticated, loading, deleteAccount } = useAuth();
     const navigate = useNavigate();
 
     const [firstName, setFirstName] = useState('');
@@ -24,6 +24,10 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
 
     // Certificate Viewer State
     const [viewingCertificate, setViewingCertificate] = useState<typeof COURSES[0] | null>(null);
+
+    // Modal de Eliminación
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         if (loading) return;
@@ -279,6 +283,31 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
                                     </div>
                                 )}
                             </form>
+
+                            {/* --- Sección Peligro --- */}
+                            <div className="space-y-6 pt-6 border-t border-white/5">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-xl font-bold text-red-500 flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-red-500">warning</span>
+                                        Zona de Riesgo
+                                    </h3>
+                                </div>
+                                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+                                    <div>
+                                        <h4 className="text-white font-bold mb-1">Eliminar mi cuenta</h4>
+                                        <p className="text-sm text-gray-400">
+                                            Una vez que solicites eliminar tu cuenta, tendrás un <strong className="text-red-400">período de gracia de 30 días</strong> antes de que los datos se borren permanentemente.
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => setIsDeleteModalOpen(true)}
+                                        className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-500 font-bold text-sm rounded-lg border border-red-500/30 transition-colors whitespace-nowrap flex items-center gap-1"
+                                    >
+                                        <span className="material-symbols-outlined text-sm">delete_forever</span>
+                                        Eliminar Cuenta
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -303,6 +332,62 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
                                     courseName={viewingCertificate.title}
                                     completionDate={new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
                                 />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* --- Delete Account Modal --- */}
+                {isDeleteModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+                        <div className="relative w-full max-w-lg bg-[#111111] border border-red-500/30 rounded-2xl shadow-2xl p-6">
+                            <div className="absolute -top-12 -left-12 w-32 h-32 bg-red-500/10 rounded-full blur-[50px] pointer-events-none"></div>
+
+                            <div className="relative z-10 flex flex-col gap-4">
+                                <div className="flex items-center gap-3 text-red-500">
+                                    <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20">
+                                        <span className="material-symbols-outlined text-3xl">warning</span>
+                                    </div>
+                                    <h3 className="text-xl font-bold text-white leading-tight">¿Estás absolutamente seguro?</h3>
+                                </div>
+
+                                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-5 text-sm text-gray-300">
+                                    <p className="mb-3 text-white font-medium">Al confirmar, sucederá lo siguiente:</p>
+                                    <ul className="list-disc pl-5 space-y-2 text-gray-400">
+                                        <li>Perderás <strong className="text-red-400">acceso inmediato</strong> a la plataforma y todos los cursos u recursos.</li>
+                                        <li>Tus datos se conservarán congelados durante un <strong>período de gracia de 30 días</strong> por seguridad.</li>
+                                        <li>Pasados los 30 días, todos tus datos serán eliminados física y permanentemente.</li>
+                                        <li>Si deseas <span className="text-white">cancelar la eliminación</span> durante este período, deberás contactar a soporte técnico.</li>
+                                    </ul>
+                                </div>
+
+                                <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-white/5">
+                                    <button
+                                        onClick={() => setIsDeleteModalOpen(false)}
+                                        disabled={isDeleting}
+                                        className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition-colors border border-white/10"
+                                    >
+                                        Mantener cuenta
+                                    </button>
+                                    <button
+                                        onClick={async () => {
+                                            setIsDeleting(true);
+                                            const res = await deleteAccount();
+                                            if (res.success) {
+                                                onShowToast(res.message || 'Cuenta programada para eliminación', 'success');
+                                            } else {
+                                                onShowToast(res.message || 'Error al eliminar cuenta', 'error');
+                                                setIsDeleting(false);
+                                                setIsDeleteModalOpen(false);
+                                            }
+                                        }}
+                                        disabled={isDeleting}
+                                        className="px-5 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 text-sm font-bold transition-all shadow-lg shadow-red-500/20 disabled:opacity-50 flex items-center gap-2"
+                                    >
+                                        {isDeleting ? <span className="material-symbols-outlined animate-spin text-sm">refresh</span> : null}
+                                        {isDeleting ? 'Procesando solicitud...' : 'Sí, Eliminar Mi Cuenta'}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
