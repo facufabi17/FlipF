@@ -92,8 +92,8 @@ const Home: React.FC = () => {
 
                     {/* Testimonios / Logos */}
                     <div className="text-center">
-                        <p className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-8">Empresas y alumnos que confían en Flip</p>
-                        <div className="grid grid-cols-2 md:grid-cols-4 justify-center gap-8 md:gap-12 transition-all duration-500">
+                        <p className="hidden md:block text-sm font-bold text-gray-500 uppercase tracking-widest mb-4">Empresas y alumnos que confían en Flip</p>
+                        <div className="grid grid-cols-2 md:grid-cols-4 justify-center gap-8 md:gap-8 transition-all duration-500 mb-4">
                             {/* Métricas de Impacto */}
                             {[
                                 { number: '+500', label: 'Alumnos Entrenados', onlyDesktop: false },
@@ -116,12 +116,17 @@ const Home: React.FC = () => {
                         </div>
                     </div>
                 </div>
+
+                <div className="block md:hidden w-full h-full">
+                    <CardCarousel items={carouselItems} />
+                </div>
+
             </section>
 
 
             {/* Nivel DIY (Cursos) - Tema Cian */}
             <section
-                className="hidden md:block relative w-full py-24 px-6 border-t border-white/5 bg-black overflow-hidden group"
+                className="hidden md:block relative w-full py-4 px-6 border-t border-white/5 bg-black overflow-hidden group"
                 onMouseMove={(e) => {
                     const { currentTarget, clientX, clientY } = e;
                     const { left, top } = currentTarget.getBoundingClientRect();
@@ -196,7 +201,7 @@ const Home: React.FC = () => {
 
             {/* Nivel DFY (Agencia) - Tema Púrpura */}
             <section
-                className="relative w-full py-24 px-6 border-t border-white/5 bg-black overflow-hidden group"
+                className="relative w-full py-12 px-6 border-t border-white/5 bg-black overflow-hidden group"
                 onMouseMove={(e) => {
                     const { currentTarget, clientX, clientY } = e;
                     const { left, top } = currentTarget.getBoundingClientRect();
@@ -225,7 +230,7 @@ const Home: React.FC = () => {
                         </p>
 
                         {/* Grid de Servicios (Cards) */}
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+                        <div className="hidden md:block grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
                             {[
                                 { icon: 'ads_click', title: 'Traffic', desc: 'Ads & Outreach' },
                                 { icon: 'hub', title: 'Funnels', desc: 'Conversión' },
@@ -327,7 +332,7 @@ const Home: React.FC = () => {
             </section>
 
             {/* 3. SECCIÓN LEAD MAGNET */}
-            <section className="w-full py-24 px-6 bg-gradient-to-b from-black to-[#1a1a1a]">
+            <section className="w-full py-12 px-6 bg-gradient-to-b from-black to-[#1a1a1a]">
                 <div className="max-w-4xl mx-auto rounded-3xl bg-white/5 border border-white/10 p-8 md:p-12 text-center relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#00F5F1] via-white to-[#842DB4]"></div>
                     <div className="absolute -left-20 -top-20 w-64 h-64 bg-primary/20 blur-[80px] rounded-full pointer-events-none"></div>
