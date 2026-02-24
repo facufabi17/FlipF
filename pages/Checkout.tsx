@@ -635,6 +635,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
 
             const paymentPayload = {
                 ...sourceData, // Esto trae token, transaction_amount, installments, payment_method_id, etc. al primer nivel
+                installments: sourceData.installments || 1, // Fallback crìtico: crédito falla si esto es null/undefined
                 description: directCourse ? `Curso: ${directCourse.title}` : `Compra en Flip - ${cart.length} items`,
                 external_reference: pendingOrderId,
                 payer: {
