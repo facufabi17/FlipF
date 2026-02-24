@@ -256,24 +256,62 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (!user) return;
         const newCourses = [...(user.enrolledCourses || []), courseId];
 
-        const { error } = await supabase
-            .from('profiles')
-            .update({ enrolled_courses: newCourses })
-            .eq('id', user.id);
+        try {
+            // Llamar al endpoint seguro en lugar de actualizar Supabase directamente
+            const session = await supabase.auth.getSession();
+            const token = session.data.session?.access_token;
 
-        if (!error) setUser({ ...user, enrolledCourses: newCourses });
+            const response = await fetch('/api/enroll-free', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify({ itemId: courseId, itemType: 'course' })
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || 'Failed to enroll');
+            }
+
+            // Actualización optimista si el backend aprueba
+            setUser({ ...user, enrolledCourses: newCourses });
+        } catch (error) {
+            console.error("Error al asignar curso gratuito:", error);
+            throw error;
+        }
     };
 
     const addResourceToUser = async (resourceId: string) => {
         if (!user) return;
         const newResources = [...(user.ownedResources || []), resourceId];
 
-        const { error } = await supabase
-            .from('profiles')
-            .update({ owned_resources: newResources })
-            .eq('id', user.id);
+        try {
+            // Llamar al endpoint seguro en lugar de actualizar Supabase directamente
+            const session = await supabase.auth.getSession();
+            const token = session.data.session?.access_token;
 
-        if (!error) setUser({ ...user, ownedResources: newResources });
+            const response = await fetch('/api/enroll-free', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify({ itemId: resourceId, itemType: 'resource' })
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || 'Failed to add resource');
+            }
+
+            // Actualización optimista si el backend aprueba
+            setUser({ ...user, ownedResources: newResources });
+        } catch (error) {
+            console.error("Error al asignar recurso gratuito:", error);
+            throw error;
+        }
     };
 
     const markModuleCompleted = async (courseId: string, moduleId: string) => {
@@ -332,34 +370,34 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 }
             }
 
-            // 2. Actualizar Perfil Público (Nombre, Apellido y DNI)
+            // 2. Actualizar Perfil Público (Nombre, Apellido y DNI) en Backend
             if ((data.name && data.name !== user.name) || (data.dni && data.dni !== user.dni) || data.firstName || data.lastName) {
-                const updates: any = {};
-                // Si viene name antiguo, tratamos de guess? Mejor no tocar si no es explicito.
-                // Pero si viene firstName/lastName, actualizamos full_name también
-                if (data.firstName) updates.first_name = data.firstName;
-                if (data.lastName) updates.last_name = data.lastName;
+                const session = await supabase.auth.getSession();
+                const token = session.data.session?.access_token;
 
-                // Sincronizar full_name si cambian las partes
-                const newFirst = data.firstName || user.firstName || '';
-                const newLast = data.lastName || user.lastName || '';
-                if (data.firstName || data.lastName) {
-                    updates.full_name = `${newFirst} ${newLast}`.trim();
-                } else if (data.name) {
-                    updates.full_name = data.name;
+                const updatesPayload = {
+                    userId: user.id,
+                    firstName: data.firstName,
+                    lastName: data.lastName,
+                    dni: data.dni
+                };
+
+                const response = await fetch('/api/update-profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                    },
+                    body: JSON.stringify(updatesPayload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Error al actualizar el perfil en el servidor');
                 }
-
-                if (data.dni) updates.dni = data.dni;
-
-                const { error: profileError } = await supabase
-                    .from('profiles')
-                    .update(updates)
-                    .eq('id', user.id);
-
-                if (profileError) throw profileError;
             }
 
-            // 3. Actualizar Estado Local
+            // 3. Actualizar Estado Local si no hubo errores
             setUser({ ...user, ...data });
 
         } catch (error: any) {
@@ -434,21 +472,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         if (!hasChanges) return;
 
-        // 2. Realizar actualización atómica única a Supabase
-        const { error } = await supabase
-            .from('profiles')
-            .update({
-                enrolled_courses: newCourses,
-                owned_resources: newResources
-            })
-            .eq('id', user.id);
+        // NOTA DE SEGURIDAD: La actualización real de la base de datos (Supabase profiles)
+        // ahora ocurre de forma segura en el backend (api/webhook.ts) al confirmar el pago.
+        // Aquí solo mantenemos una actualización optimista del estado local para fluidez en la UI.
 
-        if (error) {
-            console.error("Error processing purchase:", error);
-            throw error; // Relanzar para ser manejado por quien llama
-        }
-
-        // 3. Actualizar estado local inmediatamente
+        // Actualizar estado local inmediatamente
         setUser({
             ...user,
             enrolledCourses: newCourses,

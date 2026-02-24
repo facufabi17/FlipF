@@ -97,25 +97,86 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
             console.log(`Webhook: Pago ${paymentId} está ${status} (Ref: ${externalReference})`);
 
-            // 5. Actualizar Supabase
-            // Buscamos por external_reference (preferido) o almacenamos el payment_id si es nuevo
+            // 5. Actualizar Supabase (Orden y Perfil)
             if (externalReference) {
-                // Opción A: Actualizar tabla 'orders' o 'purchases'
-                // Ajusta 'orders' y 'uuid' según tu esquema real
+                // 5a. Obtener la orden completa para saber usuario e items comprados
+                const { data: orderData, error: fetchOrderError } = await supabase
+                    .from('orders')
+                    .select('*')
+                    .eq('id', externalReference)
+                    .single();
+
+                if (fetchOrderError) {
+                    console.error('Supabase Error fetching order:', fetchOrderError);
+                }
+
+                // 5b. Actualizar estado de la orden
                 const { error: dbError } = await supabase
                     .from('orders')
                     .update({
                         status: status,
-                        payment_id: paymentId, // Guardar el ID de MP si no lo teníamos
+                        payment_id: paymentId,
                         updated_at: new Date().toISOString()
                     })
-                    .eq('id', externalReference); // O .eq('id', externalReference) si usaste el ID de la orden como ref
+                    .eq('id', externalReference);
 
                 if (dbError) {
                     console.error('Supabase Error updating order:', dbError);
-                    // No fallamos el webhook entero, pero logueamos el error
                 } else {
-                    console.log('Supabase: Orden actualizada correctamente');
+                    console.log('Supabase: Orden actualizada correctamente a', status);
+                }
+
+                // 5c. Asignar los items comprados al perfil si el estado es 'approved'
+                if (status === 'approved' && orderData && orderData.user_id && orderData.items) {
+                    console.log(`Webhook: Intentando asignar items al usuario ${orderData.user_id}`);
+
+                    try {
+                        // Obtener perfil actual para no sobreescribir compras anteriores
+                        const { data: profileData, error: profileFetchError } = await supabase
+                            .from('profiles')
+                            .select('enrolled_courses, owned_resources')
+                            .eq('id', orderData.user_id)
+                            .single();
+
+                        if (profileFetchError) throw profileFetchError;
+
+                        const currentCourses = profileData.enrolled_courses || [];
+                        const currentResources = profileData.owned_resources || [];
+
+                        // Añadir nuevos items
+                        let hasChanges = false;
+                        const items = orderData.items as Array<any>;
+
+                        items.forEach((item: any) => {
+                            if (item.type === 'course' && !currentCourses.includes(item.id || item.item_id)) {
+                                currentCourses.push(item.id || item.item_id);
+                                hasChanges = true;
+                            } else if (item.type === 'resource' && !currentResources.includes(item.id || item.item_id)) {
+                                currentResources.push(item.id || item.item_id);
+                                hasChanges = true;
+                            }
+                        });
+
+                        if (hasChanges) {
+                            const { error: profileUpdateError } = await supabase
+                                .from('profiles')
+                                .update({
+                                    enrolled_courses: currentCourses,
+                                    owned_resources: currentResources
+                                })
+                                .eq('id', orderData.user_id);
+
+                            if (profileUpdateError) {
+                                console.error('Supabase Error asignando items al perfil:', profileUpdateError);
+                            } else {
+                                console.log(`Webhook: Items asignados exitosamente al usuario ${orderData.user_id}`);
+                            }
+                        } else {
+                            console.log(`Webhook: El usuario ${orderData.user_id} ya contaba con los items comprados.`);
+                        }
+                    } catch (assignmentError) {
+                        console.error('Webhook: Error durante el flujo de asignación al perfil:', assignmentError);
+                    }
                 }
             }
         }
