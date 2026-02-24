@@ -318,37 +318,29 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (!user) return;
 
         try {
-            // 1. Obtener el último progreso de la BD para asegurar atomicidad
-            const { data: currentData, error: fetchError } = await supabase
-                .from('profiles')
-                .select('completed_modules')
-                .eq('id', user.id)
-                .single();
+            const session = await supabase.auth.getSession();
+            const token = session.data.session?.access_token;
 
-            if (fetchError) throw fetchError;
+            const response = await fetch('/api/update-progress', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify({ courseId, moduleId })
+            });
 
-            // 2. Calcular nuevo progreso
-            const dbProgress = (currentData?.completed_modules || {}) as Record<string, string[]>;
-            const courseProgress = dbProgress[courseId] || [];
-
-            if (!courseProgress.includes(moduleId)) {
-
-                const newProgress = {
-                    ...dbProgress,
-                    [courseId]: [...courseProgress, moduleId]
-                };
-
-                // 3. Actualizar BD
-                const { error: updateError } = await supabase
-                    .from('profiles')
-                    .update({ completed_modules: newProgress })
-                    .eq('id', user.id);
-
-                if (updateError) throw updateError;
-
-                // 4. Actualizar estado local explícitamente con los nuevos datos confirmados
-                setUser(prev => prev ? ({ ...prev, progress: newProgress }) : null);
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || 'Failed to update progress');
             }
+
+            const data = await response.json();
+
+            if (data.status === 'success' && data.newProgress) {
+                setUser(prev => prev ? ({ ...prev, progress: data.newProgress }) : null);
+            }
+
         } catch (error) {
             console.error("Error marking module completed:", error);
         }
@@ -410,39 +402,45 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const issueCertificate = async (courseId: string): Promise<string | null> => {
         if (!user) return null;
 
-        // 1. Verificar si ya existe
+        // 1. Verificar si ya existe en memoria
         if (user.certificates && user.certificates[courseId]) {
             return user.certificates[courseId];
         }
 
-        // 2. Generar nuevo ID
-        const newCertId = `FLIP-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 1000)}`;
-        const newCertificates = { ...(user.certificates || {}), [courseId]: newCertId };
-
         try {
-            // 3. Guardar en Supabase
-            // Intentamos actualizar la columna certificates. Si falla (por ejemplo, si no existe la columna), capturamos el error.
-            const { error } = await supabase
-                .from('profiles')
-                .update({ certificates: newCertificates })
-                .eq('id', user.id);
+            const session = await supabase.auth.getSession();
+            const token = session.data.session?.access_token;
 
-            if (error) {
-                console.error("Error saving certificate to Supabase:", error);
-                // Si el error es porque la columna no existe, podríamos intentar crearla o avisar
-                // Por ahora, retornamos el ID generado localmente para que el usuario pueda ver su certificado,
-                // aunque no persista si recarga.
-                // throw error; 
+            const response = await fetch('/api/issue-certificate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify({ courseId })
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || 'Failed to issue certificate');
             }
 
-            // 4. Actualizar estado local
-            setUser({ ...user, certificates: newCertificates });
-            return newCertId;
+            const data = await response.json();
+            const newCertId = data.certificateId;
+
+            if (newCertId) {
+                const newCertificates = { ...(user.certificates || {}), [courseId]: newCertId };
+                setUser({ ...user, certificates: newCertificates });
+                return newCertId;
+            }
+
+            return null;
 
         } catch (error) {
             console.error("Certificate issuance error:", error);
-            // Retorno fallback local para no bloquear al usuario
-            return newCertId;
+            // Si falla devolvemos null, ya no usamos generador local temporal 
+            // para evitar inconsistencias de recarga que daban certificados falsos.
+            return null;
         }
     };
 

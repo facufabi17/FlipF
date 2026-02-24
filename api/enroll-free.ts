@@ -1,5 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
+import { COURSES } from '../data/courses';
+import { FREE_RESOURCES, PAID_RESOURCES } from '../data/resources';
 
 // Inicializar Supabase (Cliente Servidor)
 const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
@@ -38,26 +40,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             return res.status(400).json({ error: 'Missing itemId or itemType' });
         }
 
-        // 2. Validar que el curso/recurso sea GRATUITO (Simulacion de validacion usando constantes o BD).
-        // NOTA: Para implementar esta seguridad de manera total, se debería consultar la base de datos o
-        // importar los datos locales (ej: COURSES.ts) si están disponibles en el entorno Vercel.
-        // Asumiendo que tenemos una tabla `courses` y `resources` en Supabase o podemos importarlo.
-        // Dado que Flip parece usar un frontend basado en TS estático, validaremos con un endpoint básico
-        // que idealmente debería cotejar contra una tabla real "is_free" o similar.
-
+        // 2. Validar que el curso/recurso sea GRATUITO
         let isFree = false;
 
-        // Por ahora, implementaremos una consulta hipotética a Supabase asumiendo que
-        // la información de si un curso es gratuito existe de algún modo.
-        // Si no existe, al menos validamos la firma de la petición.
-        // Vamos a asumir una validación básica "passthrough" que luego el admin de BD pueda ajustar
-        // IMPORTANTE: Adaptar esta lógica según dónde estén guardados los precios de los cursos!
-
-        // Simulación: asumiendo que en DB no todo es confiable por ahora, permitimos avanzar
-        // porque el método frontend llamaba a profiles directamente. Ahora la BD está resguardada de UPDATE directos.
-        // Aquí deberías añadir tu lógica de negocio exacta: "if (dbCourse.price > 0) throw Error"
-
-        isFree = true; // TODO: Implementar validación real de costo 0
+        if (itemType === 'course') {
+            const course = COURSES.find(c => c.id === itemId);
+            if (course && course.price === 0) {
+                isFree = true;
+            }
+        } else if (itemType === 'resource') {
+            const freeResource = FREE_RESOURCES.find(r => r.id === itemId);
+            if (freeResource) {
+                isFree = true;
+            } else {
+                const paidResource = PAID_RESOURCES.find(r => r.id === itemId);
+                if (paidResource && paidResource.price === 0) {
+                    isFree = true;
+                }
+            }
+        }
 
         if (!isFree) {
             return res.status(403).json({ error: 'The requested item is not free and requires purchase.' });

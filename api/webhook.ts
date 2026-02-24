@@ -69,7 +69,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             return res.status(401).json({ error: 'Invalid signature' });
         }
     } else {
-        console.warn('Webhook Warning: MP_WEBHOOK_SECRET no configurado, saltando validación de firma.');
+        console.warn('Webhook Warning: MP_WEBHOOK_SECRET no configurado. Deteniendo ejecución.');
+        return res.status(500).json({ error: 'Webhook secret missing' });
     }
 
     try {
@@ -110,7 +111,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                     console.error('Supabase Error fetching order:', fetchOrderError);
                 }
 
-                // 5b. Actualizar estado de la orden
+                // 5b. Validar prevención contra Fraude de precio
+                if (status === 'approved' && orderData) {
+                    if (paymentInfo.transaction_amount < orderData.total) {
+                        console.error(`Fraude detectado: Pago ${paymentId} por ${paymentInfo.transaction_amount} es menor al total de la orden ${orderData.total}.`);
+
+                        await supabase
+                            .from('orders')
+                            .update({
+                                status: 'fraud_attempt',
+                                payment_id: paymentId,
+                                updated_at: new Date().toISOString()
+                            })
+                            .eq('id', externalReference);
+
+                        return res.status(400).json({ error: 'Fraud attempt detected: amount mismatch' });
+                    }
+                }
+
+                // 5c. Actualizar estado de la orden
                 const { error: dbError } = await supabase
                     .from('orders')
                     .update({
@@ -126,7 +145,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                     console.log('Supabase: Orden actualizada correctamente a', status);
                 }
 
-                // 5c. Asignar los items comprados al perfil si el estado es 'approved'
+                // 5d. Asignar los items comprados al perfil si el estado es 'approved'
                 if (status === 'approved' && orderData && orderData.user_id && orderData.items) {
                     console.log(`Webhook: Intentando asignar items al usuario ${orderData.user_id}`);
 
