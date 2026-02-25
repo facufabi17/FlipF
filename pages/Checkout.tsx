@@ -747,10 +747,13 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
         // Extraer schedule_id
         const scheduleId = itemsToPurchase.find((i: any) => i.selectedSchedule)?.selectedSchedule?.id;
 
+        // Calcular el precio real con el 10% de descuento por transferencia
+        const transferTotal = finalTotal * 0.90;
+
         // 1. Crear Orden "Pending" con datos extra
         const order = await createOrder(
             itemsToPurchase,
-            finalTotal,
+            transferTotal, // Enviar total con descuento
             'transferencia',
             'pending',
             {
@@ -772,7 +775,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                     event: 'generate_transfer_order',
                     ecommerce: {
                         transaction_id: order.id || pendingOrderId || `TRANSF-${Date.now()}`,
-                        value: finalTotal,
+                        value: transferTotal, // Reflejar monto real enviado a DB
                         currency: 'ARS',
                         payment_method: 'transfer',
                         items: itemsToPurchase.map((item: any) => ({
@@ -1033,6 +1036,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                     currentStep={3}
                                     handleBack={handleBack}
                                     ref={brickContainerRef}
+                                    finalTotal={finalTotal}
                                 />
                             )}
                         </div>

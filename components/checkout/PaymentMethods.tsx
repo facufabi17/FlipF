@@ -8,7 +8,9 @@ interface PaymentMethodsProps {
     onMainAction: () => void;
     currentStep: number;
     handleBack: () => void;
+    finalTotal: number;
 }
+
 
 const PaymentMethods = forwardRef<HTMLDivElement, PaymentMethodsProps>(({
     paymentMethod,
@@ -16,7 +18,8 @@ const PaymentMethods = forwardRef<HTMLDivElement, PaymentMethodsProps>(({
     loadingMP,
     onMainAction,
     currentStep,
-    handleBack
+    handleBack,
+    finalTotal
 }, brickContainerRef) => {
 
     return (
@@ -63,6 +66,19 @@ const PaymentMethods = forwardRef<HTMLDivElement, PaymentMethodsProps>(({
                                 <span className="material-symbols-outlined text-primary">account_balance_wallet</span>
                                 Datos Bancarios
                             </h4>
+
+                            {/* Detalle del monto con Descuento */}
+                            <div className="bg-[#0f0f0f] border border-[#00F5F1]/30 p-4 rounded-lg mb-6 shadow-[0_0_15px_rgba(0,245,241,0.1)]">
+                                <p className="text-sm text-gray-400 mb-1">Monto a transferir (10% OFF aplicados):</p>
+                                <div className="flex items-end gap-3">
+                                    <span className="text-3xl font-black text-[#00F5F1]">
+                                        ${(finalTotal * 0.90).toLocaleString('es-AR')}
+                                    </span>
+                                    <span className="text-lg text-gray-500 line-through mb-1">
+                                        ${finalTotal.toLocaleString('es-AR')}
+                                    </span>
+                                </div>
+                            </div>
                             <div className="space-y-3 text-sm">
                                 <div className="flex justify-between border-b border-white/5 pb-2">
                                     <span className="text-gray-400">Banco:</span>
