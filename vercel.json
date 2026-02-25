@@ -3,6 +3,10 @@
     {
       "source": "/api/(.*)",
       "destination": "/api/$1"
+    },
+    {
+      "source": "/(nosotros|recursos-gratis|recursos-pago|academia|checkout|pago_apro|historial-compras|mis-cursos|mis-certificados|verify|mis-recursos|perfil|ayuda|privacidad|terminos|actualizar-password|aula-virtual|consultas|login|register|payment-success|mp-callback)(/.*)?",
+      "destination": "/index.html"
     }
   ]
 }

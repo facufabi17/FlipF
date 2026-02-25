@@ -1,7 +1,5 @@
-//import { supabase } from './lib/supabase';
-
 import React, { useState, Suspense, lazy } from 'react';
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
@@ -40,9 +38,6 @@ const PagoAprobado = lazy(() => import('./pages/PagoAprobado'));
 const PaymentSuccess = lazy(() => import('./pages/PaymentSuccess'));
 const MPCallback = lazy(() => import('./components/MPCallback'));
 
-//const { data: todos } = await supabase.from('todos').select()
-
-
 
 const App: React.FC = () => {
     const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
@@ -54,7 +49,7 @@ const App: React.FC = () => {
     return (
         <AuthProvider>
             <CartProvider>
-                <HashRouter>
+                <BrowserRouter>
                     <ScrollToTop />
                     <RouteTracker />
                     <AuthHandler />
@@ -92,7 +87,6 @@ const App: React.FC = () => {
 
                                     <Route path="/consultas" element={<Consulting onShowToast={showToast} />} />
                                     <Route path="/login" element={<Login onShowToast={showToast} />} />
-                                    <Route path="/login" element={<Login onShowToast={showToast} />} />
                                     <Route path="/register" element={<Register onShowToast={showToast} />} />
                                     <Route path="/payment-success" element={<PaymentSuccess />} />
                                     <Route path="/mp-callback" element={<MPCallback />} />
@@ -104,7 +98,7 @@ const App: React.FC = () => {
                         <WhatsAppButton />
                         <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
                     </div>
-                </HashRouter>
+                </BrowserRouter>
             </CartProvider>
         </AuthProvider>
     );

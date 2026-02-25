@@ -113,7 +113,7 @@ const CertificateDisplay: React.FC<CertificateDisplayProps> = ({
             issueYear: new Date().getFullYear().toString(),
             issueMonth: (new Date().getMonth() + 1).toString(),
             certId: certId,
-            certUrl: `https://flip-f.vercel.app/#/verify/${certId}`,
+            certUrl: `https://flip-f.vercel.app/verify/${certId}`,
         });
 
         window.open(`${baseUrl}?${params.toString()}`, '_blank');
@@ -233,7 +233,7 @@ const CertificateDisplay: React.FC<CertificateDisplayProps> = ({
                                 {/* Real QR Code */}
                                 <div className="bg-white p-2 rounded-lg shadow-lg">
                                     <QRCodeSVG
-                                        value={`https://flip-f.vercel.app/#/verify/${certId}`}
+                                        value={`https://flip-f.vercel.app/verify/${certId}`}
                                         size={80}
                                         level="M"
                                         fgColor="#000000"

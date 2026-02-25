@@ -63,9 +63,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             payer: req.body.payer, // Agregar payer
             external_reference: externalReference,
             back_urls: {
-                success: `${appOrigin}/#/mp-callback`,
-                failure: `${appOrigin}/#/mp-callback`,
-                pending: `${appOrigin}/#/mp-callback`,
+                success: `${appOrigin}/mp-callback`,
+                failure: `${appOrigin}/mp-callback`,
+                pending: `${appOrigin}/mp-callback`,
             },
             ...(!appOrigin.includes('localhost') && !appOrigin.includes('127.0.0.1')
                 ? { auto_return: 'approved' }
