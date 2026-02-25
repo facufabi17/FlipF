@@ -201,7 +201,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
                             if (measurementId && apiSecret) {
                                 const ga4Payload = {
-                                    client_id: orderData.user_id, // Usamos el ID del usuario como client_id para unificar
+                                    client_id: orderData.ga_client_id || orderData.user_id, // Prioriza ID de cookie, fallback al usuario
                                     events: [{
                                         name: 'purchase',
                                         params: {

@@ -17,6 +17,18 @@ initMercadoPago(import.meta.env.VITE_MP_PUBLIC_KEY, {
     locale: 'es-AR'
 });
 
+// Función para extraer el Client ID real de Google Analytics
+const getGAClientId = () => {
+    const match = document.cookie.match(/_ga=([^;]+)/);
+    if (match) {
+        const parts = match[1].split('.');
+        if (parts.length >= 4) {
+            return `${parts[2]}.${parts[3]}`;
+        }
+    }
+    return null;
+};
+
 interface CheckoutProps {
     onShowToast: (text: string, type?: 'success' | 'error' | 'info') => void;
 }
@@ -150,7 +162,8 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                 city: formData.city,
                                 cuil: formData.cuil,
                                 business_name: formData.businessName,
-                                schedule_id: scheduleId // Guardamos el ID en la columna dedicada
+                                schedule_id: scheduleId, // Guardamos el ID en la columna dedicada
+                                ga_client_id: getGAClientId()
                             }
                         );
 
@@ -763,7 +776,8 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 city: formData.city,
                 cuil: formData.cuil,
                 business_name: formData.businessName,
-                schedule_id: scheduleId
+                schedule_id: scheduleId,
+                ga_client_id: getGAClientId()
             }
         );
 
