@@ -37,6 +37,7 @@ const UpdatePassword = lazy(() => import('./pages/UpdatePassword'));
 const PagoAprobado = lazy(() => import('./pages/PagoAprobado'));
 const PaymentSuccess = lazy(() => import('./pages/PaymentSuccess'));
 const MPCallback = lazy(() => import('./components/MPCallback'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 
 const App: React.FC = () => {
@@ -90,6 +91,9 @@ const App: React.FC = () => {
                                     <Route path="/register" element={<Register onShowToast={showToast} />} />
                                     <Route path="/payment-success" element={<PaymentSuccess />} />
                                     <Route path="/mp-callback" element={<MPCallback />} />
+
+                                    {/* Ruta Catch-all 404 (Siempre debe ir al final) */}
+                                    <Route path="*" element={<NotFound />} />
                                 </Routes>
                             </Suspense>
                         </main>
