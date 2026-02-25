@@ -1,11 +1,15 @@
 {
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
+      "source": "/sitemap.xml",
+      "destination": "/sitemap.xml"
     },
     {
-      "source": "/(nosotros|recursos-gratis|recursos-pago|academia|checkout|pago_apro|historial-compras|mis-cursos|mis-certificados|verify|mis-recursos|perfil|ayuda|privacidad|terminos|actualizar-password|aula-virtual|consultas|login|register|payment-success|mp-callback)(/.*)?",
+      "source": "/robots.txt",
+      "destination": "/robots.txt"
+    },
+    {
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
