@@ -25,7 +25,8 @@ const PagoAprobado = () => {
                 window.dataLayer.push({
                     event: 'purchase',
                     ecommerce: {
-                        transaction_id: paymentId || externalReference || `TR-${Date.now()}`,
+                        // Priorizar externalReference (order.id) para deduplicar con el Webhook
+                        transaction_id: externalReference || paymentId || `TR-${Date.now()}`,
                         value: purchaseData.value,
                         currency: 'ARS',
                         items: purchaseData.items
