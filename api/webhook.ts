@@ -193,6 +193,52 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                         } else {
                             console.log(`Webhook: El usuario ${orderData.user_id} ya contaba con los items comprados.`);
                         }
+
+                        // ---> Enviar Evento a Google Analytics 4 (Measurement Protocol) <---
+                        try {
+                            const measurementId = process.env.GA4_MEASUREMENT_ID;
+                            const apiSecret = process.env.GA4_API_SECRET;
+
+                            if (measurementId && apiSecret) {
+                                const ga4Payload = {
+                                    client_id: orderData.user_id, // Usamos el ID del usuario como client_id para unificar
+                                    events: [{
+                                        name: 'purchase',
+                                        params: {
+                                            transaction_id: orderData.id,
+                                            value: Number(orderData.total),
+                                            currency: 'ARS',
+                                            payment_type: 'mercado_pago',
+                                            items: items.map((item: any) => ({
+                                                item_id: item.id || item.item_id,
+                                                item_name: item.title || item.name || `Item ${item.id}`,
+                                                price: Number(item.price) || 0,
+                                                quantity: 1
+                                            }))
+                                        }
+                                    }]
+                                };
+
+                                const ga4Response = await fetch(`https://www.google-analytics.com/mp/collect?measurement_id=${measurementId}&api_secret=${apiSecret}`, {
+                                    method: 'POST',
+                                    body: JSON.stringify(ga4Payload),
+                                    headers: { 'Content-Type': 'application/json' }
+                                });
+
+                                if (!ga4Response.ok) {
+                                    const errorText = await ga4Response.text();
+                                    console.error('Webhook: GA4 API Error', ga4Response.status, errorText);
+                                } else {
+                                    console.log(`Webhook: Evento 'purchase' enviado exitosamente a GA4 para la orden ${orderData.id}`);
+                                }
+                            } else {
+                                console.warn('Webhook: Variables GA4_MEASUREMENT_ID o GA4_API_SECRET no configuradas. Omitiendo GA4.');
+                            }
+                        } catch (gaError) {
+                            console.error('Webhook: Excepción al intentar enviar a GA4', gaError);
+                        }
+                        // ---> Fin Google Analytics <---
+
                     } catch (assignmentError) {
                         console.error('Webhook: Error durante el flujo de asignación al perfil:', assignmentError);
                     }
