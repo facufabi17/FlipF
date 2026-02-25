@@ -488,6 +488,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             markModuleCompleted, updateProfile, purchaseItems, issueCertificate, deleteAccount, isAuthenticated: !!user, loading,
             createOrder: async (items: any[], total: number, paymentMethod: string, status: 'pending' | 'approved' = 'pending', billingData?: any) => {
                 if (!user) return null;
+
+                // Extraemos explícitamente ga_client_id para asegurar que se guarde en su propia columna
+                const { ga_client_id, ...restBillingData } = billingData || {};
+
                 const { data, error } = await supabase
                     .from('orders')
                     .insert({
@@ -496,7 +500,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                         total,
                         payment_method: paymentMethod,
                         status,
-                        ...(billingData || {})
+                        ga_client_id: ga_client_id || null, // Forzar inclusión explícita
+                        ...restBillingData
                     })
                     .select()
                     .single();
