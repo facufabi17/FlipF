@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import SEOMeta from '../components/SEOMeta';
 
 interface RegisterProps {
     onShowToast: (text: string, type?: 'success' | 'error') => void;
@@ -59,6 +60,10 @@ const Register: React.FC<RegisterProps> = ({ onShowToast }) => {
 
     return (
         <div className="animate-fade-in">
+            <SEOMeta
+                title="Crear Cuenta | Flip"
+                description="Únete a la comunidad de creadores de Flip. Accede a la mejor formación en marketing e inteligencia artificial."
+            />
             <section className="relative flex min-h-[85vh] w-full items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 z-0">
                     <div className="absolute right-1/4 bottom-1/4 h-[400px] w-[400px] rounded-full bg-accent/10 blur-[100px]"></div>

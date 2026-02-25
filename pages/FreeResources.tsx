@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { FREE_RESOURCES, FreeResource } from '../data/resources';
 import LeadMagnetModal from '../components/LeadMagnetModal';
+import SEOMeta from '../components/SEOMeta';
 
 
 const FreeResources: React.FC = () => {
@@ -46,6 +47,10 @@ const FreeResources: React.FC = () => {
 
     return (
         <div className="min-h-screen relative overflow-hidden bg-black text-white font-sans selection:bg-[#00F5F1] selection:text-black">
+            <SEOMeta
+                title="Recursos Gratuitos | Flip"
+                description="Descarga tácticas probadas, plantillas operativas y sistemas que usamos internamente para escalar tu Agencia."
+            />
 
             {/* --- SECCIÓN 1: HERO --- */}
             <section className="relative w-full flex flex-col items-center text-center min-h-[50vh] justify-center pb-12 pt-20">

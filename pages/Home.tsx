@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import FlowGradient from "../components/background/AnimacionEntrada";
 import { COURSES } from '../data/courses';
 import { CardCarousel } from '../components/ui/Tarjetas de Cursos HOME';
+import SEOMeta from '../components/SEOMeta';
 
 const Home: React.FC = () => {
     const featuredCourses = [
@@ -45,6 +46,10 @@ const Home: React.FC = () => {
 
     return (
         <div className="w-full relative animate-fade-in overflow-hidden">
+            <SEOMeta
+                title="Flip | Agencia de Marketing Digital"
+                description="Transformamos Negocios y Entrenamos Expertos. La agencia de marketing digital que no solo ejecuta estrategias, sino que te enseña a dominarlas."
+            />
 
             {/* 1. HERO SECTION (Segmentación Dual) */}
             <section className="relative w-full min-h-[90vh] flex flex-col justify-center items-center text-center px-6 pt-20 pb-12 overflow-hidden">

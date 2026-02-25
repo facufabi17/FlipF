@@ -3,6 +3,7 @@ import { PAID_RESOURCES } from '../data/resources';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import SEOMeta from '../components/SEOMeta';
 
 
 interface PaidResourcesProps {
@@ -67,6 +68,10 @@ const PaidResources: React.FC<PaidResourcesProps> = ({ onShowToast }) => {
 
     return (
         <div className="min-h-screen relative overflow-hidden bg-black text-white font-sans selection:bg-[#8B5CF6] selection:text-white">
+            <SEOMeta
+                title="Sistemas Premium | Flip"
+                description="Biblioteca de Alto Impacto. Herramientas operativas, guiones tácticos y sistemas de crecimiento."
+            />
 
             {/* --- SECCIÓN 1: HERO (VIOLETA) --- */}
             <section className="relative w-full flex flex-col items-center text-center min-h-[50vh] justify-center pb-12 pt-20">

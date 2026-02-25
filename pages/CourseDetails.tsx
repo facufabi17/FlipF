@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { COURSES } from '../data/courses';
 import ScheduleSelector from '../components/ui/Horarios de Cursos';
+import SEOMeta from '../components/SEOMeta';
 
 interface CourseDetailsProps {
     onShowToast: (text: string, type?: 'success' | 'error') => void;
@@ -64,6 +65,10 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ onShowToast }) => {
 
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white">
+            <SEOMeta
+                title={`${selectedCourse.title} | Flip`}
+                description={selectedCourse.description}
+            />
             {/* Background Effects */}
             <div className="fixed inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5 pointer-events-none mix-blend-overlay"></div>
             <div className="fixed top-0 left-0 w-full h-[500px] bg-gradient-to-b from-[#00F5F1]/5 to-transparent pointer-events-none"></div>

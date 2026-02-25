@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import SEOMeta from '../components/SEOMeta';
 
 interface LoginProps {
     onShowToast: (text: string, type?: 'success' | 'error') => void;
@@ -88,6 +89,10 @@ const Login: React.FC<LoginProps> = ({ onShowToast }) => {
 
     return (
         <div className="animate-fade-in">
+            <SEOMeta
+                title="Iniciar Sesión | Flip"
+                description="Ingresa a tu cuenta de Flip y accede a tus cursos y herramientas de marketing con IA."
+            />
             <section className="relative flex min-h-[85vh] w-full items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 z-0">
                     <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-primary/20 blur-[120px]"></div>

@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import emailjs from '@emailjs/browser';
 import NeuralNetworkHero from "../components/background/AnimacionVioleta";
 import { CONTACT_INFO } from '../info';
+import SEOMeta from '../components/SEOMeta';
 
 interface ConsultingProps {
   onShowToast: (text: string) => void;
@@ -67,6 +68,10 @@ const Consulting: React.FC<ConsultingProps> = ({ onShowToast }) => {
 
   return (
     <div className="animate-fade-in">
+      <SEOMeta
+        title="Consultoría | Flip"
+        description="¿Necesitas resultados sin la curva de aprendizaje? Implementamos sistemas de adquisición con Inteligencia Artificial."
+      />
       {/* Hero Section de Consultas */}
       {/* Hero Section de Consultas con Neural Network */}
       <div className="relative z-0">

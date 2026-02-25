@@ -10,6 +10,7 @@ import { CourseTimeline } from '../components/ui/Linea de Cursos ACADEMIA';
 import { supabase } from '../lib/supabase';
 import ScheduleSelector from '../components/ui/Horarios de Cursos';
 import { CourseSchedule } from '../types';
+import SEOMeta from '../components/SEOMeta';
 
 // --- Types & Data for Career Paths ---
 interface CareerStage {
@@ -238,6 +239,10 @@ const Academy: React.FC = () => {
 
     return (
         <div ref={containerRef} className="min-h-screen relative overflow-hidden bg-black text-white font-sans selection:bg-[#00F5F1] selection:text-black">
+            <SEOMeta
+                title="Academia | Flip"
+                description="Certifica tu Talento. Lidera el Mercado Digital con nuestras Rutas de Carrera especializadas y Cursos de Ejecución Inmediata."
+            />
 
             {/* --- SECCIÓN 1: HERO (Full Width) --- */}
             <section ref={heroRef} className="relative w-full flex flex-col items-center text-center min-h-[60vh] justify-center pb-24 pt-20">
