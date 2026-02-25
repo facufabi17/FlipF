@@ -765,6 +765,26 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
         );
 
         if (order) {
+            // Disparar Evento GA4 de Intención de Compra por Transferencia
+            if (window.dataLayer) {
+                window.dataLayer.push({ ecommerce: null }); // Limpiar objeto ecommerce previo
+                window.dataLayer.push({
+                    event: 'generate_transfer_order',
+                    ecommerce: {
+                        transaction_id: order.id || pendingOrderId || `TRANSF-${Date.now()}`,
+                        value: finalTotal,
+                        currency: 'ARS',
+                        payment_method: 'transfer',
+                        items: itemsToPurchase.map((item: any) => ({
+                            item_id: item.id,
+                            item_name: item.title,
+                            price: item.price,
+                            quantity: 1
+                        }))
+                    }
+                });
+            }
+
             // 2. Limpiar carrito si corresponde
             if (!directCourse) {
                 clearCart();
