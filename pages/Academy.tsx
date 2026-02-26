@@ -261,9 +261,20 @@ const Academy: React.FC = () => {
                         En nuestra academia, cada curso que completas es un paso hacia una certificación de nivel experto. Hecha para profesionales que buscan resultados reales.
                     </p>
                     <div className="hero-text flex flex-col sm:flex-row items-center gap-4 relative z-20">
+
                         <button
-                            onClick={() => document.getElementById('rutas')?.scrollIntoView({ behavior: 'smooth' })}
-                            className="group px-5 py-2 bg-[#00F5F1] text-black font-bold text-xs md:text-sm rounded-full hover:bg-white transition-all duration-300 shadow-[0_0_20px_rgba(0,245,241,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] flex items-center gap-2"
+                            onClick={() => document.getElementById('rutas-mobile')?.scrollIntoView({ behavior: 'smooth' })}
+                            className="block md:hidden group px-5 py-2 bg-[#00F5F1] text-black font-bold text-xs md:text-sm rounded-full hover:bg-white transition-all duration-300 shadow-[0_0_20px_rgba(0,245,241,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] flex items-center gap-2"
+                        >
+                            Explorar Rutas
+                            <span className="material-symbols-outlined text-lg group-hover:translate-y-1 transition-transform">
+                                arrow_downward
+                            </span>
+                        </button>
+
+                        <button
+                            onClick={() => document.getElementById('rutas-desktop')?.scrollIntoView({ behavior: 'smooth' })}
+                            className="hidden md:flex group px-5 py-2 bg-[#00F5F1] text-black font-bold text-xs md:text-sm rounded-full hover:bg-white transition-all duration-300 shadow-[0_0_20px_rgba(0,245,241,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] flex items-center gap-2"
                         >
                             Explorar Rutas
                             <span className="material-symbols-outlined text-lg group-hover:translate-y-1 transition-transform">
@@ -299,7 +310,7 @@ const Academy: React.FC = () => {
 
 
                 {/* --- SECCIÓN 2: RUTAS DE CARRERA (MISSION MAPS) --- */}
-                <section className='block md:hidden' id="rutas" ref={pathsRef}>
+                <section className='block md:hidden' id="rutas-mobile" ref={pathsRef}>
                     <div className="flex flex-col items-center text-center gap-4 mb-16">
                         <div className="flex items-center gap-4 animate-fade-in-up">
                             <span className="material-symbols-outlined text-[#00F5F1] text-4xl shadow-cyan-glow rounded-full">map</span>
@@ -414,7 +425,7 @@ const Academy: React.FC = () => {
 
 
                 {/* --- SECCIÓN 2: RUTAS DE CARRERA (MISSION MAPS) --- */}
-                <section className='hidden md:block' id="rutas" ref={pathsRef}>
+                <section className='hidden md:block' id="rutas-desktop" ref={pathsRef}>
                     <div className="flex flex-col items-center text-center gap-4 mb-16">
                         <div className="flex items-center gap-4 animate-fade-in-up">
                             <span className="material-symbols-outlined text-[#00F5F1] text-4xl shadow-cyan-glow rounded-full">map</span>
