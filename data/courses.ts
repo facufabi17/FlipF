@@ -61,5 +61,5 @@ export const COURSES: Course[] = [
     INGENIERIA_DATOS,
 
     // Otros
-    //COURSE_OPERATIONS
+    COURSE_OPERATIONS
 ];

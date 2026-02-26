@@ -4,7 +4,7 @@ export const COURSE_OPERATIONS: Course = {
     id: 'c2',
     title: 'Prueba',
     description: 'Prueba',
-    price: 45000,
+    price: 0,
     category: 'Operaciones',
     level: 'Intermedio',
     image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800',

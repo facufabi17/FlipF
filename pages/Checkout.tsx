@@ -742,6 +742,78 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
         }
     };
 
+    // --- Lógica de Pedido Gratuito ---
+    const handleFreeOrder = async () => {
+        if (!user) return;
+        setIsProcessing(true);
+
+        const itemsToPurchase = directCourse
+            ? [{ id: directCourse.id, title: directCourse.title, type: 'course' as const, price: 0, selectedSchedule: undefined }]
+            : cart.map(item => ({ id: item.id, title: item.title, type: item.type, price: 0, selectedSchedule: item.selectedSchedule }));
+
+        const scheduleId = itemsToPurchase.find((i: any) => i.selectedSchedule)?.selectedSchedule?.id;
+
+        try {
+            // 1. Creamos la orden como 'pending' igual que en Mercado Pago
+            const order = await createOrder(
+                itemsToPurchase,
+                0,
+                'gratis',
+                'pending', // ESTADO PENDIENTE
+                {
+                    entity_type: formData.entityType,
+                    country: formData.country,
+                    province: formData.province,
+                    city: formData.city,
+                    cuil: formData.cuil,
+                    business_name: formData.businessName,
+                    schedule_id: scheduleId,
+                    ga_client_id: getGAClientId()
+                }
+            );
+
+            if (!order) throw new Error("Error creando orden");
+
+            // 2. Le pedimos a nuestra API simple que la valide y la apruebe
+            const response = await fetch('/api/verify-free', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    orderId: order.id,
+                    couponCode: activeCoupon ? activeCoupon.code : null,
+                    userId: user.id
+                })
+            });
+
+            if (!response.ok) throw new Error('Validación de seguridad fallida');
+
+            // 3. Todo OK: Limpiamos y mandamos a éxito
+            if (!directCourse) {
+                clearCart();
+                if (activeCoupon) removeCoupon();
+            }
+
+            // Actualizar estado de React INMEDIATAMENTE para que el usuario no tenga que recargar con F5
+            await purchaseItems(itemsToPurchase.map((item: any) => ({ id: item.id, type: item.type })));
+
+            const purchaseData = {
+                value: 0,
+                items: itemsToPurchase.map((item: any) => ({ item_id: item.id, item_name: item.title, price: 0, quantity: 1 }))
+            };
+            sessionStorage.setItem('lastPurchaseData', JSON.stringify(purchaseData));
+            sessionStorage.removeItem('checkout_step');
+            sessionStorage.removeItem('checkout_form');
+            setCurrentStep(1);
+
+            navigate('/pago_apro');
+        } catch (error) {
+            console.error(error);
+            onShowToast('Error al procesar el pedido. Verifica si el cupón es válido.', 'error');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
     // --- Lógica de Transferencia ---
     const handleTransferOrder = async () => {
         if (!user) return;
@@ -1039,7 +1111,9 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                     setPaymentMethod={setPaymentMethod}
                                     loadingMP={loadingMP}
                                     onMainAction={() => {
-                                        if (paymentMethod === 'mercadopago') {
+                                        if (finalTotal === 0) {
+                                            handleFreeOrder();
+                                        } else if (paymentMethod === 'mercadopago') {
                                             processMercadoPagoPayment();
                                         } else if (paymentMethod === 'transferencia') {
                                             handleTransferOrder();
@@ -1068,7 +1142,8 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                 currentStep={currentStep}
                                 onMainAction={() => {
                                     if (currentStep === 3) {
-                                        if (paymentMethod === 'mercadopago') processMercadoPagoPayment();
+                                        if (finalTotal === 0) handleFreeOrder();
+                                        else if (paymentMethod === 'mercadopago') processMercadoPagoPayment();
                                         else if (paymentMethod === 'transferencia') handleTransferOrder();
                                         else handleNext();
                                     } else {
@@ -1183,7 +1258,8 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                 <button
                                     onClick={() => {
                                         if (currentStep === 3) {
-                                            if (paymentMethod === 'mercadopago') processMercadoPagoPayment();
+                                            if (finalTotal === 0) handleFreeOrder();
+                                            else if (paymentMethod === 'mercadopago') processMercadoPagoPayment();
                                             else if (paymentMethod === 'transferencia') handleTransferOrder();
                                             else handleNext();
                                         } else {
@@ -1198,7 +1274,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                             Continuar <span className="material-symbols-outlined text-lg">arrow_forward</span>
                                         </div>
                                     ) : loadingMP && paymentMethod === 'mercadopago' ? 'Cargando...' :
-                                        paymentMethod === 'mercadopago' ? 'Pagar' : 'Finalizar'}
+                                        finalTotal === 0 ? 'Obtener Gratis' : paymentMethod === 'mercadopago' ? 'Pagar' : 'Finalizar'}
                                 </button>
                             </div>
                         </div>

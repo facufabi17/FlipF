@@ -21,6 +21,14 @@ const PaymentMethods = forwardRef<HTMLDivElement, PaymentMethodsProps>(({
     handleBack,
     finalTotal
 }, brickContainerRef) => {
+    if (finalTotal === 0) {
+        return (
+            <div className="bg-surface-dark border border-white/5 rounded-2xl p-8 text-center">
+                <h3 className="text-2xl font-bold text-white mb-2">Pedido Gratuito</h3>
+                <p className="text-gray-400">El total es $0. Haz clic en el botón para finalizar tu inscripción de forma segura.</p>
+            </div>
+        );
+    }
 
     return (
         <div className="animate-fade-in space-y-6">

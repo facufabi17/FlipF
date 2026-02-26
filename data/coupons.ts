@@ -8,6 +8,7 @@ export interface Coupon {
 // Ejemplos de cupones. Puedes editarlos según necesites.
 export const COUPONS: Coupon[] = [
     { code: 'WELCOME10', discount: 10, type: 'percent' },
+    { code: 'FREE', discount: 100, type: 'percent' },
     { code: 'CURSO50', discount: 50, type: 'fixed', targetId: 'course-marketing' },
     { code: 'RESOURCE5', discount: 5, type: 'fixed' },
     { code: 'HALFOFF', discount: 50, type: 'percent', targetId: 'course-operations' }
