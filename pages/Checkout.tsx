@@ -798,6 +798,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
             await purchaseItems(itemsToPurchase.map((item: any) => ({ id: item.id, type: item.type })));
 
             const purchaseData = {
+                transaction_id: order.id,
                 value: 0,
                 items: itemsToPurchase.map((item: any) => ({ item_id: item.id, item_name: item.title, price: 0, quantity: 1 }))
             };
@@ -880,6 +881,13 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 clearCart();
                 if (activeCoupon) removeCoupon();
             }
+
+            const purchaseData = {
+                transaction_id: order.id,
+                value: transferTotal,
+                items: itemsToPurchase.map((item: any) => ({ item_id: item.id, item_name: item.title, price: item.price, quantity: 1 }))
+            };
+            sessionStorage.setItem('lastPurchaseData', JSON.stringify(purchaseData));
 
             // 3. Notificar y Redirigir
             onShowToast('Pedido registrado. Por favor envía tu comprobante.', 'success');

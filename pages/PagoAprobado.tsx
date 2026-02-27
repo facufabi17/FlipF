@@ -17,17 +17,24 @@ const PagoAprobado = () => {
         channel.close();
 
         // Recuperar datos reales de la compra
-        const savedPurchase = sessionStorage.getItem('lastPurchaseData');
-        if (savedPurchase) {
+        const purchaseDataStr = sessionStorage.getItem('lastPurchaseData');
+        const purchaseData = purchaseDataStr ? JSON.parse(purchaseDataStr) : null;
+
+        if (purchaseData) {
             try {
-                const purchaseData = JSON.parse(savedPurchase);
+                // Prioridad 1: El ID real guardado en session (Transferencias/Gratis)
+                // Prioridad 2: El ID que viene de la URL (Mercado Pago)
+                // Prioridad 3: Plan de respaldo extremo
+                const transactionId = (purchaseData && purchaseData.transaction_id)
+                    || externalReference
+                    || paymentId
+                    || `TR-${Date.now()}`;
 
                 window.dataLayer = window.dataLayer || [];
                 window.dataLayer.push({
                     event: 'purchase',
                     ecommerce: {
-                        // Priorizar externalReference (order.id) para deduplicar con el Webhook
-                        transaction_id: externalReference || paymentId || `TR-${Date.now()}`,
+                        transaction_id: transactionId,
                         value: purchaseData.value,
                         currency: 'ARS',
                         items: purchaseData.items
