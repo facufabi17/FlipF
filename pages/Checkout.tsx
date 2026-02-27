@@ -6,6 +6,7 @@ import { COURSES } from '../data/courses';
 import { initMercadoPago } from '@mercadopago/sdk-react';
 
 // Components
+import SEOMeta from '../components/SEOMeta';
 import CheckoutSteps from '../components/checkout/CheckoutSteps';
 import CartSummary from '../components/checkout/CartSummary';
 import BillingForm from '../components/checkout/BillingForm';
@@ -930,7 +931,17 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 }
             });
 
-            setCurrentStep(2);
+            const nextStep = 2;
+            setCurrentStep(nextStep);
+            window.scrollTo(0, 0);
+
+            // Evento para Google Analytics 4 (Avance en el embudo)
+            if (typeof window !== 'undefined' && window.dataLayer) {
+                window.dataLayer.push({
+                    event: 'checkout_progress',
+                    checkout_step: nextStep
+                });
+            }
         } else if (currentStep === 2) {
             if (!formData.firstName || !formData.lastName || !formData.email || !formData.dni || !formData.address || !formData.zipCode || !formData.country || !formData.province || !formData.city) {
                 onShowToast('Por favor completa todos los campos obligatorios', 'error');
@@ -947,7 +958,18 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                     console.error("Error guardando DNI", e);
                 }
             }
-            setCurrentStep(3);
+
+            const nextStep = 3;
+            setCurrentStep(nextStep);
+            window.scrollTo(0, 0);
+
+            // Evento para Google Analytics 4 (Avance en el embudo)
+            if (typeof window !== 'undefined' && window.dataLayer) {
+                window.dataLayer.push({
+                    event: 'checkout_progress',
+                    checkout_step: nextStep
+                });
+            }
         }
     };
 
@@ -999,6 +1021,10 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     // Main Render
     return (
         <>
+            <SEOMeta
+                title="Finalizar Compra | Flip-F"
+                description="Completa tu inscripción de forma segura y comienza tu formación en Flip-F."
+            />
             {/* Overlay de Espera de Pago */}
             {isWaitingPayment && (
                 <div className="fixed inset-0 bg-black/95 backdrop-blur-md z-[9999] flex flex-col items-center justify-center p-4 animate-fade-in" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh' }}>

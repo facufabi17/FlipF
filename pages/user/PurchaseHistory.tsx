@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Order } from '../../types';
 import { CONTACT_INFO } from '../../info';
+import SEOMeta from '../../components/SEOMeta';
 
 const PurchaseHistory: React.FC = () => {
     const navigate = useNavigate();
@@ -47,6 +48,7 @@ const PurchaseHistory: React.FC = () => {
 
     return (
         <div className="animate-fade-in min-h-screen bg-background-dark text-white">
+            <SEOMeta title="Historial de Compras | Flip-F" description="Revisa tu historial de compras y pedidos en Flip-F." />
             <section className="p-6 lg:p-12 max-w-7xl mx-auto">
                 <div className="flex items-center gap-4 mb-8">
                     <button onClick={() => navigate('/perfil')} className="text-gray-400 hover:text-white transition-colors">

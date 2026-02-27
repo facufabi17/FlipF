@@ -1,6 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import SEOMeta from '../components/SEOMeta';
 
 const PaymentSuccess: React.FC = () => {
     const navigate = useNavigate();
@@ -25,6 +26,7 @@ const PaymentSuccess: React.FC = () => {
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-surface-dark text-white">
+            <SEOMeta title="Pago Exitoso | Flip-F" description="Tu pago ha sido exitoso." />
             <div className="text-center p-8">
                 <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
                     <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

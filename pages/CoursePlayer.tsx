@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { COURSES } from '../data/courses';
 import CertificateDisplay from '../components/CertificateDisplay';
+import SEOMeta from '../components/SEOMeta';
 
 const CoursePlayer: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -136,6 +137,10 @@ const CoursePlayer: React.FC = () => {
 
     return (
         <div className="animate-fade-in min-h-screen flex flex-col">
+            <SEOMeta
+                title={`${selectedCourse.title} | Aula Virtual | Flip-F`}
+                description={`Estudiando el curso ${selectedCourse.title} en Flip-F`}
+            />
             <div className="flex flex-col lg:flex-row h-full min-h-screen">
 
                 {/* --- SIDEBAR --- */}

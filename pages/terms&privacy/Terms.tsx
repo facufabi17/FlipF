@@ -1,8 +1,10 @@
 import React from 'react';
+import SEOMeta from '../../components/SEOMeta';
 
 const Terms: React.FC = () => {
     return (
         <div className="animate-fade-in min-h-screen bg-background text-text-primary px-6 py-20">
+            <SEOMeta title="Términos y Condiciones | Flip-F" description="Lee los términos y condiciones de Flip-F." />
             <div className="max-w-4xl mx-auto space-y-8 text-gray-300">
 
                 <div className="text-center mb-12">

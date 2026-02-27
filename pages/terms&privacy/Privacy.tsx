@@ -1,8 +1,10 @@
 import React from 'react';
+import SEOMeta from '../../components/SEOMeta';
 
 const Privacy: React.FC = () => {
     return (
         <div className="animate-fade-in min-h-screen bg-background text-text-primary px-6 py-20">
+            <SEOMeta title="Políticas de Privacidad | Flip-F" description="Políticas de privacidad y tratamiento de datos de Flip-F." />
             <div className="max-w-4xl mx-auto space-y-8 text-gray-300">
 
                 <div className="text-center mb-12">

@@ -1,9 +1,11 @@
 import React from 'react';
 import { CONTACT_INFO } from '../info';
+import SEOMeta from '../components/SEOMeta';
 
 const Help: React.FC = () => {
     return (
         <div className="animate-fade-in">
+            <SEOMeta title="Ayuda | Flip-F" description="Centro de ayuda y soporte técnico de Flip-F." />
             <section className="relative flex min-h-[85vh] w-full items-center justify-center overflow-hidden py-20">
                 <div className="absolute inset-0 z-0">
                     <div className="absolute right-1/4 bottom-1/4 h-[400px] w-[400px] rounded-full bg-tech/10 blur-[100px]"></div>

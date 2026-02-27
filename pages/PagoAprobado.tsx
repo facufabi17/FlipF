@@ -1,6 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import SEOMeta from '../components/SEOMeta';
 
 const PagoAprobado = () => {
     const navigate = useNavigate();
@@ -43,6 +44,7 @@ const PagoAprobado = () => {
 
     return (
         <div className="min-h-screen bg-black flex items-center justify-center p-4">
+            <SEOMeta title="Pago Aprobado | Flip-F" description="Tu pago ha sido aprobado correctamente." />
             <div className="bg-surface-dark border border-primary/20 rounded-2xl p-8 max-w-md w-full text-center shadow-[0_0_50px_rgba(34,211,238,0.1)] animate-fade-in">
                 <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
                     <span className="material-symbols-outlined text-4xl text-green-400">check_circle</span>
