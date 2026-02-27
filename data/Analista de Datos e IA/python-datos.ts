@@ -7,6 +7,7 @@ export const PYTHON_DATOS: Course = {
     price: 50000,
     category: 'Datos',
     level: 'Principiante',
+    includes: 'Incluye 3 Plantillas + 1 Prompt IA',
     image: '/img-cources/data-python.webp',
     modules: []
 };

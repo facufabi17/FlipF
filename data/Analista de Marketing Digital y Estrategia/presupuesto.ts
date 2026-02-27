@@ -7,6 +7,7 @@ export const PRESUPUESTO: Course = {
     price: 65000,
     category: 'Negocios',
     level: 'Avanzado',
+    includes: 'Incluye 3 Plantillas + 1 Prompt IA',
     image: '/img-cources/mkt-budget.webp',
     modules: []
 };

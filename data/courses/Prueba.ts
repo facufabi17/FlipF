@@ -7,6 +7,7 @@ export const COURSE_OPERATIONS: Course = {
     price: 0,
     category: 'Operaciones',
     level: 'Intermedio',
+    includes: 'Incluye 3 Plantillas + 1 Prompt IA',
     image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800',
     modules: [
         {

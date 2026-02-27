@@ -7,6 +7,7 @@ export const DESARROLLO_WEB_ESTRATEGICO: Course = {
     price: 55000,
     category: 'Desarrollo',
     level: 'Intermedio',
+    includes: 'Incluye 3 Plantillas + 1 Prompt IA',
     image: '/img-cources/mkt-web.webp',
     modules: []
 };

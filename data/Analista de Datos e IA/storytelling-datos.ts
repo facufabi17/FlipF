@@ -7,6 +7,7 @@ export const STORYTELLING_DATOS: Course = {
     price: 75000,
     category: 'Negocios',
     level: 'Avanzado',
+    includes: 'Incluye 3 Plantillas + 1 Prompt IA',
     image: '/img-cources/data-story.webp',
     modules: []
 };

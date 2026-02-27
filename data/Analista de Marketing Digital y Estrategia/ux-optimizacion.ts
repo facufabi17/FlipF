@@ -7,6 +7,7 @@ export const UX_OPTIMIZACION: Course = {
     price: 55000,
     category: 'Marketing',
     level: 'Intermedio',
+    includes: 'Incluye 3 Plantillas + 1 Prompt IA',
     image: '/img-cources/mkt-ux.webp',
     modules: []
 };

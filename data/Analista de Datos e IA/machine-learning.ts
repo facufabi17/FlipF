@@ -7,6 +7,7 @@ export const MACHINE_LEARNING: Course = {
     price: 75000,
     category: 'IA',
     level: 'Avanzado',
+    includes: 'Incluye 3 Plantillas + 1 Prompt IA',
     image: '/img-cources/data-ml.webp',
     modules: []
 };

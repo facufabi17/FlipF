@@ -7,6 +7,7 @@ export const SERVIDORES_AVANZADOS: Course = {
     price: 60000,
     category: 'Desarrollo',
     level: 'Intermedio',
+    includes: 'Incluye 3 Plantillas + 1 Prompt IA',
     image: '/img-cources/data-server.webp',
     modules: []
 };

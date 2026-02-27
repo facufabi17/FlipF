@@ -7,6 +7,7 @@ export const GROWTH_STRATEGIES: Course = {
     price: 65000,
     category: 'Growth',
     level: 'Avanzado',
+    includes: 'Incluye 3 Plantillas + 1 Prompt IA',
     image: '/img-cources/mkt-growth.webp',
     modules: []
 };

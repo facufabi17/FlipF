@@ -7,6 +7,7 @@ export const POWERBI: Course = {
     price: 60000,
     category: 'Datos',
     level: 'Intermedio',
+    includes: 'Incluye 3 Plantillas + 1 Prompt IA',
     image: '/img-cources/data-powerbi.webp',
     modules: []
 };

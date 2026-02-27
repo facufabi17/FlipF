@@ -7,6 +7,7 @@ export const AI_OPERATIVA: Course = {
     price: 50000,
     category: 'IA',
     level: 'Principiante',
+    includes: 'Incluye 3 Plantillas + 1 Prompt IA',
     image: '/img-cources/data-ai.webp',
     modules: []
 };

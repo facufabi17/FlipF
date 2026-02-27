@@ -7,6 +7,7 @@ export const ANALISIS_EXPLORATORIO: Course = {
     price: 50000,
     category: 'Datos',
     level: 'Principiante',
+    includes: 'Incluye 3 Plantillas + 1 Prompt IA',
     image: '/img-cources/data-viz-basic.webp',
     modules: []
 };

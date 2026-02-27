@@ -7,6 +7,7 @@ export const NOSQL_DATABASES: Course = {
     price: 75000,
     category: 'Datos',
     level: 'Avanzado',
+    includes: 'Incluye 3 Plantillas + 1 Prompt IA',
     image: '/img-cources/data-nosql.webp',
     modules: []
 };

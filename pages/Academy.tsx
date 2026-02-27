@@ -590,10 +590,12 @@ const Academy: React.FC = () => {
                                             </h3>
 
                                             {/* Gancho Done-With-You */}
-                                            <div className="flex items-center gap-2 text-xs text-gray-400 mb-6 bg-white/5 p-2 rounded border border-white/5">
-                                                <span className="material-symbols-outlined text-sm text-[#00F5F1]">folder_zip</span>
-                                                Incluye 3 Plantillas + 1 Prompt IA
-                                            </div>
+                                            {course.includes && (
+                                                <div className="flex items-center gap-2 text-xs text-gray-400 mb-6 bg-white/5 p-2 rounded border border-white/5">
+                                                    <span className="material-symbols-outlined text-sm text-[#00F5F1]">folder_zip</span>
+                                                    {course.includes}
+                                                </div>
+                                            )}
 
                                             <div className="mt-auto flex items-center justify-between pt-4 border-t border-white/5">
                                                 <div>

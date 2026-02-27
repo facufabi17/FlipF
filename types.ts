@@ -64,6 +64,7 @@ export interface Course {
     image: string;
     category: string;
     level: 'Principiante' | 'Intermedio' | 'Avanzado';
+    includes?: string;
     modules: CourseModule[];
 }
 

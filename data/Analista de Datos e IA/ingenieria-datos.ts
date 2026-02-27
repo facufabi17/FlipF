@@ -7,6 +7,7 @@ export const INGENIERIA_DATOS: Course = {
     price: 75000,
     category: 'Desarrollo',
     level: 'Avanzado',
+    includes: 'Incluye 3 Plantillas + 1 Prompt IA',
     image: '/img-cources/data-eng.webp',
     modules: []
 };

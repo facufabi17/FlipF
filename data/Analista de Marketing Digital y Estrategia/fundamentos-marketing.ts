@@ -7,6 +7,7 @@ export const FUNDAMENTOS_MARKETING: Course = {
     price: 45000,
     category: 'Marketing',
     level: 'Principiante',
+    includes: 'Incluye 3 Plantillas + 1 Prompt IA',
     image: '/img-cources/mkt-fundamentals.webp',
     modules: [
         {

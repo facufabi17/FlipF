@@ -7,6 +7,7 @@ export const ANALYTICS_DIGITAL: Course = {
     price: 65000,
     category: 'Datos',
     level: 'Avanzado',
+    includes: 'Incluye 3 Plantillas + 1 Prompt IA',
     image: '/img-cources/mkt-analytics.webp',
     modules: []
 };
