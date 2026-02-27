@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { COURSES } from '../data/courses';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import AnimacionCian from '../components/background/AnimacionCian';
+const AnimacionCian = React.lazy(() => import('../components/background/AnimacionCian'));
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { CourseTimeline } from '../components/ui/Linea de Cursos ACADEMIA';
@@ -248,7 +248,9 @@ const Academy: React.FC = () => {
             <section ref={heroRef} className="relative w-full flex flex-col items-center text-center min-h-[60vh] justify-center pb-24 pt-20">
                 {/* Background Animation restricted to Hero */}
                 <div className="absolute inset-0 z-0 overflow-hidden">
-                    <AnimacionCian />
+                    <React.Suspense fallback={<div className="absolute inset-0 bg-black" />}>
+                        <AnimacionCian />
+                    </React.Suspense>
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black"></div>
                 </div>
 

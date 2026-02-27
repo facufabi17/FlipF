@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useRef } from 'react';
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import React, { useRef, useEffect, useState } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { cn } from '@/lib/utils'; // Assumes you have a utils file
 import { School, TrendingUp, Rocket, Medal, Award, ChevronRight, Check } from 'lucide-react';
 
@@ -29,33 +30,72 @@ export const CourseTimeline: React.FC<TimelineProps> = ({
     incentive = "Certificación Oficial"
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
+    const lineRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
 
-    // Track scroll progress relative to this component
-    const { scrollYProgress } = useScroll({
-        target: containerRef,
-        offset: ["start center", "end center"]
-    });
+    useEffect(() => {
+        gsap.registerPlugin(ScrollTrigger);
 
-    // Smooth out the progress line
-    const scaleX = useSpring(scrollYProgress, {
-        stiffness: 100,
-        damping: 30,
-        restDelta: 0.001
-    });
+        if (containerRef.current && lineRef.current) {
+            gsap.to(lineRef.current, {
+                scaleX: 1,
+                ease: window.innerWidth < 768 ? "none" : "power1.inOut",
+                scrollTrigger: {
+                    trigger: containerRef.current,
+                    start: "top center",
+                    end: "bottom center",
+                    scrub: 1
+                }
+            });
+
+            // Animaciones de los nodos de la línea
+            const nodes = gsap.utils.toArray('.timeline-node', containerRef.current);
+            nodes.forEach((node: any, idx: number) => {
+                gsap.fromTo(node,
+                    { scale: 0, opacity: 0 },
+                    {
+                        scale: 1,
+                        opacity: 1,
+                        duration: 0.6,
+                        ease: "back.out(1.5)",
+                        scrollTrigger: {
+                            trigger: node,
+                            start: "top 80%",
+                            toggleActions: "play none none reverse"
+                        }
+                    }
+                );
+            });
+
+            // Animaciones de las tarjetas
+            const cards = gsap.utils.toArray('.timeline-card', containerRef.current);
+            cards.forEach((card: any, idx: number) => {
+                gsap.fromTo(card,
+                    { opacity: 0, y: 20 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.5,
+                        ease: "power2.out",
+                        scrollTrigger: {
+                            trigger: card,
+                            start: "top 85%",
+                            toggleActions: "play none none reverse"
+                        }
+                    }
+                );
+            });
+        }
+
+    }, []);
 
     return (
         <div ref={containerRef} className={cn("w-full py-10 relative", className)}>
 
             {/* --- Header / Context --- */}
             <div className="mb-10 text-center">
-                <motion.h3
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-[#00F5F1]"
-                >
-                </motion.h3>
+                <h3 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-[#00F5F1] timeline-card">
+                </h3>
             </div>
 
             {/* --- Timeline Container --- */}
@@ -69,8 +109,9 @@ export const CourseTimeline: React.FC<TimelineProps> = ({
 
                 {/* --- ACTIVE PROGRESS LINE (Cyan) --- */}
                 {/* Desktop: Animated Width */}
-                <motion.div
-                    style={{ scaleX, transformOrigin: "left" }}
+                <div
+                    ref={lineRef}
+                    style={{ transformOrigin: "left", transform: "scaleX(0)" }}
                     className="absolute top-[32px] left-12 right-12 h-[2px] bg-[#00F5F1] hidden md:block shadow-[0_0_10px_#00F5F1]"
                 />
                 {/* Mobile: Vertical Progress (Optional - keeping simple for now or use scaleY) */}
@@ -84,13 +125,7 @@ export const CourseTimeline: React.FC<TimelineProps> = ({
                         <div key={index} className="relative z-10 flex flex-row md:flex-col items-start md:items-center gap-4 md:gap-0 flex-1 group">
 
                             {/* 1. NODE (Circle) */}
-                            <motion.div
-                                initial={{ scale: 0, opacity: 0 }}
-                                whileInView={{ scale: 1, opacity: 1 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: index * 0.1, type: "spring" }}
-                                className="relative flex-shrink-0 mt-1 md:mt-0"
-                            >
+                            <div className="relative flex-shrink-0 mt-1 md:mt-0 timeline-node">
                                 {/* Glow Effect behind */}
                                 <div className="absolute inset-0 bg-[#00F5F1] blur-md opacity-20 group-hover:opacity-60 transition-opacity duration-500 rounded-full" />
 
@@ -100,16 +135,10 @@ export const CourseTimeline: React.FC<TimelineProps> = ({
 
                                 {/* Connector dot for Mobile (on the line) */}
                                 <div className="md:hidden absolute -left-[29px] top-1/2 -translate-y-1/2 w-3 h-3 bg-[#00F5F1] rounded-full shadow-[0_0_10px_#00F5F1]" />
-                            </motion.div>
+                            </div>
 
                             {/* 2. CONTENT CARD */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: index * 0.1 + 0.1 }}
-                                className="flex-1 w-full"
-                            >
+                            <div className="flex-1 w-full timeline-card">
                                 <div className="bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-xl hover:bg-white/10 transition-colors relative overflow-hidden group/card shadow-lg hover:border-[#00F5F1]/30 flex flex-col h-full">
                                     {/* Top Accent */}
                                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#00F5F1]/50 to-transparent opacity-50 group-hover/card:opacity-100 transition-opacity" />
@@ -139,7 +168,7 @@ export const CourseTimeline: React.FC<TimelineProps> = ({
                                         </div>
                                     )}
                                 </div>
-                            </motion.div>
+                            </div>
 
                             {/* Connector Line for Desktop (Arrow) - Optional */}
                             {index < stages.length - 1 && (
@@ -151,25 +180,14 @@ export const CourseTimeline: React.FC<TimelineProps> = ({
 
                 {/* --- END NODE (Certification) --- */}
                 <div className="relative z-10 flex flex-col items-center flex-1">
-                    <motion.div
-                        initial={{ scale: 0, rotate: -180 }}
-                        whileInView={{ scale: 1, rotate: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: stages.length * 0.1, type: "spring", bounce: 0.5 }}
-                        className="relative mt-1 md:mt-0"
-                    >
+                    <div className="relative mt-1 md:mt-0 timeline-node">
                         <div className="absolute inset-0 bg-yellow-500/20 blur-xl rounded-full animate-pulse" />
                         <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-yellow-600/20 to-black border-2 border-yellow-500/50 flex items-center justify-center md:mb-6 relative z-10 shadow-[0_0_30px_rgba(234,179,8,0.3)]">
                             <Award className="w-8 h-8 text-yellow-400 drop-shadow-[0_0_10px_rgba(234,179,8,0.8)]" />
                         </div>
-                    </motion.div>
+                    </div>
 
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        transition={{ delay: stages.length * 0.2 + 0.3 }}
-                        className="text-center mt-4 md:mt-0"
-                    >
+                    <div className="text-center mt-4 md:mt-0 timeline-card">
                         <div className="bg-yellow-500/10 border border-yellow-500/20 px-6 py-4 rounded-xl backdrop-blur-sm">
                             <h4 className="text-yellow-400 font-bold text-sm uppercase tracking-wider mb-1">
                                 Meta Final
@@ -178,7 +196,7 @@ export const CourseTimeline: React.FC<TimelineProps> = ({
                                 {incentive}
                             </p>
                         </div>
-                    </motion.div>
+                    </div>
                 </div>
 
             </div>

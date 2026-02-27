@@ -145,7 +145,7 @@ const CoursePlayer: React.FC = () => {
                             <p className="text-[10px] text-primary font-bold uppercase tracking-wider mb-1">Aula Virtual</p>
                             <h1 className="text-white text-xs font-bold line-clamp-1">{selectedCourse.title}</h1>
                         </div>
-                        <button onClick={() => navigate('/mis-cursos')} className="text-text-muted hover:text-white p-2 rounded-lg hover:bg-white/5 transition-colors">
+                        <button onClick={() => navigate('/mis-cursos')} aria-label="Salir del curso" className="text-text-muted hover:text-white p-2 rounded-lg hover:bg-white/5 transition-colors">
                             <span className="material-symbols-outlined text-lg">logout</span>
                         </button>
                     </div>

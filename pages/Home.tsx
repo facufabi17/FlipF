@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import FlowGradient from "../components/background/AnimacionEntrada";
+const FlowGradient = React.lazy(() => import('../components/background/AnimacionEntrada'));
 import { COURSES } from '../data/courses';
 import { CardCarousel } from '../components/ui/Tarjetas de Cursos HOME';
 import SEOMeta from '../components/SEOMeta';
@@ -31,6 +31,7 @@ const Home: React.FC = () => {
                     height={300}
                     className="h-full w-full object-cover"
                     alt={course.title}
+                    loading="lazy"
                 />
             </div>
         )
@@ -56,7 +57,9 @@ const Home: React.FC = () => {
 
 
                 {/* Animación de Fondo */}
-                <FlowGradient className="opacity-80" />
+                <React.Suspense fallback={<div className="absolute inset-0 bg-black opacity-80" />}>
+                    <FlowGradient className="opacity-80" />
+                </React.Suspense>
                 <div className="absolute top-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
 
                 {/* Contenido */}

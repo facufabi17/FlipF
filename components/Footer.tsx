@@ -1,8 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { CONTACT_INFO } from '../info';
+import { useAuth } from '../context/AuthContext';
 
 const Footer: React.FC = () => {
+    const { isAuthenticated } = useAuth();
+
     return (
         <footer className="w-full border-t border-white/5 bg-black/40 pt-12 pb-8">
             <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between gap-8">
@@ -28,7 +31,9 @@ const Footer: React.FC = () => {
                         <Link id="footer-resources-paid" to="/recursos-pago" className="text-gray-400 text-sm hover:text-primary transition-colors">Recursos de Pago</Link>
                         <Link id="footer-academy" to="/academia" className="text-gray-400 text-sm hover:text-primary transition-colors">Cursos</Link>
                         <Link id="footer-consulting" to="/consultas" className="text-gray-400 text-sm hover:text-primary transition-colors">Consultas</Link>
-                        <Link id="footer-login" to="/login" className="text-primary font-medium text-sm hover:text-accent transition-colors">Login Alumnos</Link>
+                        {!isAuthenticated && (
+                            <Link id="footer-login" to="/login" className="text-primary font-medium text-sm hover:text-accent transition-colors">Login Alumnos</Link>
+                        )}
                     </div>
                     <div className="flex flex-col gap-3">
                         <h4 className="text-white font-bold text-sm">Compañía</h4>

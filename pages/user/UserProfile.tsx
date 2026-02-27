@@ -320,6 +320,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
                                 <h3 className="text-lg font-bold text-white">Vista de Certificado</h3>
                                 <button
                                     onClick={() => setViewingCertificate(null)}
+                                    aria-label="Cerrar certificado"
                                     className="p-2 hover:bg-white/10 rounded-full text-gray-400 hover:text-white transition-colors"
                                 >
                                     <span className="material-symbols-outlined">close</span>

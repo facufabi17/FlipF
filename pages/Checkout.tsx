@@ -1065,7 +1065,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                                             </div>
                                                         </div>
                                                         {!directCourse && (
-                                                            <button onClick={() => removeFromCart(item.id)} className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-500 transition-all">
+                                                            <button onClick={() => removeFromCart(item.id)} aria-label="Remover del carrito" className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-500 transition-all">
                                                                 <span className="material-symbols-outlined text-lg">close</span>
                                                             </button>
                                                         )}
@@ -1090,7 +1090,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                                             <h4 className="font-bold text-white text-lg">{item.title}</h4>
                                                             <p className="text-primary font-bold text-lg">${item.price.toLocaleString()}</p>
                                                         </div>
-                                                        <button onClick={() => removeFromCart(item.id)} className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-500 transition-all">
+                                                        <button onClick={() => removeFromCart(item.id)} aria-label="Remover del carrito" className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-500 transition-all">
                                                             <span className="material-symbols-outlined text-lg">close</span>
                                                         </button>
                                                     </div>
@@ -1193,7 +1193,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                                                         <span className="material-symbols-outlined text-sm">local_offer</span>
                                                         Cupón aplicado
                                                     </span>
-                                                    <button onClick={removeCoupon} className="text-gray-500 hover:text-white">
+                                                    <button onClick={removeCoupon} aria-label="Remover cupón" className="text-gray-500 hover:text-white">
                                                         <span className="material-symbols-outlined text-sm">close</span>
                                                     </button>
                                                 </div>
@@ -1240,6 +1240,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                             <div className="p-4 flex items-center gap-4 bg-surface-dark border-t border-white/5">
                                 <button
                                     onClick={() => setIsMobileDetailsOpen(!isMobileDetailsOpen)}
+                                    aria-label="Alternar detalles del pedido"
                                     className="p-2 text-gray-400 hover:text-white transition-colors"
                                 >
                                     <span className={`material-symbols-outlined transform transition-transform duration-300 ${isMobileDetailsOpen ? 'rotate-180' : ''}`}>keyboard_arrow_up</span>

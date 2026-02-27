@@ -90,7 +90,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({
                                 <span className="material-symbols-outlined text-sm">local_offer</span>
                                 Cupón activado
                             </span>
-                            <button onClick={onRemoveCoupon} className="text-gray-500 hover:text-white">
+                            <button onClick={onRemoveCoupon} aria-label="Remover cupón" className="text-gray-500 hover:text-white">
                                 <span className="material-symbols-outlined text-sm">close</span>
                             </button>
                         </div>
@@ -105,6 +105,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({
                             />
                             <button
                                 onClick={() => onApplyCoupon(couponInput)}
+                                aria-label="Aplicar cupón"
                                 className="shrink-0 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white text-sm font-bold transition-all"
                             >
                                 <span className="material-symbols-outlined text-sm">check</span>

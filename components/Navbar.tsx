@@ -79,7 +79,7 @@ const Navbar: React.FC = () => {
                 {/* Acciones */}
                 <div className="flex items-center gap-4">
                     {/* Carrito */}
-                    <Link id="nav-cart" to="/checkout" className="relative p-2 text-gray-300 hover:text-white transition-colors group">
+                    <Link id="nav-cart" to="/checkout" aria-label="Ver carrito" className="relative p-2 text-gray-300 hover:text-white transition-colors group">
                         <span className="material-symbols-outlined">shopping_cart</span>
                         {itemCount > 0 && (
                             <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-white shadow-sm ring-2 ring-[#1b131f]">
@@ -162,13 +162,13 @@ const Navbar: React.FC = () => {
                     ) : (
                         <>
                             <Link id="nav-login-btn" to="/login" className="hidden md:block text-sm font-medium text-white hover:text-gray-300 transition-colors">Iniciar Sesión</Link>
-                            <Link id="nav-register-btn" to="/register" className="bg-primary/20 hover:bg-primary/40 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all border border-white/5">
+                            <Link id="nav-register-btn" to="/register" aria-label="Registrarse" className="bg-primary/20 hover:bg-primary/40 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all border border-white/5">
                                 Empezar
                             </Link>
                         </>
                     )}
 
-                    <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden text-white">
+                    <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Menú móvil" className="md:hidden text-white">
                         <span className="material-symbols-outlined">{mobileMenuOpen ? 'close' : 'menu'}</span>
                     </button>
                 </div>
@@ -202,7 +202,7 @@ const Navbar: React.FC = () => {
                         <>
                             <div className="border-t border-white/10 my-2"></div>
                             <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="text-gray-300 hover:text-white">Iniciar Sesión</Link>
-                            <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="text-primary font-bold">Registrarse</Link>
+                            <Link to="/register" onClick={() => setMobileMenuOpen(false)} aria-label="Registrarse" className="text-primary font-bold">Registrarse</Link>
                         </>
                     )}
                 </div>
