@@ -347,6 +347,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 onShowToast('¡Pago exitoso!', 'success');
 
                 const purchaseData = {
+                    transaction_id: externalReference || pendingOrderId,
                     value: finalTotal,
                     items: directCourse
                         ? [{ item_id: directCourse.id, item_name: directCourse.title, price: directCourse.price, quantity: 1 }]
@@ -433,6 +434,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 setCurrentStep(1);
 
                 const purchaseData = {
+                    transaction_id: pendingOrderId || externalReference,
                     value: finalTotal,
                     items: directCourse
                         ? [{ item_id: directCourse.id, item_name: directCourse.title, price: directCourse.price, quantity: 1 }]
@@ -709,6 +711,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
                 setCurrentStep(1);
 
                 const purchaseData = {
+                    transaction_id: pendingOrderId || externalReference,
                     value: finalTotal,
                     items: directCourse
                         ? [{ item_id: directCourse.id, item_name: directCourse.title, price: directCourse.price, quantity: 1 }]
