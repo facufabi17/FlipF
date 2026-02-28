@@ -1,81 +1,78 @@
 import React from 'react';
 import SEOMeta from '../../components/SEOMeta';
 
-const Terms: React.FC = () => {
+export default function Terms() {
     return (
         <div className="animate-fade-in min-h-screen bg-background text-text-primary px-6 py-20">
             <SEOMeta title="Términos y Condiciones | Flip-F" description="Lee los términos y condiciones de Flip-F." />
             <div className="max-w-4xl mx-auto space-y-8 text-gray-300">
-
                 <div className="text-center mb-12">
                     <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Términos y Condiciones</h1>
-                    <p className="text-text-muted">Última actualización: 28 de enero de 2026</p>
+                    <p className="text-text-muted">Última actualización: 28 de febrero de 2026</p>
                 </div>
 
                 <div className="space-y-6 text-lg leading-relaxed">
                     <p>
-                        Bienvenido a Flip Manager. Al acceder a nuestro sitio web y utilizar nuestros servicios, aceptas cumplir con los siguientes términos y condiciones. Te recomendamos leerlos atentamente.
+                        Bienvenido a <strong>Flip-F</strong>. Al registrarte, crear una cuenta y acceder a nuestra plataforma de e-learning, compras y recursos digitales, confirmas que has leído, entendido y aceptado cumplir con los presentes Términos y Condiciones, así como con nuestra Política de Privacidad.
                     </p>
                 </div>
 
                 <section className="space-y-4">
-                    <h2 className="text-2xl font-bold text-white">1. Servicios de la Agencia</h2>
-                    <p>Flip Manager ofrece servicios de marketing digital para empresas.</p>
+                    <h2 className="text-2xl font-bold text-white">1. Creación de Cuenta y Responsabilidad</h2>
+                    <p>Para acceder a nuestros cursos y realizar compras, es obligatorio crear una cuenta y aceptar estos términos.</p>
                     <ul className="list-disc pl-6 space-y-2">
-                        <li><strong>Contratación:</strong> La prestación de servicios se regirá por el contrato específico firmado entre las partes.</li>
-                        <li><strong>Responsabilidad:</strong> El cliente es responsable de proporcionar la información y accesos necesarios para la ejecución de las estrategias.</li>
+                        <li><strong>Información veraz:</strong> Eres responsable de proporcionar información exacta, actual y completa (incluyendo tu nombre, DNI, dirección física real y correo electrónico).</li>
+                        <li><strong>Seguridad de la cuenta:</strong> Eres el único y total responsable de mantener la confidencialidad de tus credenciales de acceso a la plataforma. El uso compartido de cuentas de aprendizaje está estrictamente prohibido.</li>
                     </ul>
                 </section>
 
                 <section className="space-y-4">
-                    <h2 className="text-2xl font-bold text-white">2. Venta de Cursos y Recursos Educativos</h2>
-                    <p>Al adquirir nuestros cursos o recursos, aceptas las siguientes reglas:</p>
+                    <h2 className="text-2xl font-bold text-white">2. Políticas de Compra, Pagos y Entrega</h2>
+                    <p>Flip-F comercializa cursos online y recursos digitales.</p>
                     <ul className="list-disc pl-6 space-y-2">
-                        <li><strong>Acceso:</strong> El acceso a los cursos es personal e intransferible.</li>
-                        <li><strong>Uso de Recursos:</strong> Los recursos descargables (plantillas, guías, etc.) son para uso profesional del comprador, pero está prohibida su reventa o distribución masiva sin autorización previa.</li>
-                        <li><strong>Certificaciones:</strong> Para obtener el certificado de finalización de ciertos cursos, se requiere que el usuario complete su perfil con su DNI, información que se manejará de forma privada y no será modificable tras su emisión.</li>
+                        <li><strong>Métodos de Pago:</strong> Aceptamos pagos a través de <strong>Mercado Pago</strong> (tarjetas de crédito, débito y dinero en la cuenta) y a través de <strong>Transferencias Bancarias</strong> directas a nuestras cuentas.</li>
+                        <li><strong>Tiempos de Entrega (Acceso):</strong> Si el pago se realiza a través de Mercado Pago y es aprobado de forma automática, el acceso al curso o recurso será <strong>inmediato</strong> tras la confirmación técnica del pago en nuestro sistema en línea.</li>
+                        <li><strong>Transferencias Bancarias:</strong> Si seleccionas abonar por transferencia, el acceso quedará temporalmente en estado pendiente y requerirá de una <strong>validación manual</strong> por parte de nuestro equipo. Una vez que recibamos y verifiquemos el importe en nuestros canales financieros junto al comprobante de transferencia, se habilitará el respectivo acceso.</li>
                     </ul>
                 </section>
 
                 <section className="space-y-4">
-                    <h2 className="text-2xl font-bold text-white">3. Propiedad Intelectual</h2>
-                    <p>
-                        Todo el contenido presente en este sitio, incluyendo textos, gráficos, logotipos, iconos, imágenes, clips de audio, descargas digitales y compilaciones de datos, es propiedad de Flip Manager o de sus proveedores de contenido y está protegido por las leyes de propiedad intelectual.
-                    </p>
-                </section>
-
-                <section className="space-y-4">
-                    <h2 className="text-2xl font-bold text-white">4. Políticas de Pago y Devolución</h2>
+                    <h2 className="text-2xl font-bold text-white">3. Política de Devoluciones y Reembolsos</h2>
+                    <p>Nuestra política de reembolsos está diseñada considerando de manera justificada la naturaleza específica de los contenidos y bienes digitales que ofrecemos:</p>
                     <ul className="list-disc pl-6 space-y-2">
-                        <li><strong>Pagos:</strong> Todos los pagos se realizan a través de plataformas seguras de terceros.</li>
-                        <li><strong>Reembolsos:</strong> Debido a la naturaleza digital de nuestros cursos y recursos, no se realizarán reembolsos una vez que el usuario haya accedido al contenido o descargado el material, salvo excepciones legales vigentes.</li>
+                        <li><strong>Productos Digitales Inmediatos:</strong> Debido a que nuestros cursos y recursos son productos digitales de consumo o de descarga inmediata en la máquina del usuario, <strong>no se ofrecen reembolsos ni devoluciones comerciales de ningún tipo</strong> una vez que el pago ha sido procesado de manera exitosa y el acceso legítimo al contenido ya se ha otorgado al usuario.</li>
+                        <li><strong>Excepciones Exclusivas:</strong> Solamente se contemplarán reembolsos económicos en el caso sumamente excepcional de fallas técnicas verídicamente comprobables que involucren un error grave dentro de nuestra plataforma e imposibiliten total y definitivamente el acceso al material digital previamente adquirido, siempre y cuando no puedan ser resueltas por nuestro grupo de soporte técnico especializado dentro de un plazo temporal prudencial o razonable.</li>
                     </ul>
                 </section>
 
                 <section className="space-y-4">
-                    <h2 className="text-2xl font-bold text-white">5. Modificaciones de los Términos</h2>
+                    <h2 className="text-2xl font-bold text-white">4. Propiedad Intelectual y Restricciones de Uso</h2>
                     <p>
-                        Nos reservamos el derecho de modificar estos términos en cualquier momento. Las modificaciones entrarán en vigor inmediatamente después de su publicación en el sitio web. Es responsabilidad del usuario revisar periódicamente esta sección.
+                        Todo el contenido provisto en la plataforma Flip-F, incluyendo lecciones en video, manuales, código fuente, diseños y recursos descargables, es propiedad exclusiva de Flip-F y está protegido por las leyes de propiedad intelectual y derechos de autor.
+                    </p>
+                    <ul className="list-disc pl-6 space-y-2">
+                        <li><strong>Prohibición de Piratería:</strong> Queda estrictamente <strong>prohibido descargar (salvo los recursos explícitamente indicados), grabar, revender, distribuir, o compartir</strong> el contenido de la plataforma de ninguna forma, incluyendo el uso de cuentas compartidas.</li>
+                        <li><strong>Licencia de Uso:</strong> Adquirir un curso te otorga una licencia de uso personal, no exclusiva e intransferible para tu propio aprendizaje. Cualquier violación a estos derechos implicará la cancelación inmediata de tu cuenta sin derecho a reembolso y la posible toma de acciones legales.</li>
+                    </ul>
+                </section>
+
+                <section className="space-y-4">
+                    <h2 className="text-2xl font-bold text-white">5. Modificaciones del Servicio y Suspensión de Cuentas</h2>
+                    <p>
+                        Flip-F se reserva el derecho de modificar o discontinuar cursos, recursos, funcionalidades o los presentes términos en cualquier momento. También nos reservamos el derecho a modificar los precios, sin que esto afecte a los usuarios que ya hubieran completado su compra con anterioridad.
+                    </p>
+                    <p>
+                        <strong>Suspensión por Mal Uso:</strong> Nos reservamos el derecho de suspender o cancelar de forma permanente cualquier cuenta que detectemos realizando actividades fraudulentas, intentos de violación de seguridad, o que infrinja las políticas de propiedad intelectual aquí descritas, sin previo aviso ni derecho a reembolso.
                     </p>
                 </section>
 
                 <section className="space-y-4">
-                    <h2 className="text-2xl font-bold text-white">6. Limitación de Responsabilidad</h2>
+                    <h2 className="text-2xl font-bold text-white">6. Legislación y Jurisdicción Aplicable</h2>
                     <p>
-                        Flip Manager no garantiza resultados específicos (como aumento de ventas o seguidores) derivados del uso de sus cursos o recursos, ya que el éxito depende de la implementación individual y factores externos del mercado.
+                        Estos términos se interpretan y rigen conforme a las leyes de la República Argentina. Cualquier disputa será resuelta de forma exclusiva ante los tribunales ordinarios competentes de la ciudad de Resistencia, Provincia del Chaco, renunciando a cualquier otro fuero o jurisdicción.
                     </p>
                 </section>
-
-                <section className="space-y-4">
-                    <h2 className="text-2xl font-bold text-white">7. Ley Aplicable y Jurisdicción</h2>
-                    <p>
-                        Estos términos se rigen por las leyes de la República Argentina. Cualquier controversia será sometida a los tribunales ordinarios de la ciudad de Resistencia, Chaco.
-                    </p>
-                </section>
-
             </div>
         </div>
     );
-};
-
-export default Terms;
+}

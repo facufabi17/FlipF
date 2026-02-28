@@ -169,9 +169,20 @@ const Register: React.FC<RegisterProps> = ({ onShowToast }) => {
                                         ⚠️ Esta información no se podrá modificar una vez guardada.
                                     </p>
                                 </div>
-                                <button id="btn-register-submit" type="submit" disabled={loading} className="w-full bg-primary hover:bg-purple-600 text-white font-bold py-3.5 rounded-lg transition-all shadow-lg shadow-primary/20 disabled:opacity-50">
+                                <button id="btn-register-submit" type="submit" disabled={loading} className="w-full bg-primary hover:bg-purple-600 text-white font-bold py-3.5 rounded-lg transition-all shadow-lg shadow-primary/20 disabled:opacity-50 mt-6">
                                     {loading ? 'Creando cuenta...' : 'Registrarse'}
                                 </button>
+                                <p className="text-xs text-center text-gray-500 mt-4">
+                                    Al registrarte, aceptas nuestros{' '}
+                                    <Link to="/terms" className="text-primary hover:underline">
+                                        Términos y Condiciones
+                                    </Link>{' '}
+                                    y{' '}
+                                    <Link to="/privacy" className="text-primary hover:underline">
+                                        Políticas de Privacidad
+                                    </Link>
+                                    .
+                                </p>
                             </div>
                         </form>
                         <p className="mt-6 text-center text-sm text-gray-400">
