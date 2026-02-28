@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && npx tsx scripts/generate-seo.ts",
+    "build": "vite build && npx tsx scripts/SEO-Links.ts",
     "preview": "vite preview",
     "start-all": "concurrently \"npm run dev\" \"npx tsx api/server.ts\""
   },
