@@ -1,4 +1,5 @@
 {
+  "cleanUrls": true,
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -13,18 +14,7 @@
       "destination": "/robots.txt"
     },
     {
-      "source": "/((?!api/|@|src/|node_modules/|.*\\.).*)",
-      "has": [
-        {
-          "type": "header",
-          "key": "user-agent",
-          "value": "(?i).*(bot|facebook|whatsapp|linkedin|twitter|slack|telegram|discord).*"
-        }
-      ],
-      "destination": "/api/MetaInfo-og"
-    },
-    {
-      "source": "/((?!api/|@|src/|node_modules/|.*\\.).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
