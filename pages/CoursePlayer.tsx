@@ -140,6 +140,7 @@ const CoursePlayer: React.FC = () => {
             <SEOMeta
                 title={`${selectedCourse.title} | Aula Virtual | Flip-F`}
                 description={`Estudiando el curso ${selectedCourse.title} en Flip-F`}
+                image={selectedCourse.image}
             />
             <div className="flex flex-col lg:flex-row h-full min-h-screen">
 

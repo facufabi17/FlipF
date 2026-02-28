@@ -68,6 +68,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ onShowToast }) => {
             <SEOMeta
                 title={`${selectedCourse.title} | Flip`}
                 description={selectedCourse.description}
+                image={selectedCourse.image}
             />
             {/* Background Effects */}
             <div className="fixed inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5 pointer-events-none mix-blend-overlay"></div>
