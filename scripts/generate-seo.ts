@@ -34,16 +34,21 @@ function generatePageHtml(baseHtml: string, title: string, description: string, 
     const fullUrl = `${BASE_URL}${urlPath}`;
 
     let html = baseHtml
-        .replace(/<title>.*?<\/title>/gi, `<title>${title}</title>`)
-        .replace(/<meta name="description" content="[^"]*">/gi, `<meta name="description" content="${description}">`)
-        .replace(/<meta property="og:title" content="[^"]*">/gi, `<meta property="og:title" content="${title}">`)
-        .replace(/<meta property="og:description" content="[^"]*">/gi, `<meta property="og:description" content="${description}">`)
-        .replace(/<meta property="og:image" content="[^"]*">/gi, `<meta property="og:image" content="${fullImageUrl}">`)
-        .replace(/<meta property="og:url" content="[^"]*">/gi, `<meta property="og:url" content="${fullUrl}">`);
+        .replace(/<title>[\s\S]*?<\/title>/gi, `<title>${title}</title>`)
+        .replace(/<meta[^>]*name="description"[^>]*>/gi, `<meta name="description" content="${description}">`)
+        .replace(/<meta[^>]*property="og:title"[^>]*>/gi, `<meta property="og:title" content="${title}">`)
+        .replace(/<meta[^>]*property="og:description"[^>]*>/gi, `<meta property="og:description" content="${description}">`)
+        .replace(/<meta[^>]*property="og:image"[^>]*>/gi, `<meta property="og:image" content="${fullImageUrl}">`)
+        .replace(/<meta[^>]*property="og:url"[^>]*>/gi, `<meta property="og:url" content="${fullUrl}">`);
 
-    // Añadir URL si no existe
+    // Añadir URL si no existe (algunas de tus páginas lo requerían)
     if (!html.includes('og:url')) {
         html = html.replace('</head>', `  <meta property="og:url" content="${fullUrl}">\n</head>`);
+    }
+
+    // Añadir Size para arreglar los "Image Cannot Be Rendered" de Facebook (Aconsejable 1200x630 o genérico fuerte)
+    if (!html.includes('og:image:width')) {
+        html = html.replace('</head>', `  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="630">\n</head>`);
     }
 
     // Asegurar Twitter Cards
