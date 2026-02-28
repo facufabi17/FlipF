@@ -70,19 +70,39 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
 
     // 7. Leer el archivo index.html compilado
     try {
-        // En Vercel, los archivos estáticos en public o root suelen quedar en la raíz o hay que buscar el index.html
-        // Para aplicaciones Vite, Vercel sirviendo estáticos ubica el index.html en ROOT
-        const indexPath = path.join(process.cwd(), 'index.html');
+        // En Vercel, los archivos estáticos luego de un build Vite suelen quedar en la carpeta 'dist'
+        // Si no existe ahí, buscamos en la raíz.
+        const possiblePaths = [
+            path.join(process.cwd(), 'dist', 'index.html'),
+            path.join(process.cwd(), 'index.html'),
+            path.join(__dirname, '..', 'dist', 'index.html'), // path fallback alternativo
+             path.join(__dirname, '..', 'index.html') 
+        ];
+
+        let indexPath = '';
+        for (const p of possiblePaths) {
+            if (fs.existsSync(p)) {
+                 indexPath = p;
+                 break;
+            }
+        }
+
+        if (!indexPath) {
+            console.error('No se pudo encontrar index.html en Vercel. Paths buscados:', possiblePaths);
+            return res.status(500).send('Index HTML Missing');
+        }
+
         let htmlData = fs.readFileSync(indexPath, 'utf8');
 
         // 7. Reemplazar las etiquetas usando Expresiones Regulares
+        // Nota: Asegurarse de usar la tag correcta e interpolar contenido para SEO
         htmlData = htmlData
             .replace(/<title>.*?<\/title>/gi, `<title>${metaTitle}</title>`)
-            .replace(/<meta name="description" content="[^"]*">/gi, `<meta name="description" content="${metaDescription}">`)
-            .replace(/<meta property="og:title" content="[^"]*">/gi, `<meta property="og:title" content="${metaTitle}">`)
-            .replace(/<meta property="og:description" content="[^"]*">/gi, `<meta property="og:description" content="${metaDescription}">`)
-            .replace(/<meta property="og:image" content="[^"]*">/gi, `<meta property="og:image" content="${metaImage}">`)
-            .replace(/<meta property="og:url" content="[^"]*">/gi, `<meta property="og:url" content="${metaUrl}">`);
+            .replace(/<meta name=["']description["'] content=["'][^"']*["']>/gi, `<meta name="description" content="${metaDescription}">`)
+            .replace(/<meta property=["']og:title["'] content=["'][^"']*["']>/gi, `<meta property="og:title" content="${metaTitle}">`)
+            .replace(/<meta property=["']og:description["'] content=["'][^"']*["']>/gi, `<meta property="og:description" content="${metaDescription}">`)
+            .replace(/<meta property=["']og:image["'] content=["'][^"']*["']>/gi, `<meta property="og:image" content="${metaImage}">`)
+            .replace(/<meta property=["']og:type["'] content=["'][^"']*["']>/gi, `<meta property="og:type" content="website">`);
 
         // Si no existe og:url se la podemos agregar antes de cerrar la etiqueta head para mayor precision de OG
         if (!htmlData.includes('og:url')) {
@@ -92,8 +112,14 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
         // Añadir twitter cards explicitly si no están
         if (!htmlData.includes('twitter:card')) {
              htmlData = htmlData.replace('</head>', `  <meta name="twitter:card" content="summary_large_image">\n</head>`);
+        }
+        if (!htmlData.includes('twitter:title')) {
              htmlData = htmlData.replace('</head>', `  <meta name="twitter:title" content="${metaTitle}">\n</head>`);
+        }
+        if (!htmlData.includes('twitter:description')) {
              htmlData = htmlData.replace('</head>', `  <meta name="twitter:description" content="${metaDescription}">\n</head>`);
+        }
+        if (!htmlData.includes('twitter:image')) {
              htmlData = htmlData.replace('</head>', `  <meta name="twitter:image" content="${metaImage}">\n</head>`);
         }
 
@@ -104,7 +130,25 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
         res.status(200).send(htmlData);
     } catch (err) {
         console.error('Error enviando el index.html configurado', err);
-        // Si hay error en lectura en el server (rara vez pasa), redirige pero perdiendo SEO, o envía un código simple
-        res.status(500).send('Error Interno');
+        // Si hay error en lectura en el server devolvemos un HTML basico hardcodeado
+        // Esto asegura que el Crawler NUNCA reciba un error 500 y al menos reciba el titulo.
+        const fallbackHtml = `
+            <!DOCTYPE html>
+            <html lang="es">
+            <head>
+                <meta charset="utf-8">
+                <title>${metaTitle}</title>
+                <meta name="description" content="${metaDescription}">
+                <meta property="og:title" content="${metaTitle}">
+                <meta property="og:description" content="${metaDescription}">
+                <meta property="og:image" content="${metaImage}">
+                <meta property="og:url" content="${metaUrl}">
+                <meta property="og:type" content="website">
+            </head>
+            <body></body>
+            </html>
+        `;
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.status(200).send(fallbackHtml);
     }
 }
