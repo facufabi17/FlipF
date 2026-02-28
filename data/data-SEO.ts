@@ -104,7 +104,7 @@ export function getSeoForPath(pathName: string): SeoRouteConfig {
                  };
             } else {
                  return {
-                     title: `Curso Online: ${course.title} | Academia Flip`,
+                     title: `Curso: ${course.title} | Academia Flip`,
                      description: `Aprende: ${course.description} Forma parte de nuestra Academia Digital.`,
                      image: course.image
                  };
