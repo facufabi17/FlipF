@@ -68,87 +68,54 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
          metaDescription = 'Gestiona tu información personal y configuración en Flip-F.';
     }
 
-    // 7. Leer el archivo index.html compilado
-    try {
-        // En Vercel, los archivos estáticos luego de un build Vite suelen quedar en la carpeta 'dist'
-        // Si no existe ahí, buscamos en la raíz.
-        const possiblePaths = [
-            path.join(process.cwd(), 'dist', 'index.html'),
-            path.join(process.cwd(), 'index.html'),
-            path.join(__dirname, '..', 'dist', 'index.html'), // path fallback alternativo
-             path.join(__dirname, '..', 'index.html') 
-        ];
+    // 7. Generar el HTML de Respuesta (Optimizado para Bot)
+    // En lugar de intentar leer el index.html de la build (lo cual falla frecuentemente en Vercel
+    // debido a cómo Vite y Vercel Node Serverless empaquetan los assets), enviaremos un HTML
+    // ultra-ligero con los Meta Tags exactos.
+    // Si un usuario real llegara a caer aquí por error (aunque el vercel.json debería evitarlo), 
+    // añadimos un script de redirección en frontend.
+    
+    const htmlResponse = `<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>${metaTitle}</title>
+    <!-- Metadatos Básicos -->
+    <meta name="description" content="${metaDescription}">
+    
+    <!-- Open Graph (Facebook, WhatsApp, LinkedIn) -->
+    <meta property="og:title" content="${metaTitle}">
+    <meta property="og:description" content="${metaDescription}">
+    <meta property="og:image" content="${metaImage}">
+    <meta property="og:url" content="${metaUrl}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Flip Agencia">
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="${metaTitle}">
+    <meta name="twitter:description" content="${metaDescription}">
+    <meta name="twitter:image" content="${metaImage}">
+    <meta name="twitter:domain" content="${host}">
+    <meta name="twitter:url" content="${metaUrl}">
 
-        let indexPath = '';
-        for (const p of possiblePaths) {
-            if (fs.existsSync(p)) {
-                 indexPath = p;
-                 break;
-            }
+    <!-- Redirección de seguridad (por si entra un usuario y no un Bot) -->
+    <script>
+        // Redirige eliminando un eventual loop de bot
+        if (window.location.search.indexOf('bot=true') === -1) {
+             window.location.replace(window.location.pathname + "?bot=false");
         }
+    </script>
+</head>
+<body>
+    <h1>${metaTitle}</h1>
+    <p>${metaDescription}</p>
+    <img src="${metaImage}" alt="${metaTitle}" />
+</body>
+</html>`;
 
-        if (!indexPath) {
-            console.error('No se pudo encontrar index.html en Vercel. Paths buscados:', possiblePaths);
-            return res.status(500).send('Index HTML Missing');
-        }
-
-        let htmlData = fs.readFileSync(indexPath, 'utf8');
-
-        // 7. Reemplazar las etiquetas usando Expresiones Regulares
-        // Nota: Asegurarse de usar la tag correcta e interpolar contenido para SEO
-        htmlData = htmlData
-            .replace(/<title>.*?<\/title>/gi, `<title>${metaTitle}</title>`)
-            .replace(/<meta name=["']description["'] content=["'][^"']*["']>/gi, `<meta name="description" content="${metaDescription}">`)
-            .replace(/<meta property=["']og:title["'] content=["'][^"']*["']>/gi, `<meta property="og:title" content="${metaTitle}">`)
-            .replace(/<meta property=["']og:description["'] content=["'][^"']*["']>/gi, `<meta property="og:description" content="${metaDescription}">`)
-            .replace(/<meta property=["']og:image["'] content=["'][^"']*["']>/gi, `<meta property="og:image" content="${metaImage}">`)
-            .replace(/<meta property=["']og:type["'] content=["'][^"']*["']>/gi, `<meta property="og:type" content="website">`);
-
-        // Si no existe og:url se la podemos agregar antes de cerrar la etiqueta head para mayor precision de OG
-        if (!htmlData.includes('og:url')) {
-            htmlData = htmlData.replace('</head>', `  <meta property="og:url" content="${metaUrl}">\n</head>`);
-        }
-
-        // Añadir twitter cards explicitly si no están
-        if (!htmlData.includes('twitter:card')) {
-             htmlData = htmlData.replace('</head>', `  <meta name="twitter:card" content="summary_large_image">\n</head>`);
-        }
-        if (!htmlData.includes('twitter:title')) {
-             htmlData = htmlData.replace('</head>', `  <meta name="twitter:title" content="${metaTitle}">\n</head>`);
-        }
-        if (!htmlData.includes('twitter:description')) {
-             htmlData = htmlData.replace('</head>', `  <meta name="twitter:description" content="${metaDescription}">\n</head>`);
-        }
-        if (!htmlData.includes('twitter:image')) {
-             htmlData = htmlData.replace('</head>', `  <meta name="twitter:image" content="${metaImage}">\n</head>`);
-        }
-
-        // 8. Enviar HTML final.
-        // Opcional: Para cachear la respuesta en el CDN de Vercel por 1 hora y reducir invocaciones.
-        res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.status(200).send(htmlData);
-    } catch (err) {
-        console.error('Error enviando el index.html configurado', err);
-        // Si hay error en lectura en el server devolvemos un HTML basico hardcodeado
-        // Esto asegura que el Crawler NUNCA reciba un error 500 y al menos reciba el titulo.
-        const fallbackHtml = `
-            <!DOCTYPE html>
-            <html lang="es">
-            <head>
-                <meta charset="utf-8">
-                <title>${metaTitle}</title>
-                <meta name="description" content="${metaDescription}">
-                <meta property="og:title" content="${metaTitle}">
-                <meta property="og:description" content="${metaDescription}">
-                <meta property="og:image" content="${metaImage}">
-                <meta property="og:url" content="${metaUrl}">
-                <meta property="og:type" content="website">
-            </head>
-            <body></body>
-            </html>
-        `;
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.status(200).send(fallbackHtml);
-    }
+    // 8. Enviar HTML final.
+    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.status(200).send(htmlResponse);
 }
