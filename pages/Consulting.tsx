@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import emailjs from '@emailjs/browser';
 const NeuralNetworkHero = React.lazy(() => import('../components/background/AnimacionVioleta'));
 import { CONTACT_INFO } from '../info';
-import SEOMeta from '../components/SEOMeta';
+import SEOMeta from '../components/SEO-Meta';
 
 interface ConsultingProps {
   onShowToast: (text: string) => void;

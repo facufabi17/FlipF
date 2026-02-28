@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { COURSES } from '../../data/courses';
 import CertificateDisplay from '../../components/CertificateDisplay';
-import SEOMeta from '../../components/SEOMeta';
+import SEOMeta from '../../components/SEO-Meta';
 
 const MyCertificates: React.FC = () => {
     const navigate = useNavigate();
@@ -30,7 +30,7 @@ const MyCertificates: React.FC = () => {
 
     return (
         <div className="animate-fade-in min-h-screen py-12 px-4 md:px-8 max-w-7xl mx-auto">
-            <SEOMeta title="Mis Certificados | Flip-F" description="Visualiza y descarga tus certificados de completación de cursos en Flip-F." />
+            <SEOMeta />
             <div className="mb-12">
                 <h1 className="text-4xl font-bold text-white mb-4">Mis <span className="text-primary">Certificados</span></h1>
                 <p className="text-gray-400 text-lg">Aquí encontrarás todos los reconocimientos obtenidos por completar nuestros cursos.</p>

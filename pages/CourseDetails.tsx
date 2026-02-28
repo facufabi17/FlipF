@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { COURSES } from '../data/courses';
 import ScheduleSelector from '../components/ui/Horarios de Cursos';
-import SEOMeta from '../components/SEOMeta';
+import SEOMeta from '../components/SEO-Meta';
 
 interface CourseDetailsProps {
     onShowToast: (text: string, type?: 'success' | 'error') => void;

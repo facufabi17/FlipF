@@ -1,10 +1,10 @@
 import React from 'react';
-import SEOMeta from '../../components/SEOMeta';
+import SEOMeta from '../../components/SEO-Meta';
 
 export default function Privacy() {
     return (
         <div className="animate-fade-in min-h-screen bg-background text-text-primary px-6 py-20">
-            <SEOMeta title="Políticas de Privacidad | Flip-F" description="Políticas de privacidad y tratamiento de datos de Flip-F." />
+            <SEOMeta />
             <div className="max-w-4xl mx-auto space-y-8 text-gray-300">
                 <div className="text-center mb-12">
                     <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Política de Privacidad</h1>
@@ -13,7 +13,7 @@ export default function Privacy() {
 
                 <div className="space-y-6 text-lg leading-relaxed">
                     <p>
-                        En <strong>Flip-F</strong>, valoramos tu privacidad y nos comprometemos a proteger tus datos personales. Esta Política de Privacidad explica cómo recopilamos, utilizamos, compartimos y protegemos tu información cuando utilizas nuestra plataforma de e-learning, compras nuestros cursos o descargas nuestros recursos digitales.
+                        En <strong>Flip</strong>, valoramos tu privacidad y nos comprometemos a proteger tus datos personales. Esta Política de Privacidad explica cómo recopilamos, utilizamos, compartimos y protegemos tu información cuando utilizas nuestra plataforma de e-learning, compras nuestros cursos o descargas nuestros recursos digitales.
                     </p>
                 </div>
 
@@ -44,7 +44,7 @@ export default function Privacy() {
 
                 <section className="space-y-4">
                     <h2 className="text-2xl font-bold text-white">3. Compartir información con terceros</h2>
-                    <p>En Flip-F no vendemos ni comercializamos tus datos. Sin embargo, para que nuestra plataforma funcione correctamente, tu información es gestionada a través de los siguientes proveedores de infraestructura (terceros de confianza):</p>
+                    <p>En Flip no vendemos ni comercializamos tus datos. Sin embargo, para que nuestra plataforma funcione correctamente, tu información es gestionada a través de los siguientes proveedores de infraestructura (terceros de confianza):</p>
                     <ul className="list-disc pl-6 space-y-2">
                         <li><strong>Supabase:</strong> Utilizamos Supabase como nuestro proveedor de base de datos y sistema de autenticación. Tus datos personales y de cuenta se almacenan en sus servidores seguros, y tus contraseñas se encuentran fuertemente encriptadas.</li>
                         <li><strong>Mercado Pago:</strong> Actúa como nuestra pasarela para el procesamiento de pagos (tarjetas y dinero en cuenta). Al realizar una compra, los datos de pago se procesan directamente en sus servidores bajo estrictos estándares de seguridad informáticos como PCI-DSS.</li>

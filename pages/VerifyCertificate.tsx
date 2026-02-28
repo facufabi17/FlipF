@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { COURSES } from '../data/courses';
-import SEOMeta from '../components/SEOMeta';
+import SEOMeta from '../components/SEO-Meta';
 
 interface VerificationResult {
     isValid: boolean;
@@ -66,7 +66,7 @@ const VerifyCertificate: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-[#0f0f13] flex flex-col items-center justify-center p-4 relative overflow-hidden">
-            <SEOMeta title="Verificar Certificado | Flip-F" description="Verifica la autenticidad de un certificado emitido por Flip-F." />
+            <SEOMeta />
             {/* Decorative Background */}
             <div className="absolute top-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-[128px] pointer-events-none"></div>
             <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent/10 rounded-full blur-[128px] pointer-events-none"></div>

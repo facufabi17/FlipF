@@ -3,7 +3,7 @@ import { PAID_RESOURCES } from '../data/resources';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import SEOMeta from '../components/SEOMeta';
+import SEOMeta from '../components/SEO-Meta';
 
 
 interface PaidResourcesProps {

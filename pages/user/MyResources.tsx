@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { PAID_RESOURCES } from '../../data/resources';
-import SEOMeta from '../../components/SEOMeta';
+import SEOMeta from '../../components/SEO-Meta';
 
 const MyResources: React.FC = () => {
     const navigate = useNavigate();
@@ -28,7 +28,7 @@ const MyResources: React.FC = () => {
 
     return (
         <div className="animate-fade-in min-h-screen">
-            <SEOMeta title="Mis Recursos | Flip-F" description="Descarga tus herramientas, plantillas y ebooks adquiridos en Flip-F." />
+            <SEOMeta />
             <section className="p-6 lg:p-12 max-w-7xl mx-auto">
                 <div className="flex items-center gap-4 mb-8">
                     <button onClick={() => navigate('/recursos-pago')} className="text-text-muted hover:text-white transition-colors">

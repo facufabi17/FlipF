@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import SEOMeta from '../components/SEOMeta';
+import SEOMeta from '../components/SEO-Meta';
 
 const UpdatePassword: React.FC = () => {
     const navigate = useNavigate();
@@ -50,7 +50,7 @@ const UpdatePassword: React.FC = () => {
 
     return (
         <div className="animate-fade-in min-h-screen flex items-center justify-center bg-background px-4">
-            <SEOMeta title="Actualizar Contraseña | Flip-F" description="Actualiza tu contraseña de Flip-F de manera segura." />
+            <SEOMeta />
             <div className="absolute inset-0 z-0 overflow-hidden">
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-primary/20 blur-[120px]"></div>
             </div>

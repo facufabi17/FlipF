@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { COURSES } from '../../data/courses';
 import CertificateDisplay from '../../components/CertificateDisplay';
-import SEOMeta from '../../components/SEOMeta';
+import SEOMeta from '../../components/SEO-Meta';
 
 interface UserProfileProps {
     onShowToast: (text: string, type?: 'success' | 'error') => void;
@@ -105,7 +105,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
 
     return (
         <div className="animate-fade-in">
-            <SEOMeta title="Mi Perfil | Flip-F" description="Gestiona tu información personal y configuración en Flip-F." />
+            <SEOMeta />
             <section className="relative flex min-h-[85vh] w-full items-center justify-center overflow-hidden py-20">
                 <div className="absolute inset-0 z-0">
                     <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-primary/10 blur-[120px]"></div>

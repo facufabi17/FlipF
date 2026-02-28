@@ -1,10 +1,10 @@
 import React from 'react';
-import SEOMeta from '../../components/SEOMeta';
+import SEOMeta from '../../components/SEO-Meta';
 
 export default function Terms() {
     return (
         <div className="animate-fade-in min-h-screen bg-background text-text-primary px-6 py-20">
-            <SEOMeta title="Términos y Condiciones | Flip-F" description="Lee los términos y condiciones de Flip-F." />
+            <SEOMeta />
             <div className="max-w-4xl mx-auto space-y-8 text-gray-300">
                 <div className="text-center mb-12">
                     <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Términos y Condiciones</h1>
@@ -13,7 +13,7 @@ export default function Terms() {
 
                 <div className="space-y-6 text-lg leading-relaxed">
                     <p>
-                        Bienvenido a <strong>Flip-F</strong>. Al registrarte, crear una cuenta y acceder a nuestra plataforma de e-learning, compras y recursos digitales, confirmas que has leído, entendido y aceptado cumplir con los presentes Términos y Condiciones, así como con nuestra Política de Privacidad.
+                        Bienvenido a <strong>Flip</strong>. Al registrarte, crear una cuenta y acceder a nuestra plataforma de e-learning, compras y recursos digitales, confirmas que has leído, entendido y aceptado cumplir con los presentes Términos y Condiciones, así como con nuestra Política de Privacidad.
                     </p>
                 </div>
 
@@ -28,7 +28,7 @@ export default function Terms() {
 
                 <section className="space-y-4">
                     <h2 className="text-2xl font-bold text-white">2. Políticas de Compra, Pagos y Entrega</h2>
-                    <p>Flip-F comercializa cursos online y recursos digitales.</p>
+                    <p>Flip comercializa cursos online y recursos digitales.</p>
                     <ul className="list-disc pl-6 space-y-2">
                         <li><strong>Métodos de Pago:</strong> Aceptamos pagos a través de <strong>Mercado Pago</strong> (tarjetas de crédito, débito y dinero en la cuenta) y a través de <strong>Transferencias Bancarias</strong> directas a nuestras cuentas.</li>
                         <li><strong>Tiempos de Entrega (Acceso):</strong> Si el pago se realiza a través de Mercado Pago y es aprobado de forma automática, el acceso al curso o recurso será <strong>inmediato</strong> tras la confirmación técnica del pago en nuestro sistema en línea.</li>
@@ -48,7 +48,7 @@ export default function Terms() {
                 <section className="space-y-4">
                     <h2 className="text-2xl font-bold text-white">4. Propiedad Intelectual y Restricciones de Uso</h2>
                     <p>
-                        Todo el contenido provisto en la plataforma Flip-F, incluyendo lecciones en video, manuales, código fuente, diseños y recursos descargables, es propiedad exclusiva de Flip-F y está protegido por las leyes de propiedad intelectual y derechos de autor.
+                        Todo el contenido provisto en la plataforma Flip, incluyendo lecciones en video, manuales, código fuente, diseños y recursos descargables, es propiedad exclusiva de Flip y está protegido por las leyes de propiedad intelectual y derechos de autor.
                     </p>
                     <ul className="list-disc pl-6 space-y-2">
                         <li><strong>Prohibición de Piratería:</strong> Queda estrictamente <strong>prohibido descargar (salvo los recursos explícitamente indicados), grabar, revender, distribuir, o compartir</strong> el contenido de la plataforma de ninguna forma, incluyendo el uso de cuentas compartidas.</li>
@@ -59,7 +59,7 @@ export default function Terms() {
                 <section className="space-y-4">
                     <h2 className="text-2xl font-bold text-white">5. Modificaciones del Servicio y Suspensión de Cuentas</h2>
                     <p>
-                        Flip-F se reserva el derecho de modificar o discontinuar cursos, recursos, funcionalidades o los presentes términos en cualquier momento. También nos reservamos el derecho a modificar los precios, sin que esto afecte a los usuarios que ya hubieran completado su compra con anterioridad.
+                        Flip se reserva el derecho de modificar o discontinuar cursos, recursos, funcionalidades o los presentes términos en cualquier momento. También nos reservamos el derecho a modificar los precios, sin que esto afecte a los usuarios que ya hubieran completado su compra con anterioridad.
                     </p>
                     <p>
                         <strong>Suspensión por Mal Uso:</strong> Nos reservamos el derecho de suspender o cancelar de forma permanente cualquier cuenta que detectemos realizando actividades fraudulentas, intentos de violación de seguridad, o que infrinja las políticas de propiedad intelectual aquí descritas, sin previo aviso ni derecho a reembolso.

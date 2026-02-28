@@ -1,10 +1,10 @@
 import React from 'react';
-import SEOMeta from '../components/SEOMeta';
+import SEOMeta from '../components/SEO-Meta';
 
 const About: React.FC = () => {
     return (
         <div className="animate-fade-in">
-            <SEOMeta title="Sobre Nosotros | Flip-F" description="Conoce más acerca de Flip-F, nuestra misión, visión y equipo de trabajo." />
+            <SEOMeta />
             {/* Hero Section */}
             <section className="relative overflow-hidden bg-[#1b131f] py-16 px-4 md:py-24">
                 <div className="absolute inset-0 z-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#842db4 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>

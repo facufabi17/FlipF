@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 const FlowGradient = React.lazy(() => import('../components/background/AnimacionEntrada'));
 import { COURSES } from '../data/courses';
 import { CardCarousel } from '../components/ui/Tarjetas de Cursos HOME';
-import SEOMeta from '../components/SEOMeta';
+import SEOMeta from '../components/SEO-Meta';
 
 const Home: React.FC = () => {
     const featuredCourses = [

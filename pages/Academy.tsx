@@ -10,7 +10,7 @@ import { CourseTimeline } from '../components/ui/Linea de Cursos ACADEMIA';
 import { supabase } from '../lib/supabase';
 import ScheduleSelector from '../components/ui/Horarios de Cursos';
 import { CourseSchedule } from '../types';
-import SEOMeta from '../components/SEOMeta';
+import SEOMeta from '../components/SEO-Meta';
 
 // --- Types & Data for Career Paths ---
 interface CareerStage {

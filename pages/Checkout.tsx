@@ -6,7 +6,7 @@ import { COURSES } from '../data/courses';
 import { initMercadoPago } from '@mercadopago/sdk-react';
 
 // Components
-import SEOMeta from '../components/SEOMeta';
+import SEOMeta from '../components/SEO-Meta';
 import CheckoutSteps from '../components/checkout/CheckoutSteps';
 import CartSummary from '../components/checkout/CartSummary';
 import BillingForm from '../components/checkout/BillingForm';
@@ -1033,8 +1033,8 @@ const Checkout: React.FC<CheckoutProps> = ({ onShowToast }) => {
     return (
         <>
             <SEOMeta
-                title="Finalizar Compra | Flip-F"
-                description="Completa tu inscripción de forma segura y comienza tu formación en Flip-F."
+                title="Finalizar Compra | Flip"
+                description="Completa tu inscripción de forma segura y comienza tu formación en Flip."
             />
             {/* Overlay de Espera de Pago */}
             {isWaitingPayment && (

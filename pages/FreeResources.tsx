@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { FREE_RESOURCES, FreeResource } from '../data/resources';
 import LeadMagnetModal from '../components/LeadMagnetModal';
-import SEOMeta from '../components/SEOMeta';
+import SEOMeta from '../components/SEO-Meta';
 
 
 const FreeResources: React.FC = () => {
