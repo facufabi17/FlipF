@@ -6,7 +6,7 @@ const About: React.FC = () => {
         <div className="animate-fade-in">
             <SEOMeta />
             {/* Hero Section */}
-            <section className="relative overflow-hidden bg-[#1b131f] py-16 px-4 md:py-24">
+            <section className="relative overflow-hidden bg-background py-16 px-4 md:py-24">
                 <div className="absolute inset-0 z-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#842db4 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
                 <div className="absolute top-0 right-1/2 translate-x-1/2 w-3/4 h-64 bg-primary/20 blur-[100px] -z-10 rounded-full pointer-events-none"></div>
 

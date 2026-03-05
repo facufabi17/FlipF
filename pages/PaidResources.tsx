@@ -67,7 +67,7 @@ const PaidResources: React.FC<PaidResourcesProps> = ({ onShowToast }) => {
     };
 
     return (
-        <div className="min-h-screen relative overflow-hidden bg-black text-white font-sans selection:bg-[#8B5CF6] selection:text-white">
+        <div className="min-h-screen relative overflow-hidden bg-black text-white font-sans selection:bg-primary selection:text-white">
             <SEOMeta
                 title="Sistemas Premium | Flip"
                 description="Biblioteca de Alto Impacto. Herramientas operativas, guiones tácticos y sistemas de crecimiento."
@@ -81,14 +81,14 @@ const PaidResources: React.FC<PaidResourcesProps> = ({ onShowToast }) => {
                 </div>
 
                 <div className="relative z-10 w-full max-w-4xl px-6 flex flex-col items-center">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#8B5CF6]/10 border border-[#8B5CF6]/20 backdrop-blur-md mb-6 animate-fade-in-up">
-                        <span className="material-symbols-outlined text-[#8B5CF6] text-sm">verified</span>
-                        <span className="text-xs font-bold text-[#8B5CF6] tracking-wide uppercase">Sistemas & Procesos</span>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-md mb-6 animate-fade-in-up">
+                        <span className="material-symbols-outlined text-primary text-sm">verified</span>
+                        <span className="text-xs font-bold text-primary tracking-wide uppercase">Sistemas & Procesos</span>
                     </div>
 
                     <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight animate-fade-in-up delay-100">
                         Biblioteca de <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-[#8B5CF6] to-[#8B5CF6]">Alto Impacto.</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-[#8B5CF6] to-primary">Alto Impacto.</span>
                     </h1>
 
                     <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-in-up delay-200">
@@ -110,7 +110,7 @@ const PaidResources: React.FC<PaidResourcesProps> = ({ onShowToast }) => {
                                 placeholder="Buscar recurso premium..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full bg-[#0a0a0a]/80 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#8B5CF6]/50 focus:ring-1 focus:ring-[#8B5CF6]/50 transition-all font-medium"
+                                className="w-full bg-[#0a0a0a]/80 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-[#8B5CF6]/50 transition-all font-medium"
                             />
                             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">search</span>
                         </div>
@@ -119,7 +119,7 @@ const PaidResources: React.FC<PaidResourcesProps> = ({ onShowToast }) => {
                         <div className="flex flex-wrap gap-2 w-full md:w-auto justify-start md:justify-end">
                             <button
                                 onClick={() => handleCategoryFilter(null)}
-                                className={`px-4 py-2 rounded-lg text-xs font-bold border transition-all ${!selectedCategory ? 'bg-[#8B5CF6] text-white border-[#8B5CF6]' : 'bg-white/5 text-gray-300 border-white/5 hover:border-white/20'}`}
+                                className={`px-4 py-2 rounded-lg text-xs font-bold border transition-all ${!selectedCategory ? 'bg-primary text-white border-primary' : 'bg-white/5 text-gray-300 border-white/5 hover:border-white/20'}`}
                             >
                                 Todos
                             </button>
@@ -127,7 +127,7 @@ const PaidResources: React.FC<PaidResourcesProps> = ({ onShowToast }) => {
                                 <button
                                     key={cat}
                                     onClick={() => handleCategoryFilter(cat)}
-                                    className={`px-4 py-2 rounded-lg text-xs font-bold border transition-all ${selectedCategory === cat ? 'bg-[#8B5CF6]/20 text-[#8B5CF6] border-[#8B5CF6]' : 'bg-white/5 text-gray-300 border-white/5 hover:border-white/20'}`}
+                                    className={`px-4 py-2 rounded-lg text-xs font-bold border transition-all ${selectedCategory === cat ? 'bg-primary/20 text-primary border-primary' : 'bg-white/5 text-gray-300 border-white/5 hover:border-white/20'}`}
                                 >
                                     {cat}
                                 </button>
@@ -144,7 +144,7 @@ const PaidResources: React.FC<PaidResourcesProps> = ({ onShowToast }) => {
                         <p className="text-gray-400">Intenta ajustar tu búsqueda.</p>
                         <button
                             onClick={() => { setSearchTerm(''); setSelectedCategory(null); }}
-                            className="mt-6 text-[#8B5CF6] hover:underline font-bold"
+                            className="mt-6 text-primary hover:underline font-bold"
                         >
                             Ver todo el catálogo
                         </button>
@@ -158,14 +158,14 @@ const PaidResources: React.FC<PaidResourcesProps> = ({ onShowToast }) => {
                             return (
                                 <div
                                     key={resource.id}
-                                    className="group relative flex flex-col bg-gray-900/40 backdrop-blur-sm border border-white/5 rounded-2xl overflow-hidden hover:border-[#8B5CF6]/50 transition-all duration-500 hover:shadow-[0_0_30px_-10px_rgba(139,92,246,0.15)] hover:-translate-y-1"
+                                    className="group relative flex flex-col bg-gray-900/40 backdrop-blur-sm border border-white/5 rounded-2xl overflow-hidden hover:border-primary/50 transition-all duration-500 hover:shadow-[0_0_30px_-10px_rgba(139,92,246,0.15)] hover:-translate-y-1"
                                     onClick={() => setSelectedResource(resource)}
                                     style={{ animationDelay: `${index * 100}ms` }}
                                 >
                                     {/* Image & Type */}
                                     <div className="relative aspect-video w-full overflow-hidden cursor-pointer">
                                         <div className="absolute top-3 left-3 z-10 flex gap-2">
-                                            <span className="inline-flex items-center rounded-md bg-black/60 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur-md border border-white/10 uppercase tracking-wider">
+                                            <span className="inline-flex items-center rounded-md bg-black/60 px-2.5 py-1 text-xs font-bold text-white backdrop-blur-md border border-white/10 uppercase tracking-wider">
                                                 {resource.type}
                                             </span>
                                         </div>
@@ -179,12 +179,12 @@ const PaidResources: React.FC<PaidResourcesProps> = ({ onShowToast }) => {
                                     {/* Content */}
                                     <div className="flex flex-1 flex-col p-6">
                                         <div className="flex justify-between items-start mb-2">
-                                            <span className="text-[10px] font-bold text-[#8B5CF6] uppercase tracking-wider border border-[#8B5CF6]/20 px-2 py-0.5 rounded bg-[#8B5CF6]/5">
+                                            <span className="text-xs font-bold text-primary uppercase tracking-wider border border-primary/20 px-2 py-0.5 rounded bg-primary/5">
                                                 {resource.category}
                                             </span>
                                         </div>
 
-                                        <h3 className="mb-2 text-xl font-bold text-white group-hover:text-[#8B5CF6] transition-colors leading-tight cursor-pointer">
+                                        <h3 className="mb-2 text-xl font-bold text-white group-hover:text-primary transition-colors leading-tight cursor-pointer">
                                             {resource.title}
                                         </h3>
                                         <p className="mb-6 text-sm text-gray-400 leading-relaxed line-clamp-2">
@@ -214,7 +214,7 @@ const PaidResources: React.FC<PaidResourcesProps> = ({ onShowToast }) => {
                                                 ) : isInCart ? (
                                                     <button
                                                         onClick={() => navigate('/checkout')}
-                                                        className="px-4 py-2 rounded-lg bg-[#8B5CF6]/20 text-[#8B5CF6] font-bold text-sm border border-[#8B5CF6]/30 flex items-center gap-2 cursor-default"
+                                                        className="px-4 py-2 rounded-lg bg-primary/20 text-primary font-bold text-sm border border-primary/30 flex items-center gap-2 cursor-default"
                                                     >
                                                         <span className="material-symbols-outlined text-sm">shopping_cart</span>
                                                         En carrito
@@ -222,7 +222,7 @@ const PaidResources: React.FC<PaidResourcesProps> = ({ onShowToast }) => {
                                                 ) : (
                                                     <button
                                                         onClick={() => handleAddToCart(resource)}
-                                                        className="px-4 py-2 rounded-lg bg-[#8B5CF6] text-white font-bold text-sm hover:bg-white hover:text-[#8B5CF6] transition-all shadow-[0_0_15px_rgba(139,92,246,0.3)] flex items-center gap-2"
+                                                        className="px-4 py-2 rounded-lg bg-primary text-white font-bold text-sm hover:bg-white hover:text-primary transition-all shadow-[0_0_15px_rgba(139,92,246,0.3)] flex items-center gap-2"
                                                     >
                                                         <span className="material-symbols-outlined text-sm">add_shopping_cart</span>
                                                         Comprar
@@ -256,7 +256,7 @@ const PaidResources: React.FC<PaidResourcesProps> = ({ onShowToast }) => {
 
                         <div className="md:w-1/2 p-8 flex flex-col">
                             <div className="mb-4">
-                                <span className="inline-block px-2 py-1 rounded bg-[#8B5CF6]/20 text-[#8B5CF6] text-xs font-bold uppercase tracking-wider mb-3 border border-[#8B5CF6]/30">
+                                <span className="inline-block px-2 py-1 rounded bg-primary/20 text-primary text-xs font-bold uppercase tracking-wider mb-3 border border-primary/30">
                                     {selectedResource.category}
                                 </span>
                                 <h2 className="text-2xl font-bold text-white mb-3 leading-tight">{selectedResource.title}</h2>
@@ -288,7 +288,7 @@ const PaidResources: React.FC<PaidResourcesProps> = ({ onShowToast }) => {
                                 ) : (
                                     <button
                                         onClick={() => handleAddToCart(selectedResource)}
-                                        className="w-full bg-[#8B5CF6] text-white font-bold py-3 rounded-lg hover:bg-white hover:text-[#8B5CF6] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#8B5CF6]/20"
+                                        className="w-full bg-primary text-white font-bold py-3 rounded-lg hover:bg-white hover:text-primary transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#8B5CF6]/20"
                                     >
                                         <span className="material-symbols-outlined">add_shopping_cart</span>
                                         Agregar al Carrito

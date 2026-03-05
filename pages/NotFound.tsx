@@ -6,11 +6,11 @@ export default function NotFound() {
         <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
             <div className="text-center space-y-6 max-w-md">
                 <div className="flex justify-center">
-                    <AlertCircle className="w-24 h-24 text-[#00F5F1] animate-pulse" />
+                    <AlertCircle className="w-24 h-24 text-tech animate-pulse" />
                 </div>
 
                 <h1 className="text-6xl font-black text-white tracking-tighter">
-                    4<span className="text-[#00F5F1]">0</span>4
+                    4<span className="text-tech">0</span>4
                 </h1>
 
                 <h2 className="text-2xl font-bold text-gray-200">
@@ -24,7 +24,7 @@ export default function NotFound() {
                 <div className="pt-8">
                     <Link
                         to="/"
-                        className="inline-flex items-center justify-center px-8 py-3 text-base font-bold text-black transition-all duration-200 bg-[#00F5F1] border border-transparent rounded-lg hover:bg-[#00d8d5] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00F5F1]"
+                        className="inline-flex items-center justify-center px-8 py-3 text-base font-bold text-black transition-all duration-200 bg-tech border border-transparent rounded-lg hover:bg-[#00d8d5] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00F5F1]"
                     >
                         Volver al inicio
                     </Link>

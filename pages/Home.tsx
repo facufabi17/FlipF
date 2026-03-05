@@ -76,16 +76,16 @@ const Home: React.FC = () => {
                     {/* Botones CTA Duales */}
                     <div className="flex flex-col md:flex-row gap-6 w-full max-w-2xl justify-center items-stretch md:items-center">
                         {/* Botón A: Aprender (Cian) */}
-                        <Link to="/academia" className="group relative flex-1 bg-[#00F5F1]/10 border border-[#00F5F1]/50 hover:bg-[#00F5F1] hover:text-black hover:border-[#00F5F1] text-[#00F5F1] transition-all duration-300 rounded-xl px-8 py-6 flex flex-col items-center justify-center text-center gap-2 overflow-hidden">
-                            <span className="absolute inset-0 bg-[#00F5F1]/20 blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-300"></span>
+                        <Link to="/academia" className="group relative flex-1 bg-tech/10 border border-tech/50 hover:bg-tech hover:text-black hover:border-tech text-tech transition-all duration-300 rounded-xl px-8 py-6 flex flex-col items-center justify-center text-center gap-2 overflow-hidden">
+                            <span className="absolute inset-0 bg-tech/20 blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-300"></span>
                             <span className="font-bold text-lg relative z-10 tracking-wide">Quiero Aprender Marketing</span>
                             <span className="text-xs opacity-70 relative z-10 font-medium">Para Estudiantes y Futuros Expertos</span>
                             <span className="material-symbols-outlined absolute right-4 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">school</span>
                         </Link>
 
                         {/* Botón B: Contratar (Púrpura) */}
-                        <Link to="/consultas" className="group relative flex-1 bg-[#842DB4]/10 border border-[#842DB4]/50 hover:bg-[#842DB4] hover:text-white hover:border-[#842DB4] text-[#842DB4] transition-all duration-300 rounded-xl px-8 py-6 flex flex-col items-center justify-center text-center gap-2 overflow-hidden">
-                            <span className="absolute inset-0 bg-[#842DB4]/20 blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-300"></span>
+                        <Link to="/consultas" className="group relative flex-1 bg-primary/10 border border-primary/50 hover:bg-primary hover:text-white hover:border-primary text-primary transition-all duration-300 rounded-xl px-8 py-6 flex flex-col items-center justify-center text-center gap-2 overflow-hidden">
+                            <span className="absolute inset-0 bg-primary/20 blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-300"></span>
                             <span className="font-bold text-lg relative z-10 tracking-wide">Quiero Contratar la Agencia</span>
                             <span className="text-sm opacity-70 relative z-10 font-medium">Para Dueños de Negocios y CEOs</span>
                             <span className="material-symbols-outlined absolute right-4 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">rocket_launch</span>
@@ -150,14 +150,14 @@ const Home: React.FC = () => {
                     }}
                 />
 
-                <div className="absolute top-0 right-0 w-1/3 h-full bg-[#00F5F1]/5 blur-[120px] pointer-events-none"></div>
+                <div className="absolute top-0 right-0 w-1/3 h-full bg-tech/5 blur-[120px] pointer-events-none"></div>
 
                 <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center relative z-10">
 
                     {/* COLUMNA VISUAL (IZQUIERDA) - Panel con CardCarousel */}
                     <div className="order-2 md:order-1 relative">
                         {/* Bordes de luz */}
-                        <div className="absolute top-0 left-0 w-32 h-32 bg-[#00F5F1]/20 blur-[50px] rounded-full pointer-events-none"></div>
+                        <div className="absolute top-0 left-0 w-32 h-32 bg-tech/20 blur-[50px] rounded-full pointer-events-none"></div>
 
                         {/* Carrusel Integrado */}
                         <div className="w-full h-full relative z-10 p-4">
@@ -186,8 +186,8 @@ const Home: React.FC = () => {
                                 { icon: 'update', title: 'Actualizado', desc: 'Tendencias 2026' },
                                 { icon: 'workspace_premium', title: 'Certificado', desc: 'Validez Real' }
                             ].map((item, i) => (
-                                <div key={i} className="bg-white/5 border border-white/10 p-4 rounded-xl hover:border-[#00F5F1]/50 transition-colors group/card">
-                                    <span className="material-symbols-outlined text-[#00F5F1] mb-2 group-hover/card:scale-110 transition-transform">{item.icon}</span>
+                                <div key={i} className="bg-white/5 border border-white/10 p-4 rounded-xl hover:border-tech/50 transition-colors group/card">
+                                    <span className="material-symbols-outlined text-tech mb-2 group-hover/card:scale-110 transition-transform">{item.icon}</span>
                                     <h4 className="font-bold text-white text-sm">{item.title}</h4>
                                     <p className="text-xs text-gray-400">{item.desc}</p>
                                 </div>
@@ -195,7 +195,7 @@ const Home: React.FC = () => {
                         </div>
 
                         <div className="flex flex-col items-start gap-3">
-                            <Link to="/academia" className="bg-[#00F5F1] text-black font-bold hover:bg-[#4dfaf7] transition-all px-8 py-4 rounded-xl flex items-center gap-2 shadow-[0_0_20px_rgba(0,245,241,0.3)] hover:shadow-[0_0_30px_rgba(0,245,241,0.5)]">
+                            <Link to="/academia" className="bg-tech text-black font-bold hover:bg-[#4dfaf7] transition-all px-8 py-4 rounded-xl flex items-center gap-2 shadow-[0_0_20px_rgba(0,245,241,0.3)] hover:shadow-[0_0_30px_rgba(0,245,241,0.5)]">
                                 Explorar Academia
                                 <span className="material-symbols-outlined">arrow_forward</span>
                             </Link>
@@ -225,7 +225,7 @@ const Home: React.FC = () => {
                     }}
                 />
 
-                <div className="absolute bottom-0 left-0 w-1/3 h-full bg-[#842DB4]/10 blur-[120px] pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 w-1/3 h-full bg-primary/10 blur-[120px] pointer-events-none"></div>
 
                 <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center relative z-10">
                     <div className="order-1">
@@ -244,8 +244,8 @@ const Home: React.FC = () => {
                                 { icon: 'hub', title: 'Funnels', desc: 'Conversión' },
                                 { icon: 'psychology', title: 'Strategy', desc: 'Growth Partner' }
                             ].map((item, i) => (
-                                <div key={i} className="bg-white/5 border border-white/10 p-4 rounded-xl hover:border-[#842DB4]/50 transition-colors group/card">
-                                    <span className="material-symbols-outlined text-[#842DB4] mb-2 group-hover/card:scale-110 transition-transform">{item.icon}</span>
+                                <div key={i} className="bg-white/5 border border-white/10 p-4 rounded-xl hover:border-primary/50 transition-colors group/card">
+                                    <span className="material-symbols-outlined text-primary mb-2 group-hover/card:scale-110 transition-transform">{item.icon}</span>
                                     <h4 className="font-bold text-white text-sm">{item.title}</h4>
                                     <p className="text-xs text-gray-400">{item.desc}</p>
                                 </div>
@@ -253,7 +253,7 @@ const Home: React.FC = () => {
                         </div>
 
                         <div className="flex flex-col items-start gap-3">
-                            <Link to="/consultas" className="bg-[#842DB4] text-white font-bold hover:bg-[#9d36d6] transition-all px-8 py-4 rounded-xl flex items-center gap-2 shadow-[0_0_20px_rgba(132,45,180,0.3)] hover:shadow-[0_0_30px_rgba(132,45,180,0.5)]">
+                            <Link to="/consultas" className="bg-primary text-white font-bold hover:bg-[#9d36d6] transition-all px-8 py-4 rounded-xl flex items-center gap-2 shadow-[0_0_20px_rgba(132,45,180,0.3)] hover:shadow-[0_0_30px_rgba(132,45,180,0.5)]">
                                 Agendar Consultoría
                                 <span className="material-symbols-outlined">arrow_forward</span>
                             </Link>
@@ -265,10 +265,10 @@ const Home: React.FC = () => {
 
                     <div className="order-2 relative">
                         {/* Panel de Control Futurista (Glassmorphism) */}
-                        <div className="aspect-square rounded-3xl border border-[#842DB4]/30 bg-black/40 backdrop-blur-xl p-8 relative overflow-hidden shadow-2xl group/panel">
+                        <div className="aspect-square rounded-3xl border border-primary/30 bg-black/40 backdrop-blur-xl p-8 relative overflow-hidden shadow-2xl group/panel">
                             {/* Bordes de luz */}
-                            <div className="absolute inset-0 border-2 border-[#842DB4]/20 rounded-3xl pointer-events-none"></div>
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-[#842DB4]/20 blur-[50px] rounded-full pointer-events-none"></div>
+                            <div className="absolute inset-0 border-2 border-primary/20 rounded-3xl pointer-events-none"></div>
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 blur-[50px] rounded-full pointer-events-none"></div>
 
                             {/* Header del Panel */}
                             <div className="flex justify-between items-center mb-8 border-b border-white/10 pb-4">
@@ -318,7 +318,7 @@ const Home: React.FC = () => {
                                 </svg>
 
                                 {/* Etiqueta FLotante ROI */}
-                                <div className="absolute top-0 right-0 bg-[#842DB4] text-white text-xs font-bold px-3 py-1 rounded-full shadow-[0_0_15px_rgba(132,45,180,0.5)] transform -translate-y-1 translate-x-1">
+                                <div className="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full shadow-[0_0_15px_rgba(132,45,180,0.5)] transform -translate-y-1 translate-x-1">
                                     +127% ROI
                                 </div>
                             </div>
@@ -326,11 +326,11 @@ const Home: React.FC = () => {
                             {/* Stats Secundarias */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="bg-white/5 rounded-lg p-3 border border-white/5">
-                                    <p className="text-gray-400 text-[10px] uppercase">Retorno</p>
+                                    <p className="text-gray-400 text-xs uppercase">Retorno</p>
                                     <p className="text-white font-bold text-lg">12.5x</p>
                                 </div>
                                 <div className="bg-white/5 rounded-lg p-3 border border-white/5">
-                                    <p className="text-gray-400 text-[10px] uppercase">Leads/Mes</p>
+                                    <p className="text-gray-400 text-xs uppercase">Leads/Mes</p>
                                     <p className="text-white font-bold text-lg">+850</p>
                                 </div>
                             </div>

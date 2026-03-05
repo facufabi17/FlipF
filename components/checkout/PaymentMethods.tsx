@@ -76,10 +76,10 @@ const PaymentMethods = forwardRef<HTMLDivElement, PaymentMethodsProps>(({
                             </h4>
 
                             {/* Detalle del monto con Descuento */}
-                            <div className="bg-[#0f0f0f] border border-[#00F5F1]/30 p-4 rounded-lg mb-6 shadow-[0_0_15px_rgba(0,245,241,0.1)]">
+                            <div className="bg-surface-dark border border-tech/30 p-4 rounded-lg mb-6 shadow-[0_0_15px_rgba(0,245,241,0.1)]">
                                 <p className="text-sm text-gray-400 mb-1">Monto a transferir (10% OFF aplicados):</p>
                                 <div className="flex items-end gap-3">
-                                    <span className="text-3xl font-black text-[#00F5F1]">
+                                    <span className="text-3xl font-black text-tech">
                                         ${(finalTotal * 0.90).toLocaleString('es-AR')}
                                     </span>
                                     <span className="text-lg text-gray-500 line-through mb-1">
@@ -104,7 +104,7 @@ const PaymentMethods = forwardRef<HTMLDivElement, PaymentMethodsProps>(({
                                             onClick={() => navigator.clipboard.writeText(BANK_INFO.cbu)}
                                             className="text-primary text-xs hover:underline mt-1 flex items-center gap-1 justify-end ml-auto"
                                         >
-                                            <span className="material-symbols-outlined text-[10px]">content_copy</span>
+                                            <span className="material-symbols-outlined text-xs">content_copy</span>
                                             Copiar CBU
                                         </button>
                                     </div>
@@ -117,7 +117,7 @@ const PaymentMethods = forwardRef<HTMLDivElement, PaymentMethodsProps>(({
                                             onClick={() => navigator.clipboard.writeText(BANK_INFO.alias)}
                                             className="text-gray-400 text-xs hover:text-white hover:underline mt-1 flex items-center gap-1 justify-end ml-auto"
                                         >
-                                            <span className="material-symbols-outlined text-[10px]">content_copy</span>
+                                            <span className="material-symbols-outlined text-xs">content_copy</span>
                                             Copiar Alias
                                         </button>
                                     </div>

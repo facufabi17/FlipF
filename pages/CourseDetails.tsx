@@ -75,7 +75,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ onShowToast }) => {
             <div className="fixed top-0 left-0 w-full h-[500px] bg-gradient-to-b from-[#00F5F1]/5 to-transparent pointer-events-none"></div>
 
             <section className="relative px-6 py-24 lg:pt-8 lg:pb-24 max-w-7xl mx-auto">
-                <Link to="/academia" className="inline-flex items-center gap-2 text-gray-400 hover:text-[#00F5F1] mb-8 transition-colors group">
+                <Link to="/academia" className="inline-flex items-center gap-2 text-gray-400 hover:text-tech mb-8 transition-colors group">
                     <span className="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
                     Volver a la Biblioteca
                 </Link>
@@ -86,7 +86,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ onShowToast }) => {
                         {/* Course Header */}
                         <div className="mb-12">
                             <div className="flex items-center gap-3 mb-6">
-                                <div className="inline-block px-3 py-1 rounded-full bg-[#00F5F1]/10 text-[#00F5F1] text-xs font-bold border border-[#00F5F1]/20 uppercase tracking-wider">
+                                <div className="inline-block px-3 py-1 rounded-full bg-tech/10 text-tech text-xs font-bold border border-tech/20 uppercase tracking-wider">
                                     {selectedCourse.category}
                                 </div>
                                 <div className="inline-block px-3 py-1 rounded-full bg-white/10 text-white text-xs font-bold border border-white/20 uppercase tracking-wider">
@@ -104,7 +104,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ onShowToast }) => {
                         {/* Curriculum Section */}
                         <div className="mb-12">
                             <div className="flex items-center gap-3 mb-8">
-                                <span className="material-symbols-outlined text-[#00F5F1] text-2xl">menu_book</span>
+                                <span className="material-symbols-outlined text-tech text-2xl">menu_book</span>
                                 <h2 className="text-2xl font-bold">Plan de Estudios</h2>
                             </div>
 
@@ -113,7 +113,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ onShowToast }) => {
                                     selectedCourse.modules.map((module, modIdx) => (
                                         <div key={module.id} className="relative pl-6 border-l border-white/10 ml-3">
                                             {/* Module Title */}
-                                            <div className="absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full bg-[#00F5F1] shadow-[0_0_10px_rgba(0,245,241,0.5)]"></div>
+                                            <div className="absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full bg-tech shadow-[0_0_10px_rgba(0,245,241,0.5)]"></div>
                                             <h3 className="text-lg font-bold text-white mb-4 -mt-1.5 flex items-center gap-3">
                                                 <span className="text-gray-500 font-mono text-sm">Módulo {modIdx + 1}:</span>
                                                 {module.title}
@@ -124,7 +124,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ onShowToast }) => {
                                                 {module.lessons.map((lesson, lessonIdx) => (
                                                     <div key={lesson.id} className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 hover:border-white/10 transition-all group">
                                                         <div className="flex items-center gap-4">
-                                                            <div className="w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-xs text-gray-400 font-mono border border-white/5 group-hover:text-[#00F5F1] group-hover:border-[#00F5F1]/30 transition-colors">
+                                                            <div className="w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-xs text-gray-400 font-mono border border-white/5 group-hover:text-tech group-hover:border-tech/30 transition-colors">
                                                                 {lessonIdx + 1}
                                                             </div>
                                                             <span className="text-gray-300 font-medium group-hover:text-white transition-colors">
@@ -151,7 +151,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ onShowToast }) => {
                     {/* Right Column: Sticky Pricing Card */}
                     <div className="lg:col-span-4">
                         <div className="sticky top-32">
-                            <div className="bg-[#0f0f0f] border border-white/10 rounded-3xl overflow-hidden shadow-2xl shadow-black/50">
+                            <div className="bg-surface-dark border border-white/10 rounded-3xl overflow-hidden shadow-2xl shadow-black/50">
                                 {/* Course Image */}
                                 <div className="h-48 relative overflow-hidden">
                                     <img src={selectedCourse.image} alt={selectedCourse.title} className="w-full h-full object-cover" />
@@ -179,19 +179,19 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ onShowToast }) => {
 
                                     <ul className="space-y-4 mb-6">
                                         <li className="flex items-start gap-3 text-gray-300 text-sm">
-                                            <span className="material-symbols-outlined text-[#00F5F1] text-lg mt-0.5">check_circle</span>
+                                            <span className="material-symbols-outlined text-tech text-lg mt-0.5">check_circle</span>
                                             <span>Acceso inmediato y de por vida</span>
                                         </li>
                                         <li className="flex items-start gap-3 text-gray-300 text-sm">
-                                            <span className="material-symbols-outlined text-[#00F5F1] text-lg mt-0.5">check_circle</span>
+                                            <span className="material-symbols-outlined text-tech text-lg mt-0.5">check_circle</span>
                                             <span>Certificado avalado por Flip</span>
                                         </li>
                                         <li className="flex items-start gap-3 text-gray-300 text-sm">
-                                            <span className="material-symbols-outlined text-[#00F5F1] text-lg mt-0.5">check_circle</span>
+                                            <span className="material-symbols-outlined text-tech text-lg mt-0.5">check_circle</span>
                                             <span>{selectedCourse.modules.length} Módulos estratégicos</span>
                                         </li>
                                         <li className="flex items-start gap-3 text-gray-300 text-sm">
-                                            <span className="material-symbols-outlined text-[#00F5F1] text-lg mt-0.5">check_circle</span>
+                                            <span className="material-symbols-outlined text-tech text-lg mt-0.5">check_circle</span>
                                             <span>Recursos y plantillas descargables</span>
                                         </li>
                                     </ul>
@@ -220,7 +220,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({ onShowToast }) => {
                                                 className={`w-full py-4 rounded-xl font-bold text-lg border transition-all flex items-center justify-center gap-2 group
                                                     ${requiresSchedule && !selectedSchedule
                                                         ? 'bg-gray-800 text-gray-500 border-gray-700 cursor-not-allowed opacity-50'
-                                                        : 'bg-[#00F5F1]/10 text-[#00F5F1] border-[#00F5F1]/50 hover:bg-[#00F5F1] hover:text-black'
+                                                        : 'bg-tech/10 text-tech border-tech/50 hover:bg-tech hover:text-black'
                                                     }`}
                                             >
                                                 <span className="material-symbols-outlined group-hover:scale-110 transition-transform">add_shopping_cart</span>

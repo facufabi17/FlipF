@@ -238,7 +238,7 @@ const Academy: React.FC = () => {
     };
 
     return (
-        <div ref={containerRef} className="min-h-screen relative overflow-hidden bg-black text-white font-sans selection:bg-[#00F5F1] selection:text-black">
+        <div ref={containerRef} className="min-h-screen relative overflow-hidden bg-black text-white font-sans selection:bg-tech selection:text-black">
             <SEOMeta
                 title="Academia | Flip"
                 description="Certifica tu Talento. Lidera el Mercado Digital con nuestras Rutas de Carrera especializadas y Cursos de Ejecución Inmediata."
@@ -266,7 +266,7 @@ const Academy: React.FC = () => {
 
                         <button
                             onClick={() => document.getElementById('rutas-mobile')?.scrollIntoView({ behavior: 'smooth' })}
-                            className="block md:hidden group px-5 py-2 bg-[#00F5F1] text-black font-bold text-xs md:text-sm rounded-full hover:bg-white transition-all duration-300 shadow-[0_0_20px_rgba(0,245,241,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] flex items-center gap-2"
+                            className="block md:hidden group px-5 py-2 bg-tech text-black font-bold text-xs md:text-sm rounded-full hover:bg-white transition-all duration-300 shadow-[0_0_20px_rgba(0,245,241,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] flex items-center gap-2"
                         >
                             Explorar Rutas
                             <span className="material-symbols-outlined text-lg group-hover:translate-y-1 transition-transform">
@@ -276,7 +276,7 @@ const Academy: React.FC = () => {
 
                         <button
                             onClick={() => document.getElementById('rutas-desktop')?.scrollIntoView({ behavior: 'smooth' })}
-                            className="hidden md:flex group px-5 py-2 bg-[#00F5F1] text-black font-bold text-xs md:text-sm rounded-full hover:bg-white transition-all duration-300 shadow-[0_0_20px_rgba(0,245,241,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] flex items-center gap-2"
+                            className="hidden md:flex group px-5 py-2 bg-tech text-black font-bold text-xs md:text-sm rounded-full hover:bg-white transition-all duration-300 shadow-[0_0_20px_rgba(0,245,241,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] flex items-center gap-2"
                         >
                             Explorar Rutas
                             <span className="material-symbols-outlined text-lg group-hover:translate-y-1 transition-transform">
@@ -285,7 +285,7 @@ const Academy: React.FC = () => {
                         </button>
                         <button
                             onClick={() => document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth' })}
-                            className="group px-5 py-2 bg-transparent text-white font-bold text-xs md:text-sm rounded-full border border-white/20 hover:bg-white/10 hover:border-[#00F5F1]/50 transition-all duration-300 flex items-center gap-2 backdrop-blur-sm"
+                            className="group px-5 py-2 bg-transparent text-white font-bold text-xs md:text-sm rounded-full border border-white/20 hover:bg-white/10 hover:border-tech/50 transition-all duration-300 flex items-center gap-2 backdrop-blur-sm"
                         >
                             Explorar Cursos Disponibles
                             <span className="material-symbols-outlined text-lg group-hover:translate-y-1 transition-transform">
@@ -296,9 +296,9 @@ const Academy: React.FC = () => {
 
                     {/* Visual de "Escalera" simplificada */}
                     <div className="hero-text mt-8 animate-fade-in-up delay-300">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00F5F1]/5 border border-[#00F5F1]/20 backdrop-blur-md hover:bg-[#00F5F1]/10 transition-all duration-300 cursor-default">
-                            <span className="material-symbols-outlined text-[#00F5F1] text-sm md:text-base">verified</span>
-                            <span className="text-[10px] md:text-xs font-medium text-gray-200 tracking-wide">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-tech/5 border border-tech/20 backdrop-blur-md hover:bg-tech/10 transition-all duration-300 cursor-default">
+                            <span className="material-symbols-outlined text-tech text-sm md:text-base">verified</span>
+                            <span className="text-xs md:text-xs font-medium text-gray-200 tracking-wide">
                                 <span className="text-white font-bold">5</span> Certificados + <span className="text-white font-bold">1</span> Diploma de Analista
                             </span>
                         </div>
@@ -315,13 +315,13 @@ const Academy: React.FC = () => {
                 <section className='block md:hidden' id="rutas-mobile" ref={pathsRef}>
                     <div className="flex flex-col items-center text-center gap-4 mb-16">
                         <div className="flex items-center gap-4 animate-fade-in-up">
-                            <span className="material-symbols-outlined text-[#00F5F1] text-4xl shadow-cyan-glow rounded-full">map</span>
+                            <span className="material-symbols-outlined text-tech text-4xl shadow-cyan-glow rounded-full">map</span>
                             <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight">
                                 Mapas de <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00F5F1] to-white">Rutas de Carrera</span>
                             </h2>
                         </div>
                         <p className="text-gray-400 max-w-xl text-sm md:text-base border border-white/5 bg-white/5 px-6 py-2 rounded-full backdrop-blur-md">
-                            Completa cursos tácticos para desbloquear tu <span className="text-[#00F5F1] font-bold">Certificado de Analista e Insignia de Carrera</span>.
+                            Completa cursos tácticos para desbloquear tu <span className="text-tech font-bold">Certificado de Analista e Insignia de Carrera</span>.
                         </p>
                     </div>
 
@@ -337,20 +337,20 @@ const Academy: React.FC = () => {
                             const isPathCompleto = false;
 
                             return (
-                                <div key={path.id} className="group relative bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 hover:border-[#00F5F1]/50 transition-all duration-500 hover:shadow-[0_0_50px_-10px_rgba(0,245,241,0.15)] flex flex-col overflow-hidden">
+                                <div key={path.id} className="group relative bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 hover:border-tech/50 transition-all duration-500 hover:shadow-[0_0_50px_-10px_rgba(0,245,241,0.15)] flex flex-col overflow-hidden">
                                     {/* Decorative Grid Background */}
                                     <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay"></div>
-                                    <div className="absolute -right-20 -top-20 w-64 h-64 bg-[#00F5F1]/5 rounded-full blur-[80px] group-hover:bg-[#00F5F1]/10 transition-colors duration-500"></div>
+                                    <div className="absolute -right-20 -top-20 w-64 h-64 bg-tech/5 rounded-full blur-[80px] group-hover:bg-tech/10 transition-colors duration-500"></div>
 
                                     {/* Header Icon & Title */}
                                     <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-5 mb-6 pb-6 border-b border-white/5">
-                                        <div className="w-16 h-16 rounded-xl flex-shrink-0 flex items-center justify-center border bg-white/5 border-white/10 group-hover:border-[#00F5F1]/30 transition-all duration-500">
-                                            <span className="material-symbols-outlined text-3xl text-gray-400 group-hover:text-[#00F5F1] transition-colors duration-300">
+                                        <div className="w-16 h-16 rounded-xl flex-shrink-0 flex items-center justify-center border bg-white/5 border-white/10 group-hover:border-tech/30 transition-all duration-500">
+                                            <span className="material-symbols-outlined text-3xl text-gray-400 group-hover:text-tech transition-colors duration-300">
                                                 {path.icon}
                                             </span>
                                         </div>
                                         <div>
-                                            <h3 className="text-xl md:text-2xl font-bold mb-2 group-hover:text-[#00F5F1] transition-colors">{path.title}</h3>
+                                            <h3 className="text-xl md:text-2xl font-bold mb-2 group-hover:text-tech transition-colors">{path.title}</h3>
                                             <p className="text-sm text-gray-400 leading-relaxed">{path.description}</p>
                                         </div>
                                     </div>
@@ -360,7 +360,7 @@ const Academy: React.FC = () => {
                                         {path.stages.map((stage, sIdx) => (
                                             <div key={sIdx} className="relative">
                                                 <div className="flex items-center gap-3 mb-2">
-                                                    <div className="px-2 py-0.5 rounded bg-[#00F5F1]/10 border border-[#00F5F1]/20 text-[#00F5F1] text-[10px] font-bold uppercase tracking-wider">
+                                                    <div className="px-2 py-0.5 rounded bg-tech/10 border border-tech/20 text-tech text-xs font-bold uppercase tracking-wider">
                                                         {stage.name.split(':')[0]}
                                                     </div>
                                                     <h4 className="text-xs font-medium text-white/80">{stage.name.split(':')[1]}</h4>
@@ -376,8 +376,8 @@ const Academy: React.FC = () => {
                                                                 onClick={() => course && navigate(`/academia/${course.id}`)}
                                                                 className={`flex items-center gap-3 group/item transition-colors ${course ? 'cursor-pointer' : 'cursor-default'}`}
                                                             >
-                                                                <div className="w-1.5 h-1.5 rounded-full bg-gray-600 group-hover/item:bg-[#00F5F1] transition-colors relative">
-                                                                    <div className="absolute inset-0 bg-[#00F5F1] blur-sm opacity-0 group-hover/item:opacity-100 transition-opacity"></div>
+                                                                <div className="w-1.5 h-1.5 rounded-full bg-gray-600 group-hover/item:bg-tech transition-colors relative">
+                                                                    <div className="absolute inset-0 bg-tech blur-sm opacity-0 group-hover/item:opacity-100 transition-opacity"></div>
                                                                 </div>
                                                                 <span className="text-xs text-gray-500 group-hover/item:text-white transition-colors">
                                                                     {courseName}
@@ -393,22 +393,22 @@ const Academy: React.FC = () => {
                                     {/* Final Incentive */}
                                     <div className="mt-6 pt-5 border-t border-white/10 flex items-center justify-between relative z-10">
                                         <div className="flex items-center gap-2">
-                                            <span className="material-symbols-outlined text-[#00F5F1] text-lg">military_tech</span>
+                                            <span className="material-symbols-outlined text-tech text-lg">military_tech</span>
                                             <span className="text-xs font-bold text-gray-300">Recompensa: <span className="text-white">{path.incentive}</span></span>
                                         </div>
                                         <div className="relative">
                                             <button
                                                 onClick={() => setActiveIncentive(activeIncentive === path.id ? null : path.id)}
-                                                className="px-4 py-1.5 rounded-md bg-[#00F5F1]/10 text-[#00F5F1] font-bold text-xs border border-[#00F5F1]/30 hover:bg-[#00F5F1]/20 transition-all flex items-center gap-1"
+                                                className="px-4 py-1.5 rounded-md bg-tech/10 text-tech font-bold text-xs border border-tech/30 hover:bg-tech/20 transition-all flex items-center gap-1"
                                             >
                                                 {activeIncentive === path.id ? 'Cerrar' : 'Ver Detalles'}
                                             </button>
 
                                             {/* Tooltip Popover */}
                                             {activeIncentive === path.id && (
-                                                <div className="absolute bottom-full right-0 mb-3 w-64 p-4 rounded-xl bg-[#1a1a1a] border border-[#00F5F1]/30 shadow-[0_0_30px_-5px_rgba(0,245,241,0.2)] z-50 animate-fade-in-up">
-                                                    <div className="absolute -bottom-2 right-6 w-4 h-4 bg-[#1a1a1a] border-b border-r border-[#00F5F1]/30 transform rotate-45"></div>
-                                                    <h5 className="text-[#00F5F1] font-bold text-xs mb-2 uppercase tracking-wider">Sobre la Certificación</h5>
+                                                <div className="absolute bottom-full right-0 mb-3 w-64 p-4 rounded-xl bg-[#1a1a1a] border border-tech/30 shadow-[0_0_30px_-5px_rgba(0,245,241,0.2)] z-50 animate-fade-in-up">
+                                                    <div className="absolute -bottom-2 right-6 w-4 h-4 bg-[#1a1a1a] border-b border-r border-tech/30 transform rotate-45"></div>
+                                                    <h5 className="text-tech font-bold text-xs mb-2 uppercase tracking-wider">Sobre la Certificación</h5>
                                                     <p className="text-xs text-gray-300 leading-relaxed">
                                                         {path.incentiveDescription}
                                                     </p>
@@ -430,13 +430,13 @@ const Academy: React.FC = () => {
                 <section className='hidden md:block' id="rutas-desktop" ref={pathsRef}>
                     <div className="flex flex-col items-center text-center gap-4 mb-16">
                         <div className="flex items-center gap-4 animate-fade-in-up">
-                            <span className="material-symbols-outlined text-[#00F5F1] text-4xl shadow-cyan-glow rounded-full">map</span>
+                            <span className="material-symbols-outlined text-tech text-4xl shadow-cyan-glow rounded-full">map</span>
                             <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight">
                                 Mapas de <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00F5F1] to-white">Rutas de Carrera</span>
                             </h2>
                         </div>
                         <p className="text-gray-400 max-w-xl text-sm md:text-base border border-white/5 bg-white/5 px-6 py-2 rounded-full backdrop-blur-md">
-                            Completa cursos tácticos para desbloquear tu <span className="text-[#00F5F1] font-bold">Certificado de Analista e Insignia de Carrera</span>.
+                            Completa cursos tácticos para desbloquear tu <span className="text-tech font-bold">Certificado de Analista e Insignia de Carrera</span>.
                         </p>
                     </div>
 
@@ -450,7 +450,7 @@ const Academy: React.FC = () => {
 
                                     {/* Header */}
                                     <div className="flex flex-col md:flex-row items-center gap-6 mb-8 relative z-10">
-                                        <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#00F5F1] shadow-[0_0_20px_rgba(0,245,241,0.1)]">
+                                        <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-tech shadow-[0_0_20px_rgba(0,245,241,0.1)]">
                                             <span className="material-symbols-outlined text-4xl">{path.icon}</span>
                                         </div>
                                         <div className="text-center md:text-left">
@@ -485,7 +485,7 @@ const Academy: React.FC = () => {
                 {/* --- SECCIÓN 3: CATÁLOGO DE CURSOS --- */}
                 <section id="catalogo" ref={catalogRef}>
                     <div className="flex items-center gap-4 mb-8">
-                        <span className="material-symbols-outlined text-[#00F5F1] text-3xl">library_books</span>
+                        <span className="material-symbols-outlined text-tech text-3xl">library_books</span>
                         <h2 className="text-3xl md:text-4xl font-bold">Biblioteca Táctica</h2>
                     </div>
 
@@ -498,7 +498,7 @@ const Academy: React.FC = () => {
                                 placeholder="Buscar curso por nombre, tema o palabra clave..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full bg-[#0a0a0a]/80 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#00F5F1]/50 focus:ring-1 focus:ring-[#00F5F1]/50 transition-all"
+                                className="w-full bg-[#0a0a0a]/80 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-tech/50 focus:ring-1 focus:ring-[#00F5F1]/50 transition-all"
                             />
                             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">search</span>
                         </div>
@@ -510,7 +510,7 @@ const Academy: React.FC = () => {
                                 <div className="flex flex-wrap gap-2">
                                     <button
                                         onClick={() => handleCareerFilter(null)}
-                                        className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-all ${!selectedCareerId ? 'bg-[#00F5F1] text-black border-[#00F5F1]' : 'bg-transparent text-gray-400 border-white/10 hover:border-white'}`}
+                                        className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-all ${!selectedCareerId ? 'bg-tech text-black border-tech' : 'bg-transparent text-gray-400 border-white/10 hover:border-white'}`}
                                     >
                                         Todas
                                     </button>
@@ -518,7 +518,7 @@ const Academy: React.FC = () => {
                                         <button
                                             key={path.id}
                                             onClick={() => handleCareerFilter(path.id)}
-                                            className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-all flex items-center gap-2 ${selectedCareerId === path.id ? 'bg-[#00F5F1]/20 text-[#00F5F1] border-[#00F5F1]' : 'bg-transparent text-gray-400 border-white/10 hover:border-white'}`}
+                                            className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-all flex items-center gap-2 ${selectedCareerId === path.id ? 'bg-tech/20 text-tech border-tech' : 'bg-transparent text-gray-400 border-white/10 hover:border-white'}`}
                                         >
                                             <span className="material-symbols-outlined text-sm">{path.icon}</span>
                                             {path.title}
@@ -552,7 +552,7 @@ const Academy: React.FC = () => {
                             <p className="text-gray-400">Intenta ajustar tus filtros de búsqueda.</p>
                             <button
                                 onClick={() => { setSearchTerm(''); setSelectedCareerId(null); setSelectedCategory(null); }}
-                                className="mt-6 text-[#00F5F1] hover:underline"
+                                className="mt-6 text-tech hover:underline"
                             >
                                 Limpiar todos los filtros
                             </button>
@@ -567,7 +567,7 @@ const Academy: React.FC = () => {
                                     <div
                                         key={course.id}
                                         onClick={() => navigate(`/academia/${course.id}`)}
-                                        className="flex flex-col bg-gray-900/40 backdrop-blur-sm border border-white/5 rounded-xl overflow-hidden hover:border-[#00F5F1]/50 transition-all duration-300 group hover:-translate-y-1 cursor-pointer"
+                                        className="flex flex-col bg-gray-900/40 backdrop-blur-sm border border-white/5 rounded-xl overflow-hidden hover:border-tech/50 transition-all duration-300 group hover:-translate-y-1 cursor-pointer"
                                     >
                                         {/* Image Wrapper */}
                                         <div className="relative h-48 overflow-hidden">
@@ -581,18 +581,18 @@ const Academy: React.FC = () => {
                                         {/* Content */}
                                         <div className="p-6 flex-grow flex flex-col">
                                             <div className="flex items-center gap-2 mb-3">
-                                                <span className="px-2 py-0.5 rounded-full bg-[#00F5F1]/10 text-[#00F5F1] text-[10px] font-bold border border-[#00F5F1]/20 uppercase">
+                                                <span className="px-2 py-0.5 rounded-full bg-tech/10 text-tech text-xs font-bold border border-tech/20 uppercase">
                                                     Nivel {course.level || 'Intermedio'}
                                                 </span>
                                             </div>
-                                            <h3 className="text-xl font-bold mb-2 leading-tight group-hover:text-[#00F5F1] transition-colors">
+                                            <h3 className="text-xl font-bold mb-2 leading-tight group-hover:text-tech transition-colors">
                                                 {course.title.replace("Curso de ", "Sistema de ")}
                                             </h3>
 
                                             {/* Gancho Done-With-You */}
                                             {course.includes && (
                                                 <div className="flex items-center gap-2 text-xs text-gray-400 mb-6 bg-white/5 p-2 rounded border border-white/5">
-                                                    <span className="material-symbols-outlined text-sm text-[#00F5F1]">folder_zip</span>
+                                                    <span className="material-symbols-outlined text-sm text-tech">folder_zip</span>
                                                     {course.includes}
                                                 </div>
                                             )}
@@ -600,7 +600,7 @@ const Academy: React.FC = () => {
                                             <div className="mt-auto flex items-center justify-between pt-4 border-t border-white/5">
                                                 <div>
                                                     <p className="text-2xl font-bold text-white">${course.price.toLocaleString()}</p>
-                                                    <p className="text-[10px] text-gray-500 uppercase tracking-wider">Incluido en Ruta</p>
+                                                    <p className="text-xs text-gray-500 uppercase tracking-wider">Incluido en Ruta</p>
                                                 </div>
 
                                                 <div className="flex gap-2">
@@ -615,7 +615,7 @@ const Academy: React.FC = () => {
                                                     {isEnrolled ? (
                                                         <button
                                                             onClick={(e) => { e.stopPropagation(); navigate(`/aula-virtual/${course.id}`); }}
-                                                            className="px-4 py-2 rounded-lg bg-[#00F5F1]/20 text-[#00F5F1] font-bold text-sm border border-[#00F5F1]/30 hover:bg-[#00F5F1]/30 transition-all flex items-center gap-2"
+                                                            className="px-4 py-2 rounded-lg bg-tech/20 text-tech font-bold text-sm border border-tech/30 hover:bg-tech/30 transition-all flex items-center gap-2"
                                                         >
                                                             <span className="material-symbols-outlined text-sm">school</span>
                                                             Aula
@@ -634,7 +634,7 @@ const Academy: React.FC = () => {
                                                             disabled={isCheckingSchedules === course.id}
                                                             className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors flex items-center gap-2 shadow-[0_0_15px_rgba(0,245,241,0.3)] ${isCheckingSchedules === course.id
                                                                 ? 'bg-gray-600 text-gray-300 cursor-wait shadow-none'
-                                                                : 'bg-[#00F5F1] text-black hover:bg-white'
+                                                                : 'bg-tech text-black hover:bg-white'
                                                                 }`}
                                                         >
                                                             {isCheckingSchedules === course.id ? (
@@ -658,27 +658,27 @@ const Academy: React.FC = () => {
                 {/* --- SECCIÓN 4: DIFERENCIADORES --- */}
                 <section ref={diffRef} className="py-12 border-t border-white/10">
                     <div className="text-center mb-12">
-                        <h2 className="text-3xl font-bold mb-4">¿Por qué aprender con <span className="text-[#00F5F1]">Flip</span>?</h2>
+                        <h2 className="text-3xl font-bold mb-4">¿Por qué aprender con <span className="text-tech">Flip</span>?</h2>
                         <p className="text-gray-400">La diferencia entre un curso teórico y una carrera operativa.</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div className="p-6 rounded-2xl bg-gradient-to-b from-white/5 to-transparent border border-white/5 text-center">
-                            <div className="w-12 h-12 mx-auto bg-[#00F5F1]/10 rounded-full flex items-center justify-center mb-4 text-[#00F5F1]">
+                            <div className="w-12 h-12 mx-auto bg-tech/10 rounded-full flex items-center justify-center mb-4 text-tech">
                                 <span className="material-symbols-outlined text-2xl">group_work</span>
                             </div>
                             <h3 className="text-lg font-bold mb-2">Instructores Activos</h3>
                             <p className="text-sm text-gray-400">Nuestros profesores no son teóricos; gestionan cuentas reales todos los días.</p>
                         </div>
                         <div className="p-6 rounded-2xl bg-gradient-to-b from-white/5 to-transparent border border-white/5 text-center">
-                            <div className="w-12 h-12 mx-auto bg-[#00F5F1]/10 rounded-full flex items-center justify-center mb-4 text-[#00F5F1]">
+                            <div className="w-12 h-12 mx-auto bg-tech/10 rounded-full flex items-center justify-center mb-4 text-tech">
                                 <span className="material-symbols-outlined text-2xl">update</span>
                             </div>
                             <h3 className="text-lg font-bold mb-2">Curriculum Vivo</h3>
                             <p className="text-sm text-gray-400">Actualizamos el contenido semanalmente con el proceso G.R.O.W.S. Nunca aprenderás estrategias obsoletas.</p>
                         </div>
                         <div className="p-6 rounded-2xl bg-gradient-to-b from-white/5 to-transparent border border-white/5 text-center">
-                            <div className="w-12 h-12 mx-auto bg-[#00F5F1]/10 rounded-full flex items-center justify-center mb-4 text-[#00F5F1]">
+                            <div className="w-12 h-12 mx-auto bg-tech/10 rounded-full flex items-center justify-center mb-4 text-tech">
                                 <span className="material-symbols-outlined text-2xl">smart_toy</span>
                             </div>
                             <h3 className="text-lg font-bold mb-2">Herramientas de IA</h3>
@@ -694,11 +694,11 @@ const Academy: React.FC = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
                     <div className="bg-[#111111] border border-white/10 rounded-2xl p-6 max-w-lg w-full shadow-2xl relative overflow-hidden">
                         {/* Gradient decorativo */}
-                        <div className="absolute -top-32 -left-32 w-64 h-64 bg-[#00F5F1]/10 rounded-full blur-[80px]"></div>
+                        <div className="absolute -top-32 -left-32 w-64 h-64 bg-tech/10 rounded-full blur-[80px]"></div>
 
                         <div className="relative z-10 flex flex-col gap-6">
                             <h2 className="text-xl font-bold flex items-center gap-2">
-                                <span className="material-symbols-outlined text-[#00F5F1]">event_available</span>
+                                <span className="material-symbols-outlined text-tech">event_available</span>
                                 Horarios Disponibles
                             </h2>
                             <p className="text-sm text-gray-400 -mt-2">
@@ -738,8 +738,8 @@ const Academy: React.FC = () => {
                                     }}
                                     disabled={!selectedSchedule}
                                     className={`px-6 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${selectedSchedule
-                                        ? 'bg-[#00F5F1] text-black hover:bg-white shadow-[0_0_15px_rgba(0,245,241,0.3)]'
-                                        : 'bg-[#00F5F1]/10 text-[#00F5F1]/50 cursor-not-allowed border border-[#00F5F1]/20'
+                                        ? 'bg-tech text-black hover:bg-white shadow-[0_0_15px_rgba(0,245,241,0.3)]'
+                                        : 'bg-tech/10 text-tech/50 cursor-not-allowed border border-tech/20'
                                         }`}
                                 >
                                     <span className="material-symbols-outlined text-sm">add_shopping_cart</span>

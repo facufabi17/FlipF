@@ -125,7 +125,7 @@ const PurchaseHistory: React.FC = () => {
                                                     {order.status === 'pending' && (
                                                         <button
                                                             onClick={() => handleSendProof(order)}
-                                                            className="flex items-center gap-1 bg-[#25D366]/20 hover:bg-[#25D366]/30 text-[#25D366] px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border border-[#25D366]/30"
+                                                            className="flex items-center gap-1 bg-green-500/20 hover:bg-[#25D366]/30 text-green-500 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border border-green-500/30"
                                                         >
                                                             <span className="material-symbols-outlined text-sm">send</span>
                                                             Enviar Comprobante

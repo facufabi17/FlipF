@@ -65,7 +65,7 @@ const VerifyCertificate: React.FC = () => {
     }, [id]);
 
     return (
-        <div className="min-h-screen bg-[#0f0f13] flex flex-col items-center justify-center p-4 relative overflow-hidden">
+        <div className="min-h-screen bg-background-dark flex flex-col items-center justify-center p-4 relative overflow-hidden">
             <SEOMeta />
             {/* Decorative Background */}
             <div className="absolute top-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-[128px] pointer-events-none"></div>
@@ -91,7 +91,7 @@ const VerifyCertificate: React.FC = () => {
                         <p className="text-gray-400">Verificando autenticidad del certificado...</p>
                     </div>
                 ) : result?.isValid ? (
-                    <div className="relative bg-[#1a1a2e] border border-primary/20 p-8 md:p-12 rounded-3xl shadow-2xl overflow-hidden">
+                    <div className="relative bg-surface-dark border border-primary/20 p-8 md:p-12 rounded-3xl shadow-2xl overflow-hidden">
 
                         {/* Status Badge */}
                         <div className="absolute top-0 right-0 bg-green-500/10 text-green-400 px-6 py-2 rounded-bl-2xl font-bold text-sm uppercase tracking-wider border-b border-l border-green-500/20 flex items-center gap-2">

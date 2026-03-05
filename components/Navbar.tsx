@@ -57,8 +57,8 @@ const Navbar: React.FC = () => {
                     <Link id="nav-home" to="/" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Inicio</Link>
                     <Link id="nav-academy" to="/academia" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Academia</Link>
                     <Link id="nav-consulting" to="/consultas" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Consultas</Link>
-                    {/*Academia-text-[#00F5F1]*/}
-                    {/*Consultas-text-[#842DB4]*/}
+                    {/*Academia-text-tech*/}
+                    {/*Consultas-text-primary*/}
                     {/* Recursos Dropdown */}
                     <div className="relative group h-full flex items-center">
                         <button id="nav-resources-dropdown" className="text-sm font-medium text-gray-300 hover:text-white transition-colors flex items-center gap-1 py-4">
@@ -67,7 +67,7 @@ const Navbar: React.FC = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
-                        <div className="absolute top-full left-0 hidden group-hover:block w-44 bg-[#1b131f] border border-white/5 rounded-xl shadow-2xl py-2 z-[100]">
+                        <div className="absolute top-full left-0 hidden group-hover:block w-44 bg-background border border-white/5 rounded-xl shadow-2xl py-2 z-[100]">
                             <Link id="nav-resources-free" to="/recursos-gratis" className="w-full text-left block px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors">Recursos Gratis</Link>
                             <Link id="nav-resources-paid" to="/recursos-pago" className="w-full text-left block px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors">Recursos de Pago</Link>
                         </div>
@@ -82,13 +82,13 @@ const Navbar: React.FC = () => {
                     <Link id="nav-cart" to="/checkout" aria-label="Ver carrito" className="relative p-2 text-gray-300 hover:text-white transition-colors group">
                         <span className="material-symbols-outlined">shopping_cart</span>
                         {itemCount > 0 && (
-                            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-white shadow-sm ring-2 ring-[#1b131f]">
+                            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-xs font-bold text-white shadow-sm ring-2 ring-[#1b131f]">
                                 {itemCount}
                             </span>
                         )}
                         {/* Tooltip con total */}
                         {itemCount > 0 && (
-                            <div className="absolute top-full right-0 mt-2 hidden group-hover:block bg-[#1b131f] border border-white/10 p-2 rounded text-xs text-white whitespace-nowrap shadow-xl">
+                            <div className="absolute top-full right-0 mt-2 hidden group-hover:block bg-background border border-white/10 p-2 rounded text-xs text-white whitespace-nowrap shadow-xl">
                                 Total: ${total.toLocaleString()}
                             </div>
                         )}
@@ -107,7 +107,7 @@ const Navbar: React.FC = () => {
                             >
                                 <span className="text-sm font-medium text-white hidden md:block group-hover:text-primary transition-colors">{user?.firstName || user?.name}</span>
                                 <div className="size-9 md:size-10 rounded-full bg-gradient-to-br from-primary to-accent p-[2px] shadow-lg shadow-primary/20">
-                                    <div className="w-full h-full rounded-full bg-[#1b131f] flex items-center justify-center">
+                                    <div className="w-full h-full rounded-full bg-background flex items-center justify-center">
                                         <span className="font-bold text-white text-sm md:text-base">{(user?.firstName || user?.name || 'U').charAt(0).toUpperCase()}</span>
                                     </div>
                                 </div>
@@ -116,44 +116,44 @@ const Navbar: React.FC = () => {
 
                             {/* User Dropdown */}
                             {userMenuOpen && (
-                                <div className="absolute right-0 top-full mt-3 w-64 bg-[#1b131f] border border-white/10 rounded-xl shadow-2xl py-2 z-[100] animate-fade-in origin-top-right">
+                                <div className="absolute right-0 top-full mt-3 w-64 bg-background border border-white/10 rounded-xl shadow-2xl py-2 z-[100] animate-fade-in origin-top-right">
                                     <div className="px-4 py-3 border-b border-white/5 mb-1 hidden md:block">
                                         <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Cuenta</p>
                                         <p className="text-xs text-white truncate mt-1">{user?.email}</p>
                                     </div>
 
                                     <Link to="/mis-cursos" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors" onClick={() => setUserMenuOpen(false)}>
-                                        <span className="material-symbols-outlined text-[20px] text-primary">school</span>
+                                        <span className="material-symbols-outlined text-xl text-primary">school</span>
                                         Mis Cursos
                                     </Link>
                                     <Link to="/mis-certificados" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors" onClick={() => setUserMenuOpen(false)}>
-                                        <span className="material-symbols-outlined text-[20px] text-yellow-500">workspace_premium</span>
+                                        <span className="material-symbols-outlined text-xl text-yellow-500">workspace_premium</span>
                                         Mis Certificados
                                     </Link>
                                     <Link to="/mis-recursos" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors" onClick={() => setUserMenuOpen(false)}>
-                                        <span className="material-symbols-outlined text-[20px] text-accent">folder_open</span>
+                                        <span className="material-symbols-outlined text-xl text-accent">folder_open</span>
                                         Mis Recursos
                                     </Link>
 
                                     <div className="border-t border-white/5 my-1"></div>
 
                                     <Link to="/historial-compras" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors" onClick={() => setUserMenuOpen(false)}>
-                                        <span className="material-symbols-outlined text-[20px] text-gray-400">receipt_long</span>
+                                        <span className="material-symbols-outlined text-xl text-gray-400">receipt_long</span>
                                         Historial de Compras
                                     </Link>
                                     <Link to="/perfil" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors" onClick={() => setUserMenuOpen(false)}>
-                                        <span className="material-symbols-outlined text-[20px] text-gray-400">person</span>
+                                        <span className="material-symbols-outlined text-xl text-gray-400">person</span>
                                         Información de usuario
                                     </Link>
                                     <Link to="/ayuda" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors" onClick={() => setUserMenuOpen(false)}>
-                                        <span className="material-symbols-outlined text-[20px] text-gray-400">help</span>
+                                        <span className="material-symbols-outlined text-xl text-gray-400">help</span>
                                         Ayuda
                                     </Link>
 
                                     <div className="border-t border-white/5 my-1"></div>
 
                                     <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors text-left">
-                                        <span className="material-symbols-outlined text-[20px]">logout</span>
+                                        <span className="material-symbols-outlined text-xl">logout</span>
                                         Cerrar Sesión
                                     </button>
                                 </div>
@@ -175,8 +175,8 @@ const Navbar: React.FC = () => {
             </div>
 
             {/* Mobile Menu */}
-            {/*Academia-text-[#00F5F1]*/}
-            {/*Consultas-text-[#842DB4]*/}
+            {/*Academia-text-tech*/}
+            {/*Consultas-text-primary*/}
             {mobileMenuOpen && (
                 <div className="md:hidden bg-background-dark border-t border-white/5 p-4 flex flex-col gap-4 animate-fade-in">
                     <Link to="/" onClick={() => setMobileMenuOpen(false)} className="text-gray-300 hover:text-white">Inicio</Link>

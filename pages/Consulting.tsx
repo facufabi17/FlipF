@@ -75,7 +75,7 @@ const Consulting: React.FC<ConsultingProps> = ({ onShowToast }) => {
       {/* Hero Section de Consultas */}
       {/* Hero Section de Consultas con Neural Network */}
       <div className="relative z-0 min-h-[70vh]">
-        <React.Suspense fallback={<div className="absolute inset-0 bg-black flex items-center justify-center"><div className="w-8 h-8 border-2 border-[#842DB4] border-t-transparent rounded-full animate-spin"></div></div>}>
+        <React.Suspense fallback={<div className="absolute inset-0 bg-black flex items-center justify-center"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div></div>}>
           <NeuralNetworkHero
             title="DEJA DE HACERLO SOLO."
             description="No solo te enseñamos a crecer. Construimos los sistemas contigo. Consigue la alianza estratégica que necesitas para superar el estancamiento."
@@ -87,7 +87,7 @@ const Consulting: React.FC<ConsultingProps> = ({ onShowToast }) => {
             <div className="flex flex-wrap items-center justify-center gap-4 mt-8">
               <button
                 onClick={handleScroll}
-                className="group px-5 py-2 bg-[#842DB4] text-white font-bold text-xs md:text-sm rounded-full hover:bg-white hover:text-black transition-all duration-300 shadow-[0_0_20px_rgba(132,45,180,0.5)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] flex items-center gap-2"
+                className="group px-5 py-2 bg-primary text-white font-bold text-xs md:text-sm rounded-full hover:bg-white hover:text-black transition-all duration-300 shadow-[0_0_20px_rgba(132,45,180,0.5)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] flex items-center gap-2"
               >
                 Solicitar Espacio
                 <span className="material-symbols-outlined text-lg group-hover:translate-y-1 transition-transform">
@@ -98,7 +98,7 @@ const Consulting: React.FC<ConsultingProps> = ({ onShowToast }) => {
                 href={CONTACT_INFO.whatsapp}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group px-5 py-2 bg-transparent text-white font-bold text-xs md:text-sm rounded-full border border-white/20 hover:bg-white/10 hover:border-[#842DB4]/50 transition-all duration-300 flex items-center gap-2 backdrop-blur-sm"
+                className="group px-5 py-2 bg-transparent text-white font-bold text-xs md:text-sm rounded-full border border-white/20 hover:bg-white/10 hover:border-primary/50 transition-all duration-300 flex items-center gap-2 backdrop-blur-sm"
               >
                 Hablar por WhatsApp
                 <span className="material-symbols-outlined text-lg group-hover:scale-110 transition-transform">
@@ -108,9 +108,9 @@ const Consulting: React.FC<ConsultingProps> = ({ onShowToast }) => {
             </div>
 
             <div className="mt-8 animate-fade-in-up delay-300">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#842DB4]/10 border border-[#842DB4]/20 backdrop-blur-md hover:bg-[#842DB4]/20 transition-all duration-300 cursor-default">
-                <span className="material-symbols-outlined text-[#842DB4] text-sm md:text-base">verified</span>
-                <span className="text-[10px] md:text-xs font-medium text-gray-200 tracking-wide">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-md hover:bg-primary/20 transition-all duration-300 cursor-default">
+                <span className="material-symbols-outlined text-primary text-sm md:text-base">verified</span>
+                <span className="text-xs md:text-xs font-medium text-gray-200 tracking-wide">
                   <span className="text-white font-bold">Estrategia</span> + <span className="text-white font-bold">Infraestructura</span> + <span className="text-white font-bold">Crecimiento</span>
                 </span>
               </div>
@@ -375,7 +375,7 @@ const Consulting: React.FC<ConsultingProps> = ({ onShowToast }) => {
                   Enviar Solicitud
                   <span className="material-symbols-outlined transition-transform group-hover:translate-x-1">send</span>
                 </button>
-                <p className="mt-4 text-center text-[10px] text-gray-500 uppercase tracking-widest">
+                <p className="mt-4 text-center text-xs text-gray-500 uppercase tracking-widest">
                   Tus datos se enviarán directamente
                 </p>
               </div>

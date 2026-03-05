@@ -112,7 +112,7 @@ export const CourseTimeline: React.FC<TimelineProps> = ({
                 <div
                     ref={lineRef}
                     style={{ transformOrigin: "left", transform: "scaleX(0)" }}
-                    className="absolute top-[32px] left-12 right-12 h-[2px] bg-[#00F5F1] hidden md:block shadow-[0_0_10px_#00F5F1]"
+                    className="absolute top-[32px] left-12 right-12 h-[2px] bg-tech hidden md:block shadow-[0_0_10px_#00F5F1]"
                 />
                 {/* Mobile: Vertical Progress (Optional - keeping simple for now or use scaleY) */}
 
@@ -127,24 +127,24 @@ export const CourseTimeline: React.FC<TimelineProps> = ({
                             {/* 1. NODE (Circle) */}
                             <div className="relative flex-shrink-0 mt-1 md:mt-0 timeline-node">
                                 {/* Glow Effect behind */}
-                                <div className="absolute inset-0 bg-[#00F5F1] blur-md opacity-20 group-hover:opacity-60 transition-opacity duration-500 rounded-full" />
+                                <div className="absolute inset-0 bg-tech blur-md opacity-20 group-hover:opacity-60 transition-opacity duration-500 rounded-full" />
 
-                                <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-black border-2 border-[#00F5F1]/30 group-hover:border-[#00F5F1] flex items-center justify-center transition-all duration-300 shadow-[0_0_15px_rgba(0,245,241,0.1)] group-hover:shadow-[0_0_30px_rgba(0,245,241,0.4)] md:mb-6">
-                                    {stage.icon ? stage.icon : <Icon className="w-5 h-5 md:w-6 md:h-6 text-white group-hover:text-[#00F5F1] transition-colors" />}
+                                <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-black border-2 border-tech/30 group-hover:border-tech flex items-center justify-center transition-all duration-300 shadow-[0_0_15px_rgba(0,245,241,0.1)] group-hover:shadow-[0_0_30px_rgba(0,245,241,0.4)] md:mb-6">
+                                    {stage.icon ? stage.icon : <Icon className="w-5 h-5 md:w-6 md:h-6 text-white group-hover:text-tech transition-colors" />}
                                 </div>
 
                                 {/* Connector dot for Mobile (on the line) */}
-                                <div className="md:hidden absolute -left-[29px] top-1/2 -translate-y-1/2 w-3 h-3 bg-[#00F5F1] rounded-full shadow-[0_0_10px_#00F5F1]" />
+                                <div className="md:hidden absolute -left-[29px] top-1/2 -translate-y-1/2 w-3 h-3 bg-tech rounded-full shadow-[0_0_10px_#00F5F1]" />
                             </div>
 
                             {/* 2. CONTENT CARD */}
                             <div className="flex-1 w-full timeline-card">
-                                <div className="bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-xl hover:bg-white/10 transition-colors relative overflow-hidden group/card shadow-lg hover:border-[#00F5F1]/30 flex flex-col h-full">
+                                <div className="bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-xl hover:bg-white/10 transition-colors relative overflow-hidden group/card shadow-lg hover:border-tech/30 flex flex-col h-full">
                                     {/* Top Accent */}
                                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#00F5F1]/50 to-transparent opacity-50 group-hover/card:opacity-100 transition-opacity" />
 
                                     <div className="mb-3">
-                                        <h4 className="text-[#00F5F1] font-bold uppercase tracking-widest text-[10px] mb-1">
+                                        <h4 className="text-tech font-bold uppercase tracking-widest text-xs mb-1">
                                             Etapa {index + 1}
                                         </h4>
                                         <h3 className="text-white font-bold text-sm md:text-base leading-tight">
@@ -159,7 +159,7 @@ export const CourseTimeline: React.FC<TimelineProps> = ({
                                                 <button
                                                     key={cIdx}
                                                     onClick={() => navigate(`/academia/${course.id}`)}
-                                                    className="px-2 py-1 rounded bg-white/5 hover:bg-[#00F5F1] text-xs font-medium text-gray-300 hover:text-black border border-white/10 hover:border-[#00F5F1] transition-all duration-200 text-left truncate max-w-full"
+                                                    className="px-2 py-1 rounded bg-white/5 hover:bg-tech text-xs font-medium text-gray-300 hover:text-black border border-white/10 hover:border-tech transition-all duration-200 text-left truncate max-w-full"
                                                     title={course.title}
                                                 >
                                                     {course.title}

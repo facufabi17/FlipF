@@ -119,7 +119,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
                                 <p className="text-text-muted">Gestiona tus datos personales y seguridad.</p>
                             </div>
                             <div className="size-16 rounded-full bg-gradient-to-br from-primary to-accent p-[2px]">
-                                <div className="w-full h-full rounded-full bg-[#1b131f] flex items-center justify-center">
+                                <div className="w-full h-full rounded-full bg-background flex items-center justify-center">
                                     <span className="font-bold text-white text-2xl">{(firstName || user?.name || '?').charAt(0).toUpperCase()}</span>
                                 </div>
                             </div>
@@ -318,7 +318,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
                 {viewingCertificate && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
                         <div className="relative w-full max-w-5xl bg-background-dark rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-                            <div className="flex items-center justify-between p-4 border-b border-white/10 bg-[#0f0f13]">
+                            <div className="flex items-center justify-between p-4 border-b border-white/10 bg-background-dark">
                                 <h3 className="text-lg font-bold text-white">Vista de Certificado</h3>
                                 <button
                                     onClick={() => setViewingCertificate(null)}
@@ -328,7 +328,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
                                     <span className="material-symbols-outlined">close</span>
                                 </button>
                             </div>
-                            <div className="overflow-y-auto p-4 md:p-8 bg-[#0f0f13]">
+                            <div className="overflow-y-auto p-4 md:p-8 bg-background-dark">
                                 <CertificateDisplay
                                     studentName={`${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.name || 'Estudiante'}
                                     studentDni={user?.dni || ''}

@@ -87,7 +87,7 @@ const MyCertificates: React.FC = () => {
             {/* Modal de Certificado */}
             {selectedCert && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in" onClick={() => setSelectedCert(null)}>
-                    <div className="bg-[#1a1a2e] rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto relative shadow-2xl border border-white/10" onClick={e => e.stopPropagation()}>
+                    <div className="bg-surface-dark rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto relative shadow-2xl border border-white/10" onClick={e => e.stopPropagation()}>
                         <button
                             onClick={() => setSelectedCert(null)}
                             className="absolute top-4 right-4 z-50 bg-black/50 hover:bg-white/20 text-white p-2 rounded-full transition-colors"

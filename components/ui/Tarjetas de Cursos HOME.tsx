@@ -82,7 +82,7 @@ export const CardCarousel: React.FC<CarouselProps> = ({
                                     Explora Nuestra Academia
                                 </h3>
                                 <p className="text-gray-400 mt-2">
-                                    Descubre los <span className="text-[#00F5F1] font-bold">cursos</span> que están transformando carreras.
+                                    Descubre los <span className="text-tech font-bold">cursos</span> que están transformando carreras.
                                 </p>
                             </div>
                         </div>
@@ -131,7 +131,7 @@ export const CardCarousel: React.FC<CarouselProps> = ({
                                             />
                                             <div className="absolute bottom-0 left-0 w-full p-6 z-20 flex flex-col justify-end">
                                                 {item.category && (
-                                                    <span className="text-[#00F5F1] text-xs font-bold uppercase tracking-wider mb-2">{item.category}</span>
+                                                    <span className="text-tech text-xs font-bold uppercase tracking-wider mb-2">{item.category}</span>
                                                 )}
                                                 <h4 className="text-white font-bold text-lg leading-tight mb-2 shadow-black drop-shadow-md">{item.title}</h4>
                                                 {item.description && (

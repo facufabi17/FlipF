@@ -116,7 +116,7 @@ const LeadMagnetModal: React.FC<LeadMagnetModalProps> = ({ resource, isOpen, onC
                                     </label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-text-muted">
-                                            <span className="material-symbols-outlined text-[20px]">mail</span>
+                                            <span className="material-symbols-outlined text-xl">mail</span>
                                         </div>
                                         <input
                                             type="email"
@@ -154,7 +154,7 @@ const LeadMagnetModal: React.FC<LeadMagnetModalProps> = ({ resource, isOpen, onC
                                     )}
                                 </button>
 
-                                <p className="text-center text-[10px] text-text-muted/60 mt-4">
+                                <p className="text-center text-xs text-text-muted/60 mt-4">
                                     Al suscribirte aceptas recibir contenidos de valor. Cero spam.
                                 </p>
                             </form>

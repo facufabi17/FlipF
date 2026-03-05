@@ -148,7 +148,7 @@ const CoursePlayer: React.FC = () => {
                 <aside className="w-full lg:w-80 flex-none flex flex-col border-r border-border-dark bg-surface-dark lg:h-screen lg:sticky lg:top-0">
                     <div className="p-4 flex items-center justify-between border-b border-white/5 bg-surface-darker">
                         <div>
-                            <p className="text-[10px] text-primary font-bold uppercase tracking-wider mb-1">Aula Virtual</p>
+                            <p className="text-xs text-primary font-bold uppercase tracking-wider mb-1">Aula Virtual</p>
                             <h1 className="text-white text-xs font-bold line-clamp-1">{selectedCourse.title}</h1>
                         </div>
                         <button onClick={() => navigate('/mis-cursos')} aria-label="Salir del curso" className="text-text-muted hover:text-white p-2 rounded-lg hover:bg-white/5 transition-colors">
@@ -185,10 +185,10 @@ const CoursePlayer: React.FC = () => {
                                                     className={`w-full flex items-start gap-3 px-3 py-3 rounded-lg text-left transition-all duration-200 group
                                                         ${isActive ? 'bg-primary/20 border-l-2 border-primary' : 'hover:bg-white/5 border-l-2 border-transparent'}`}
                                                 >
-                                                    <span className={`text-[10px] font-mono mt-0.5 ${isActive ? 'text-primary' : 'text-gray-600'}`}>{modIdx + 1}.{lessonIdx + 1}</span>
+                                                    <span className={`text-xs font-mono mt-0.5 ${isActive ? 'text-primary' : 'text-gray-600'}`}>{modIdx + 1}.{lessonIdx + 1}</span>
                                                     <div className="flex-1 min-w-0">
                                                         <p className={`text-xs font-bold leading-tight ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-gray-200'}`}>{lesson.title}</p>
-                                                        <span className="text-[10px] text-gray-600 flex items-center gap-1 mt-1">
+                                                        <span className="text-xs text-gray-600 flex items-center gap-1 mt-1">
                                                             <span className="material-symbols-outlined text-[12px]">{icon}</span> {lesson.duration}
                                                         </span>
                                                     </div>
@@ -207,7 +207,7 @@ const CoursePlayer: React.FC = () => {
                                                 </span>
                                                 <div>
                                                     <p className={`text-xs font-bold ${viewMode === 'quiz' && modIdx === currentModuleIdx ? 'text-white' : 'text-gray-400'}`}>Examen Final</p>
-                                                    <p className="text-[10px] text-gray-500">{module.quiz.questions.length} Preguntas</p>
+                                                    <p className="text-xs text-gray-500">{module.quiz.questions.length} Preguntas</p>
                                                 </div>
                                             </button>
                                         )}
