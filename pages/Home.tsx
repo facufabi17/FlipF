@@ -109,7 +109,7 @@ const Home: React.FC = () => {
             </div>
 
             {/* 1. HERO SECTION (Segmentación Dual) */}
-            <section className="relative w-full min-h-[90vh] flex flex-col justify-center items-center text-center px-6 pt-20 pb-12 overflow-hidden">
+            <section className="relative w-full min-h-[90vh] flex flex-col justify-center items-center text-center px-6 pt-12 pb-12 overflow-hidden">
 
 
                 {/* Animación de Fondo */}
