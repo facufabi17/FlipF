@@ -52,6 +52,62 @@ const Home: React.FC = () => {
                 description="Transformamos Negocios y Entrenamos Expertos. La agencia de marketing digital que no solo ejecuta estrategias, sino que te enseña a dominarlas."
             />
 
+            {/* Cinta de Anuncios (Marquee) */}
+            <div className="w-full bg-primary/20 py-1 overflow-hidden flex whitespace-nowrap relative z-50">
+                <div className="animate-marquee flex flex-nowrap shrink-0 items-center text-[10px] md:text-xs font-bold tracking-widest text-tech/90 uppercase">
+                    <div className="mx-2 px-4 py-0.5 bg-primary/20 rounded-full flex items-center gap-2">
+                        <span className="text-sm">🔥</span> Nuevos cursos en la Academia
+                    </div>
+                    <div className="mx-2 px-4 py-0.5 bg-primary/20 rounded-full flex items-center gap-2">
+                        <span className="text-sm">🚀</span> Cupos limitados para Consultoría
+                    </div>
+                    <div className="mx-2 px-4 py-0.5 bg-primary/20 rounded-full flex items-center gap-2">
+                        <span className="text-sm">⚡</span> Únete a +500 alumnos activos
+                    </div>
+                    <div className="mx-2 px-4 py-0.5 bg-primary/20 rounded-full flex items-center gap-2">
+                        <span className="text-sm">📈</span> Estrategias con IA
+                    </div>
+                    <div className="mx-2 px-4 py-0.5 bg-primary/20 rounded-full flex items-center gap-2">
+                        <span className="text-sm">🔥</span> Nuevos cursos en la Academia
+                    </div>
+                    <div className="mx-2 px-4 py-0.5 bg-primary/20 rounded-full flex items-center gap-2">
+                        <span className="text-sm">🚀</span> Cupos limitados para Consultoría
+                    </div>
+                    <div className="mx-2 px-4 py-0.5 bg-primary/20 rounded-full flex items-center gap-2">
+                        <span className="text-sm">⚡</span> Únete a +500 alumnos activos
+                    </div>
+                    <div className="mx-2 px-4 py-0.5 bg-primary/20 rounded-full flex items-center gap-2">
+                        <span className="text-sm">📈</span> Estrategias con IA
+                    </div>
+                </div>
+                <div className="animate-marquee flex flex-nowrap shrink-0 items-center text-[10px] md:text-xs font-bold tracking-widest text-tech/90 uppercase" aria-hidden="true">
+                    <div className="mx-2 px-4 py-0.5 bg-primary/20 rounded-full flex items-center gap-2">
+                        <span className="text-sm">🔥</span> Nuevos cursos en la Academia
+                    </div>
+                    <div className="mx-2 px-4 py-0.5 bg-primary/20 rounded-full flex items-center gap-2">
+                        <span className="text-sm">🚀</span> Cupos limitados para Consultoría
+                    </div>
+                    <div className="mx-2 px-4 py-0.5 bg-primary/20 rounded-full flex items-center gap-2">
+                        <span className="text-sm">⚡</span> Únete a +500 alumnos activos
+                    </div>
+                    <div className="mx-2 px-4 py-0.5 bg-primary/20 rounded-full flex items-center gap-2">
+                        <span className="text-sm">📈</span> Estrategias con IA
+                    </div>
+                    <div className="mx-2 px-4 py-0.5 bg-primary/20 rounded-full flex items-center gap-2">
+                        <span className="text-sm">🔥</span> Nuevos cursos en la Academia
+                    </div>
+                    <div className="mx-2 px-4 py-0.5 bg-primary/20 rounded-full flex items-center gap-2">
+                        <span className="text-sm">🚀</span> Cupos limitados para Consultoría
+                    </div>
+                    <div className="mx-2 px-4 py-0.5 bg-primary/20 rounded-full flex items-center gap-2">
+                        <span className="text-sm">⚡</span> Únete a +500 alumnos activos
+                    </div>
+                    <div className="mx-2 px-4 py-0.5 bg-primary/20 rounded-full flex items-center gap-2">
+                        <span className="text-sm">📈</span> Estrategias con IA
+                    </div>
+                </div>
+            </div>
+
             {/* 1. HERO SECTION (Segmentación Dual) */}
             <section className="relative w-full min-h-[90vh] flex flex-col justify-center items-center text-center px-6 pt-20 pb-12 overflow-hidden">
 
