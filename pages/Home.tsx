@@ -53,7 +53,7 @@ const Home: React.FC = () => {
             />
 
             {/* Cinta de Anuncios (Marquee) */}
-            <div className="w-full bg-primary/20 py-1 overflow-hidden flex whitespace-nowrap relative z-50">
+            <div className="w-full bg-primary/20 py-1 overflow-hidden flex whitespace-nowrap relative z-40">
                 <div className="animate-marquee flex flex-nowrap shrink-0 items-center text-[10px] md:text-xs font-bold tracking-widest text-tech/90 uppercase">
                     <div className="mx-2 px-4 py-0.5 bg-primary/20 rounded-full flex items-center gap-2">
                         <span className="text-sm">🔥</span> Nuevos cursos en la Academia
