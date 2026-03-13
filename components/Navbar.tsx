@@ -52,14 +52,14 @@ const Navbar: React.FC = () => {
                     <span className="text-xl font-bold tracking-tight text-white">Flip</span>
                 </div>
 
-                {/* Desktop Nav */}
+                {/* Navegación Desktop */}
                 <nav className="hidden md:flex items-center gap-8">
                     <Link id="nav-home" to="/" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Inicio</Link>
                     <Link id="nav-academy" to="/academia" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Academia</Link>
                     <Link id="nav-consulting" to="/consultas" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Consultas</Link>
                     {/*Academia-text-tech*/}
                     {/*Consultas-text-primary*/}
-                    {/* Recursos Dropdown */}
+                    {/* Menú Desplegable de Recursos */}
                     <div className="relative group h-full flex items-center">
                         <button id="nav-resources-dropdown" className="text-sm font-medium text-gray-300 hover:text-white transition-colors flex items-center gap-1 py-4">
                             Recursos
@@ -86,7 +86,7 @@ const Navbar: React.FC = () => {
                                 {itemCount}
                             </span>
                         )}
-                        {/* Tooltip con total */}
+                        {/* Tooltip con precio total */}
                         {itemCount > 0 && (
                             <div className="absolute top-full right-0 mt-2 hidden group-hover:block bg-background border border-white/10 p-2 rounded text-xs text-white whitespace-nowrap shadow-xl">
                                 Total: ${total.toLocaleString()}
@@ -114,7 +114,7 @@ const Navbar: React.FC = () => {
                                 <span className={`material-symbols-outlined text-gray-400 transition-transform duration-300 ${userMenuOpen ? 'rotate-180' : ''}`}>expand_more</span>
                             </button>
 
-                            {/* User Dropdown */}
+                            {/* Menú Desplegable del Usuario */}
                             {userMenuOpen && (
                                 <div className="absolute right-0 top-full mt-3 w-64 bg-background border border-white/10 rounded-xl shadow-2xl py-2 z-[100] animate-fade-in origin-top-right">
                                     <div className="px-4 py-3 border-b border-white/5 mb-1 hidden md:block">
@@ -174,7 +174,7 @@ const Navbar: React.FC = () => {
                 </div>
             </div>
 
-            {/* Mobile Menu */}
+            {/* Menú Móvil */}
             {/*Academia-text-tech*/}
             {/*Consultas-text-primary*/}
             {mobileMenuOpen && (

@@ -11,9 +11,9 @@ function generateUUID() {
     });
 }
 
-// Vercel Handler
+// Controlador de Vercel
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-    // Enable CORS
+    // Habilitar CORS
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -32,7 +32,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-        // Initialize Mercado Pago inside handler to ensure env vars are loaded
+        // Inicializar Mercado Pago dentro del controlador para asegurar que se carguen las variables de entorno
         const accessToken = process.env.MP_ACCESS_TOKEN || process.env.VITE_MP_ACCESS_TOKEN || '';
         if (!accessToken) {
             throw new Error("Missing MP_ACCESS_TOKEN in server environment");
@@ -60,7 +60,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 unit_price: Number(item.price),
                 currency_id: 'ARS',
             })),
-            payer: req.body.payer, // Agregar payer
+            payer: req.body.payer, // Agregar pagador
             external_reference: externalReference,
             back_urls: {
                 success: `${appOrigin}/mp-callback`,
@@ -99,8 +99,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 }
 
-// Local Server Runner (if executed directly)
-// Check if running directly in Node
+// Ejecutor de Servidor Local (si se ejecuta directamente)
+// Comprobar si se ejecuta directamente en Node
 // @ts-ignore
 if (import.meta.url === `file://${process.argv[1]}`) {
     (async () => {
@@ -110,14 +110,14 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
         app.use(express.json());
 
-        // Wrap handler
+        // Envolver controlador
         app.all('/api/create-preference', (req: any, res: any) => {
-            // Mock Vercel Request/Response if needed or just pass express req/res
-            // Express req/res are compatible enough for this simple handler
+            // Mapear Petición/Respuesta de Vercel si es necesario o simplemente pasar req/res de Express
+            // Req/res de express son lo suficientemente compatibles para este controlador simple
             handler(req, res);
         });
 
-        // Also serve at root if testing direct script
+        // También servir en la raíz si se está probando el script directo
         app.post('/create-preference', (req: any, res: any) => handler(req, res));
 
         app.listen(port, () => {

@@ -32,11 +32,11 @@ const fragmentShader = `
   vec4 sigmoid(vec4 x) { return 1. / (1. + exp(-x)); }
   
   vec4 cppn_fn(vec2 coordinate, float in0, float in1, float in2) {
-    // layer 1 *********************************************************************
+    // capa 1 *********************************************************************
     buf[6] = vec4(coordinate.x, coordinate.y, 0.3948333106474662 + in0, 0.36 + in1);
     buf[7] = vec4(0.14 + in2, sqrt(coordinate.x * coordinate.x + coordinate.y * coordinate.y), 0., 0.);
 
-    // layer 2 ********************************************************************
+    // capa 2 ********************************************************************
     buf[0] = mat4(vec4(6.5404263, -3.6126034, 0.7590882, -1.13613), vec4(2.4582713, 3.1660357, 1.2219609, 0.06276096), vec4(-5.478085, -6.159632, 1.8701609, -4.7742867), vec4(6.039214, -5.542865, -0.90925294, 3.251348))
     * buf[6]
     + mat4(vec4(0.8473259, -5.722911, 3.975766, 1.6522468), vec4(-0.24321538, 0.5839259, -1.7661959, -5.350116), vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0))
@@ -52,7 +52,7 @@ const fragmentShader = `
     buf[0] = sigmoid(buf[0]);
     buf[1] = sigmoid(buf[1]);
 
-    // layer 3 ********************************************************************
+    // capa 3 ********************************************************************
     buf[2] = mat4(vec4(-15.219568, 8.095543, -2.429353, -1.9381982), vec4(-5.951362, 4.3115187, 2.6393783, 1.274315), vec4(-7.3145227, 6.7297835, 5.2473326, 5.9411426), vec4(5.0796127, 8.979051, -1.7278991, -1.158976))
     * buf[6]
     + mat4(vec4(-11.967154, -11.608155, 6.1486754, 11.237008), vec4(2.124141, -6.263192, -1.7050359, -0.7021966), vec4(0.0, 0.0, 0.0, 0.0), vec4(0.0, 0.0, 0.0, 0.0))
@@ -68,7 +68,7 @@ const fragmentShader = `
     buf[2] = sigmoid(buf[2]);
     buf[3] = sigmoid(buf[3]);
 
-    // layer 5 & 6 ****************************************************************
+    // capa 5 y 6 ****************************************************************
     buf[4] = mat4(vec4(5.214916, -7.183024, 2.7228765, 2.6592617), vec4(-5.601878, -25.3591, 4.067988, 0.4602802), vec4(-10.57759, 24.286327, 21.102104, 37.546658), vec4(4.3024497, -1.9625226, 2.3458803, -1.372816))
     * buf[0]
     + mat4(vec4(-17.6526, -10.507558, 2.2587414, 12.462782), vec4(6.265566, -502.75443, -12.642513, 0.9112289), vec4(-10.983244, 20.741234, -9.701768, -0.7635988), vec4(5.383626, 1.4819539, -4.1911616, -4.8444734))
@@ -92,7 +92,7 @@ const fragmentShader = `
     buf[4] = sigmoid(buf[4]);
     buf[5] = sigmoid(buf[5]);
 
-    // layer 7 & 8 ****************************************************************
+    // capa 7 y 8 ****************************************************************
     buf[6] = mat4(vec4(-1.61102, 0.7970257, 1.4675229, 0.20917463), vec4(-28.793737, -7.1390953, 1.5025433, 4.656581), vec4(-10.94861, 39.66238, 0.74318546, -10.095605), vec4(-0.7229728, -1.5483948, 0.7301322, 2.1687684))
     * buf[0]
     + mat4(vec4(3.2547753, 21.489103, -1.0194173, -3.3100595), vec4(-3.7316632, -3.3792162, -7.223193, -0.23685838), vec4(13.1804495, 0.7916005, 5.338587, 5.687114), vec4(-4.167605, -17.798311, -6.815736, -1.6451967))
@@ -124,7 +124,7 @@ const fragmentShader = `
     buf[6] = sigmoid(buf[6]);
     buf[7] = sigmoid(buf[7]);
 
-    // layer 9 ********************************************************************
+    // capa 9 ********************************************************************
     buf[0] = mat4(vec4(1.6794263, 1.3817469, 2.9625452, 0.0), vec4(-1.8834411, -1.4806935, -3.5924516, 0.0), vec4(-1.3279216, -1.0918057, -2.3124623, 0.0), vec4(0.2662234, 0.23235129, 0.44178495, 0.0))
     * buf[0]
     + mat4(vec4(-0.6299101, -0.5945583, -0.9125601, 0.0), vec4(0.17828953, 0.18300213, 0.18182953, 0.0), vec4(-2.96544, -2.5819945, -4.9001055, 0.0), vec4(1.4195864, 1.1868085, 2.5176322, 0.0))
@@ -144,7 +144,7 @@ const fragmentShader = `
     + vec4(-1.5468478, -3.6171484, 0.24762098, 0.0);
 
     buf[0] = sigmoid(buf[0]);
-    // Force Cyan #00F5F1 (0.0, 0.96, 0.94)
+    // Forzar Cian #00F5F1 (0.0, 0.96, 0.94)
     float intensity = max(buf[0].x, buf[0].z);
     return vec4(0.0, intensity * 0.961, intensity * 0.945, 1.0);
   }
@@ -188,7 +188,7 @@ function ShaderPlane() {
   );
 }
 
-export default function AnimacionCian() {
+function ShaderBackground() {
   const canvasRef = useRef<HTMLDivElement | null>(null);
   const [dpr, setDpr] = useState(1.5);
   const [isInView, setIsInView] = useState(false);
@@ -218,13 +218,13 @@ export default function AnimacionCian() {
     { scope: canvasRef }
   );
 
-  // Defer initialization to prioritize React/GSAP
+  // Retrasar inicialización para priorizar React/GSAP
   useEffect(() => {
     const t = setTimeout(() => setIsReady(true), 200);
     return () => clearTimeout(t);
   }, []);
 
-  // Intersection Observer for visibility
+  // Intersection Observer para visibilidad
   useEffect(() => {
     if (!canvasRef.current) return;
     const observer = new IntersectionObserver(
@@ -235,7 +235,7 @@ export default function AnimacionCian() {
     return () => observer.disconnect();
   }, []);
 
-  // Mobile detection for initial DPR
+  // Detección móvil para DPR inicial
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const isMobile = window.matchMedia("(max-width: 768px)").matches;
@@ -259,5 +259,102 @@ export default function AnimacionCian() {
       )}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/20" />
     </div>
+  );
+}
+
+// ===================== HERO =====================
+interface HeroProps {
+  title: string;
+  description: string;
+  badgeText?: string;
+  badgeLabel?: string;
+  ctaButtons?: Array<{ text: string; href?: string; onClick?: () => void; primary?: boolean }>;
+  microDetails?: Array<string>;
+  children?: React.ReactNode;
+}
+
+export default function CyanNetworkHero({
+  title,
+  description,
+  badgeText = "Potenciado por IA",
+  badgeLabel = "Nuevo",
+  ctaButtons,
+  microDetails,
+  children
+}: HeroProps) {
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const headerRef = useRef<HTMLHeadingElement | null>(null);
+  const paraRef = useRef<HTMLParagraphElement | null>(null);
+  const ctaRef = useRef<HTMLDivElement | null>(null);
+  const badgeRef = useRef<HTMLDivElement | null>(null);
+  const microRef = useRef<HTMLUListElement | null>(null);
+  const childrenRef = useRef<HTMLDivElement | null>(null);
+
+  useGSAP(
+      () => {
+          if (badgeRef.current) gsap.set(badgeRef.current, { autoAlpha: 0, y: -8 });
+          if (headerRef.current) gsap.set(headerRef.current, { autoAlpha: 0, y: 20 });
+          if (paraRef.current) gsap.set(paraRef.current, { autoAlpha: 0, y: 20 });
+          if (childrenRef.current) gsap.set(childrenRef.current, { autoAlpha: 0, y: 20 });
+          if (ctaRef.current) gsap.set(ctaRef.current, { autoAlpha: 0, y: 20 });
+          if (microRef.current) gsap.set(microRef.current, { autoAlpha: 0, y: 10 });
+
+          const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+          if (badgeRef.current) tl.to(badgeRef.current, { autoAlpha: 1, y: 0, duration: 0.5 }, 0.0);
+          if (headerRef.current) tl.to(headerRef.current, { autoAlpha: 1, y: 0, duration: 0.8 }, 0.2);
+          if (paraRef.current) tl.to(paraRef.current, { autoAlpha: 1, y: 0, duration: 0.5 }, '-=0.4');
+          if (childrenRef.current) tl.to(childrenRef.current, { autoAlpha: 1, y: 0, duration: 0.5 }, '-=0.3');
+          if (ctaRef.current) tl.to(ctaRef.current, { autoAlpha: 1, y: 0, duration: 0.5 }, '-=0.3');
+          if (microRef.current) tl.to(microRef.current, { autoAlpha: 1, y: 0, duration: 0.5 }, '-=0.2');
+      },
+      { scope: sectionRef },
+  );
+
+  return (
+      <section ref={sectionRef} className="relative w-full overflow-hidden">
+          <ShaderBackground />
+
+          <div className="relative mx-auto flex max-w-7xl flex-col items-center text-center gap-6 px-4 pb-24 pt-10 sm:gap-6 sm:pt-20 md:px-10 lg:px-16 z-10">
+              <h1 ref={headerRef} className="max-w-4xl text-5xl font-extralight leading-[1.05] tracking-tight text-white sm:text-6xl md:text-7xl">
+                  {title}
+              </h1>
+
+              <p ref={paraRef} className="max-w-2xl text-base font-light leading-relaxed tracking-tight text-white/75 sm:text-lg">
+                  {description}
+              </p>
+
+              {children && <div ref={childrenRef} className="w-full mt-4">{children}</div>}
+
+              {ctaButtons && (
+                  <div ref={ctaRef} className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                      {ctaButtons.map((button, index) => (
+                          <button
+                              key={index}
+                              onClick={button.onClick}
+                              className={`rounded-2xl border border-white/10 px-5 py-3 text-sm font-light tracking-tight transition-colors focus:outline-none focus:ring-2 focus:ring-white/30 duration-300 ${button.primary
+                                  ? "bg-white/10 text-white backdrop-blur-sm hover:bg-white/20"
+                                  : "text-white/80 hover:bg-white/5"
+                                  }`}
+                          >
+                              {button.text}
+                          </button>
+                      ))}
+                  </div>
+              )}
+
+              {microDetails && (
+                  <ul ref={microRef} className="mt-2 flex flex-wrap justify-center gap-6 text-xs font-extralight tracking-tight text-white/60">
+                      {microDetails.map((detail, index) => (
+                          <li key={index} className="flex items-center gap-2">
+                              <span className="h-1 w-1 rounded-full bg-white/40" /> {detail}
+                          </li>
+                      ))}
+                  </ul>
+              )}
+          </div>
+
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent" />
+      </section>
   );
 }

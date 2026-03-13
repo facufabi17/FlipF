@@ -54,7 +54,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // Template: "id:[data.id];request-id:[x-request-id];ts:[ts];"
         const dataId = req.body?.data?.id;
         if (!dataId) {
-            // Es una notificación de prueba o desconocida sin ID de data
+            // Es una notificación de prueba o desconocida sin ID de datos
             console.log('Webhook: Recibido sin data.id', req.body);
             return res.status(200).send('OK');
         }
@@ -78,7 +78,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         // 3. Procesar solo eventos de pago
         if (type === 'payment' || req.body.topic === 'payment') {
-            const paymentId = data?.id || req.body.resource; // data.id para webhook v1/v2, resource para IPN legacy
+            const paymentId = data?.id || req.body.resource; // data.id para webhook v1/v2, resource para IPN heredado
 
             if (!paymentId) {
                 return res.status(400).json({ error: 'No payment ID found' });
@@ -246,7 +246,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
         }
 
-        // Responder rápido con 200
+        // Responder rápido con código 200
         return res.status(200).json({ status: 'OK' });
 
     } catch (error: any) {

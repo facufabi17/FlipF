@@ -336,16 +336,16 @@ const Home: React.FC = () => {
 
                             {/* Gráfico SVG Animado */}
                             <div className="relative h-60 w-full mb-6 flex items-end overflow-hidden">
-                                {/* Scanline Effect */}
+                                {/* Efecto de escaneo */}
                                 <div className="animate-scan pointer-events-none z-0"></div>
 
                                 <svg className="w-full h-full overflow-visible relative z-10" viewBox="0 0 300 100">
-                                    {/* Grid lines */}
+                                    {/* Líneas de cuadrícula */}
                                     <line x1="0" y1="0" x2="300" y2="0" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
                                     <line x1="0" y1="50" x2="300" y2="50" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
                                     <line x1="0" y1="100" x2="300" y2="100" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
 
-                                    {/* Area Gradient (Pulsing) */}
+                                    {/* Gradiente de área (Pulsante) */}
                                     <defs>
                                         <linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
                                             <stop offset="0%" stopColor="#842DB4" stopOpacity="0.5" />
@@ -354,7 +354,7 @@ const Home: React.FC = () => {
                                     </defs>
                                     <path d="M0,100 Q50,90 100,60 T200,40 T300,10 V100 H0 Z" fill="url(#chartGradient)" className="animate-pulse-slow" />
 
-                                    {/* Line Path */}
+                                    {/* Ruta de línea */}
                                     <path
                                         d="M0,100 Q50,90 100,60 T200,40 T300,10"
                                         fill="none"
@@ -364,22 +364,22 @@ const Home: React.FC = () => {
                                         className="drop-shadow-[0_0_10px_rgba(132,45,180,0.8)] animate-dash"
                                     />
 
-                                    {/* Data Points */}
+                                    {/* Puntos de datos */}
                                     <circle cx="100" cy="60" r="3" fill="white" />
                                     <circle cx="200" cy="40" r="3" fill="white" />
 
-                                    {/* Last Point (Live) */}
+                                    {/* Último punto (En Vivo) */}
                                     <circle cx="300" cy="10" r="8" fill="#842DB4" opacity="0.5" className="animate-ping" />
                                     <circle cx="300" cy="10" r="4" fill="white" className="animate-pulse" />
                                 </svg>
 
-                                {/* Etiqueta FLotante ROI */}
+                                {/* Etiqueta Flotante ROI */}
                                 <div className="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full shadow-[0_0_15px_rgba(132,45,180,0.5)] transform -translate-y-1 translate-x-1">
                                     +127% ROI
                                 </div>
                             </div>
 
-                            {/* Stats Secundarias */}
+                            {/* Estadísticas Secundarias */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="bg-white/5 rounded-lg p-3 border border-white/5">
                                     <p className="text-gray-400 text-xs uppercase">Retorno</p>

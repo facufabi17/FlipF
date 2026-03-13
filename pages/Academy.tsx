@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { COURSES } from '../data/courses';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-const AnimacionCian = React.lazy(() => import('../components/background/AnimacionCian'));
+const CyanNetworkHero = React.lazy(() => import('../components/background/AnimacionCian'));
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { CourseTimeline } from '../components/ui/Linea de Cursos ACADEMIA';
@@ -119,7 +119,6 @@ const Academy: React.FC = () => {
 
     // GSAP Refs
     const containerRef = useRef<HTMLDivElement>(null);
-    const heroRef = useRef<HTMLDivElement>(null);
     const pathsRef = useRef<HTMLDivElement>(null);
     const catalogRef = useRef<HTMLDivElement>(null);
     const diffRef = useRef<HTMLDivElement>(null);
@@ -245,66 +244,66 @@ const Academy: React.FC = () => {
             />
 
             {/* --- SECCIÓN 1: HERO (Full Width) --- */}
-            <section ref={heroRef} className="relative w-full flex flex-col items-center text-center min-h-[60vh] justify-center pb-24 pt-20">
-                {/* Background Animation restricted to Hero */}
-                <div className="absolute inset-0 z-0 overflow-hidden">
-                    <React.Suspense fallback={<div className="absolute inset-0 bg-black" />}>
-                        <AnimacionCian />
-                    </React.Suspense>
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black"></div>
-                </div>
-
-                <div className="relative z-10 w-full max-w-4xl px-6 flex flex-col items-center">
-                    <h1 className="hero-text text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
-                        Certifica tu Talento.<br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-[#00F5F1] to-[#00F5F1]">Lidera el Mercado Digital.</span>
-                    </h1>
-                    <p className="hero-text text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-10 leading-relaxed">
-                        En nuestra academia, cada curso que completas es un paso hacia una certificación de nivel experto. Hecha para profesionales que buscan resultados reales.
-                    </p>
-                    <div className="hero-text flex flex-col sm:flex-row items-center gap-4 relative z-20">
-
-                        <button
-                            onClick={() => document.getElementById('rutas-mobile')?.scrollIntoView({ behavior: 'smooth' })}
-                            className="block md:hidden group px-5 py-2 bg-tech text-black font-bold text-xs md:text-sm rounded-full hover:bg-white transition-all duration-300 shadow-[0_0_20px_rgba(0,245,241,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] flex items-center gap-2"
-                        >
-                            Explorar Rutas
-                            <span className="material-symbols-outlined text-lg group-hover:translate-y-1 transition-transform">
-                                arrow_downward
-                            </span>
-                        </button>
-
-                        <button
-                            onClick={() => document.getElementById('rutas-desktop')?.scrollIntoView({ behavior: 'smooth' })}
-                            className="hidden md:flex group px-5 py-2 bg-tech text-black font-bold text-xs md:text-sm rounded-full hover:bg-white transition-all duration-300 shadow-[0_0_20px_rgba(0,245,241,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] flex items-center gap-2"
-                        >
-                            Explorar Rutas
-                            <span className="material-symbols-outlined text-lg group-hover:translate-y-1 transition-transform">
-                                arrow_downward
-                            </span>
-                        </button>
-                        <button
-                            onClick={() => document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth' })}
-                            className="group px-5 py-2 bg-transparent text-white font-bold text-xs md:text-sm rounded-full border border-white/20 hover:bg-white/10 hover:border-tech/50 transition-all duration-300 flex items-center gap-2 backdrop-blur-sm"
-                        >
-                            Explorar Cursos Disponibles
-                            <span className="material-symbols-outlined text-lg group-hover:translate-y-1 transition-transform">
-                                arrow_downward
-                            </span>
-                        </button>
-                    </div>
-
-                    {/* Visual de "Escalera" simplificada */}
-                    <div className="hero-text mt-8 animate-fade-in-up delay-300">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-tech/5 border border-tech/20 backdrop-blur-md hover:bg-tech/10 transition-all duration-300 cursor-default">
-                            <span className="material-symbols-outlined text-tech text-sm md:text-base">verified</span>
-                            <span className="text-xs md:text-xs font-medium text-gray-200 tracking-wide">
-                                <span className="text-white font-bold">5</span> Certificados + <span className="text-white font-bold">1</span> Diploma de Analista
-                            </span>
+            <div className="relative z-0 min-h-[70vh]">
+                <React.Suspense
+                    fallback={
+                        <div className="absolute inset-0 bg-black flex items-center justify-center">
+                            <div className="w-8 h-8 border-2 border-tech border-t-transparent rounded-full animate-spin"></div>
                         </div>
-                    </div>
-                </div>
-            </section>
+                    }>
+                    <CyanNetworkHero
+                        title="SUBÍ DE NIVEL CON FLIP"
+                        description="En nuestra academia, cada curso que completas es un paso hacia una certificación de nivel experto. Hecha para profesionales que buscan resultados reales."
+                    >
+                        <h1 className="text-5xl font-black leading-tight text-white sm:text-6xl md:text-7xl lg:text-8xl mt-2 mb-2">
+                            CERTIFICA TU TALENTO.<br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-[#00F5F1] to-[#00F5F1]">LIDERA EL MERCADO.</span>
+                        </h1>
+
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
+
+                            <button
+                                onClick={() => document.getElementById('rutas-mobile')?.scrollIntoView({ behavior: 'smooth' })}
+                                className="block md:hidden group px-5 py-2 bg-tech text-black font-bold text-xs md:text-sm rounded-full hover:bg-white transition-all duration-300 shadow-[0_0_20px_rgba(0,245,241,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] flex items-center gap-2"
+                            >
+                                Explorar Rutas
+                                <span className="material-symbols-outlined text-lg group-hover:translate-y-1 transition-transform">
+                                    arrow_downward
+                                </span>
+                            </button>
+
+                            <button
+                                onClick={() => document.getElementById('rutas-desktop')?.scrollIntoView({ behavior: 'smooth' })}
+                                className="hidden md:flex group px-5 py-2 bg-tech text-black font-bold text-xs md:text-sm rounded-full hover:bg-white transition-all duration-300 shadow-[0_0_20px_rgba(0,245,241,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] flex items-center gap-2"
+                            >
+                                Explorar Rutas
+                                <span className="material-symbols-outlined text-lg group-hover:translate-y-1 transition-transform">
+                                    arrow_downward
+                                </span>
+                            </button>
+                            <button
+                                onClick={() => document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth' })}
+                                className="group px-5 py-2 bg-transparent text-white font-bold text-xs md:text-sm rounded-full border border-white/20 hover:bg-white/10 hover:border-tech/50 transition-all duration-300 flex items-center gap-2 backdrop-blur-sm"
+                            >
+                                Explorar Cursos Disponibles
+                                <span className="material-symbols-outlined text-lg group-hover:translate-y-1 transition-transform">
+                                    arrow_downward
+                                </span>
+                            </button>
+                        </div>
+
+                        {/* Visual de "Escalera" simplificada */}
+                        <div className="mt-8 animate-fade-in-up delay-300">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-tech/5 border border-tech/20 backdrop-blur-md hover:bg-tech/10 transition-all duration-300 cursor-default">
+                                <span className="material-symbols-outlined text-tech text-sm md:text-base">verified</span>
+                                <span className="text-xs md:text-xs font-medium text-gray-200 tracking-wide">
+                                    <span className="text-white font-bold">5</span> Certificados + <span className="text-white font-bold">1</span> Diploma de Analista
+                                </span>
+                            </div>
+                        </div>
+                    </CyanNetworkHero>
+                </React.Suspense>
+            </div>
 
             <div className="relative z-10 max-w-7xl mx-auto px-6 py-12 space-y-24">
 

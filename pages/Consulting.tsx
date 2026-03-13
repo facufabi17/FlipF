@@ -75,7 +75,13 @@ const Consulting: React.FC<ConsultingProps> = ({ onShowToast }) => {
       {/* Hero Section de Consultas */}
       {/* Hero Section de Consultas con Neural Network */}
       <div className="relative z-0 min-h-[70vh]">
-        <React.Suspense fallback={<div className="absolute inset-0 bg-black flex items-center justify-center"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div></div>}>
+        <React.Suspense
+          fallback={
+            <div className="absolute inset-0 bg-black flex items-center justify-center">
+              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin">
+              </div>
+            </div>
+          }>
           <NeuralNetworkHero
             title="DEJA DE HACERLO SOLO."
             description="No solo te enseñamos a crecer. Construimos los sistemas contigo. Consigue la alianza estratégica que necesitas para superar el estancamiento."

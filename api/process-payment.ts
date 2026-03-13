@@ -8,7 +8,7 @@ const client = new MercadoPagoConfig({
 const payment = new Payment(client);
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-    // Enable CORS
+    // Habilitar CORS
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -68,18 +68,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 }
 
-// Local Server Runner
+// Ejecutor del Servidor Local
 // @ts-ignore
 if (import.meta.url === `file://${process.argv[1]}`) {
     (async () => {
         const express = (await import('express')).default;
         const app = express();
-        const port = 3002; // Different port to avoid conflict or use same via concurrency if managed
+        const port = 3002; // Puerto diferente para evitar conflictos o usar el mismo si es administrado
 
         app.use(express.json());
 
         app.post('/process_payment', (req: any, res: any) => handler(req, res));
-        app.post('/api/process-payment', (req: any, res: any) => handler(req, res)); // Match common pattern
+        app.post('/api/process-payment', (req: any, res: any) => handler(req, res)); // Coincidencia con patrón común
 
         app.listen(port, () => {
             console.log(`> Local Payment Processor running at http://localhost:${port}`);

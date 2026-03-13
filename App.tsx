@@ -12,7 +12,7 @@ import ScrollToTop from './components/ScrollToTop';
 import LoadingSpinner from './components/LoadingSpinner';
 import RouteTracker from './components/RouteTracker';
 
-// Lazy Load Pages
+// Carga perezosa de páginas
 import Home from './pages/Home';
 const About = lazy(() => import('./pages/About'));
 const FreeResources = lazy(() => import('./pages/FreeResources'));
@@ -68,7 +68,7 @@ const App: React.FC = () => {
                                     <Route path="/academia" element={<Academy />} />
                                     <Route path="/academia/:id" element={<CourseDetails onShowToast={showToast} />} />
 
-                                    {/* Checkout maneja Carrito (sin id) y Compra Directa (con id) */}
+                                    {/* Checkout maneja el carrito (sin id) y la compra directa (con id) */}
                                     <Route path="/checkout" element={<Checkout onShowToast={showToast} />} />
                                     <Route path="/checkout/:id" element={<Checkout onShowToast={showToast} />} />
                                     <Route path="/pago_apro" element={<PagoAprobado />} />
@@ -92,7 +92,7 @@ const App: React.FC = () => {
                                     <Route path="/payment-success" element={<PaymentSuccess />} />
                                     <Route path="/mp-callback" element={<MPCallback />} />
 
-                                    {/* Ruta Catch-all 404 (Siempre debe ir al final) */}
+                                    {/* Ruta comodín 404 (Siempre debe ir al final) */}
                                     <Route path="*" element={<NotFound />} />
                                 </Routes>
                             </Suspense>
