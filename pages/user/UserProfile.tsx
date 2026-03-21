@@ -216,6 +216,18 @@ const UserProfile: React.FC<UserProfileProps> = ({ onShowToast }) => {
                                             </p>
                                         )}
                                     </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-gray-300">ID de Usuario</label>
+                                        <input
+                                            type="text"
+                                            value={user?.id ? user.id.substring(0, 8) : ''}
+                                            disabled={true}
+                                            className="w-full rounded-lg border border-white/10 bg-surface-dark px-4 py-3 text-white opacity-50 cursor-not-allowed"
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            Identificador de cuenta para soporte técnico.
+                                        </p>
+                                    </div>
                                 </div>
                             </form>
 
